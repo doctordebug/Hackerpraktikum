@@ -40,11 +40,10 @@ __§ 6 Rechte des Betroffenen__
 Teilgrundordnung des ZIMK https://www.uni-trier.de/index.php?id=6397  
 CIP Pool der Informatik: http://cip.uni-trier.de/?id=0.1  
 
-### Forschung und Lehre
 Dienstanweisung über den Datenschutz und die Datensicherung an der Universität Trier: https://www.uni-trier.de/index.php?id=17988  
 Datenschutzbeauftragter: https://www.uni-trier.de/index.php?id=10355  
 
-#### Sicherungsmaßnahmen
+### Sicherungsmaßnahmen
   
 Zur Gewährung des Datenschutzes sind folgende Sicherungsmaßnahmen zu beachten:  
   
