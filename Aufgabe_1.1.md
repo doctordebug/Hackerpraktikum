@@ -1,7 +1,7 @@
 #Aufgabe 1 Rechtliche Rahmenbedingungen  
   
 Rechercheiren Sie die rechtlichen Normen, die informationstechnische Anlagen (ganz allgemein) und die mit ihnen erzeugten, verwalteten und verarbeiteten Daten schützen.  
-* Welche gesetze befassen sich damit? 
+* Welche Gesetze befassen sich damit? 
 * Welche strafrechtlichen Vorschriften gibt es?
 * Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
 * Welche Bedingungen stellt die Universität Trier selbst?
@@ -13,14 +13,25 @@ Artikel 8 der Grundrechtecharta
 2013/40/EU des Europäischen Parlaments und des Rates vom 12. August 2013 über Angriffe auf Informationssysteme und zur Ersetzung des Rahmenbeschlusses 2005/222/JI des Rates
 ##Deutschland:
 ###STGB:
-§202 Verletzung des Briefgeheimnisses  
-§202a Ausspähen von Daten  
+__§202 Verletzung des Briefgeheimnisses__    
+*Strafmaß: Freiheitsstrafe bis zu einem Jahr    
+
+__§202a Ausspähen von Daten__    
 Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
 Abschnitt (2) grenzt den Begriff "Daten" ein.  
-§202b Abfangen von Daten  
 
-§202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
-§202d Datenhehlerei  
+*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
+
+__§202b Abfangen von Daten__   
+
+*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
+__§202c Vorbereiten des Ausspähen und Abfangen von Daten__  
+(auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
+
+*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
+__§202d Datenhehlerei__  
+
+*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
 ###BDSG:
 __§1 Zweck und Anwendungsbereich__   
 (1) Zweck dieses Gesetzes ist es, den Einzelnen davor zu schützen, dass er durch den Umgang mit seinen personenbezogenen Daten in seinem Persönlichkeitsrecht beeinträchtigt wird.  
@@ -31,11 +42,11 @@ __§1 Zweck und Anwendungsbereich__
       b) als Organe der Rechtspflege tätig werden und es sich nicht um Verwaltungsangelegenheiten handelt,  
 3. nicht-öffentliche Stellen, soweit sie die Daten unter Einsatz von Datenverarbeitungsanlagen verarbeiten, nutzen oder dafür erheben oder die Daten in oder aus nicht automatisierten Dateien verarbeiten, nutzen oder dafür erheben, es sei denn, die Erhebung, Verarbeitung oder Nutzung der Daten erfolgt ausschließlich für persönliche oder familiäre Tätigkeiten.  
   
-__§ 3a Datenvermeidung und Datensparsamkeit__  
+__§3a Datenvermeidung und Datensparsamkeit__  
   
 Die Erhebung, Verarbeitung und Nutzung personenbezogener Daten und die Auswahl und Gestaltung von Datenverarbeitungssystemen sind an dem Ziel auszurichten, so wenig personenbezogene Daten wie möglich zu erheben, zu verarbeiten oder zu nutzen. Insbesondere sind personenbezogene Daten zu anonymisieren oder zu pseudonymisieren, soweit dies nach dem Verwendungszweck möglich ist und keinen im Verhältnis zu dem angestrebten Schutzzweck unverhältnismäßigen Aufwand erfordert.  
   
-__§ 6 Rechte des Betroffenen__  
+__§6 Rechte des Betroffenen__  
   
 (1) Die Rechte des Betroffenen auf Auskunft (§§ 19, 34) und auf Berichtigung, Löschung oder Sperrung (§§ 20, 35) können nicht durch Rechtsgeschäft ausgeschlossen oder beschränkt werden.  
   
