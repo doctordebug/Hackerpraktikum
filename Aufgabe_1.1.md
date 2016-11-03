@@ -89,7 +89,7 @@ WWW-Server, WWW-Cache, FTP-Server, Mail-System, DNS, Active Directory, Benutzerv
 __§202 Verletzung des Briefgeheimnisses__    
 *Zusammenfassung:* Wer unbefugt ein verschlossenes Schriftstück öffnet, die nicht zu seiner Kenntnis bestimmt sind macht sich starfbar
    
-*Strafmaß: Freiheitsstrafe bis zu einem Jahr    
+* Strafmaß: Freiheitsstrafe bis zu einem Jahr    
   
 __§202a Ausspähen von Daten__    
 Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
@@ -97,26 +97,26 @@ Abschnitt (2) grenzt den Begriff "Daten" ein.
   
 *Zusammenfassung:* Wer sich Zugang zu Daten verschaft, welche besonders gesichert sind und nicht für sich gedacht sind, unter Überwindung der Zugangssicherung, macht sich strafbar.  
   
-*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
+* Strafmaß: Freiheitsstrafe bis zu drei Jahren  
   
 __§202b Abfangen von Daten__   
   
-Wer unter verwendung von technischen Hilfsmitteln nicht für Ihn bestimmte Daten aus einer nicht öffentlichen Datenübermittlung oder aus der elektromagnetischen Abstrhlung einer Datenverarbeitungsanlage verschafft, wird bestraft.
-  
-*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
+Wer unter verwendung von technischen Hilfsmitteln nicht für Ihn bestimmte Daten aus einer nicht öffentlichen Datenübermittlung oder aus der elektromagnetischen Abstrhlung einer Datenverarbeitungsanlage verschafft, wird bestraft.  
+
+* Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
   
 __§202c Vorbereiten des Ausspähen und Abfangen von Daten__    
 (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
   
 Wer eine Straftat vorbereitet in dem er Passwörter, Sicherheitscodes oder Computerprograme zur Erlangung solche vorbereitet, kauft oder einem anderen überlässt, wird bestraft.  
   
-*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
+* Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
   
 __§202d Datenhehlerei__  
 
 Wer Daten, die nicht allgemein zugänglich sind und die andere durch eine rechtswidrige Tat erlangt hat oder anderen zugänglich macht, macht sich strafbar. Insbesondere: Amtsträger.  
   
-*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
+* Strafmaß: Freiheitsstrafe bis zu drei Jahren  
 
 # Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
 
