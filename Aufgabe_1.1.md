@@ -18,7 +18,7 @@ Artikel 8 der Grundrechtecharta
 Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
 Abschnitt (2) grenzt den Begriff "Daten" ein.  
 §202b Abfangen von Daten  
-
+Erneut geht es um Daten, die nicht für einen bestimmt sind, die aus nichtöffentlicher Datenübermittlung oder aus elektromagnetischer Abstrahlung einer Datenverarbeitungsanlage erhalten werden können. Unter "nichtöffentliche Datenübermittlung" versteht man die verschlüsselte Kommunikation. Bricht man z.B. die Verschlüsselung eines WLAN-Netzes oder fängt die elektromagnetische Strahlung ab macht man sich mit bis zu zwei Jahren strafbar. 
 §202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
 §202d Datenhehlerei  
 ###BDSG:
