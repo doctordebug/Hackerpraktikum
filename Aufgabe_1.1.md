@@ -119,7 +119,8 @@ Wer Daten, die nicht allgemein zugänglich sind und die andere durch eine rechts
 * Strafmaß: Freiheitsstrafe bis zu drei Jahren  
 
 # Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
-
+Die besonderen Bedingungen gehen aus der [Teilgrundordnung](https://www.uni-trier.de/index.php?id=6397) der Universität Trier, Der [Benutzerordnung](http://cip.uni-trier.de/?id=0.1) der CIP- und Poolrechner der Abteilung Informatik, sowie der [Dienstanweisung](https://www.uni-trier.de/index.php?id=17988) über den Datenschutz und die Datensicherung an der Universität Trier hevor.
+  
 
 # Welche Bedingungen stellt die Universität Trier selbst?
 
