@@ -8,7 +8,7 @@ Artikel 8 der Grundrechtecharta
 §202 Verletzung des Briefgeheimnisses  
 §202a Ausspähen von Daten  
 §202b Abfangen von Daten  
-§202c Vorbereiten des Ausspähen und Abfangen von Daten  
+§202c Vorbereiten des Ausspähen und Abfangen von Daten, dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
 §202d Datenhehlerei  
 ###BDSG:
 __§1 Zweck und Anwendungsbereich__   
