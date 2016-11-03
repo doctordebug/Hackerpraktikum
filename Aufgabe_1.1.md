@@ -15,8 +15,11 @@ Artikel 8 der Grundrechtecharta
 ###STGB:
 §202 Verletzung des Briefgeheimnisses  
 §202a Ausspähen von Daten  
+Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
+Abschnitt (2) grenzt den Begriff "Daten" ein.  
 §202b Abfangen von Daten  
-§202c Vorbereiten des Ausspähen und Abfangen von Daten, dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
+
+§202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
 §202d Datenhehlerei  
 ###BDSG:
 __§1 Zweck und Anwendungsbereich__   
