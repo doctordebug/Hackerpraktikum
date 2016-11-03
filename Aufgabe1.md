@@ -29,5 +29,37 @@ __§ 6 Rechte des Betroffenen__
 (1) Die Rechte des Betroffenen auf Auskunft (§§ 19, 34) und auf Berichtigung, Löschung oder Sperrung (§§ 20, 35) können nicht durch Rechtsgeschäft ausgeschlossen oder beschränkt werden.  
   
 ##Uni Trier:
-Teilgrundordnung des ZIMK https://www.uni-trier.de/index.php?id=6397
-CIP Pool der Informatik: http://cip.uni-trier.de/?id=0.1
+Teilgrundordnung des ZIMK https://www.uni-trier.de/index.php?id=6397  
+CIP Pool der Informatik: http://cip.uni-trier.de/?id=0.1  
+Dienstanweisung über den Datenschutz und die Datensicherung an der Universität Trier: https://www.uni-trier.de/index.php?id=17988  
+Datenschutzbeauftragter: https://www.uni-trier.de/index.php?id=10355  
+
+### Sicherungsmaßnahmen
+  
+Zur Gewährung des Datenschutzes sind folgende Sicherungsmaßnahmen zu beachten:  
+  
+__Zugangskontrolle__ 
+
+Unbefugten ist der Zugang zu Datenverarbeitungsanlagen, mit denen personenbezogene Daten verarbeitet werden, zu verwehren. Deshalb sind
+
+__Speicher-, Zugriffs-, Benutzer- und Datenträgerkontrolle__
+
+Es ist zu verhindern, dass Datenverarbeitungssysteme mit Hilfe von Einrichtungen zur Datenübertragung von Unbefugten benutzt werden können. Weiterhin ist zu verhindern, dass Datenträger unbefugt gelesen, kopiert, verändert, gelöscht oder entfernt werden können oder dass durch Unbefugte Eingaben vorgenommen werden. Es ist zu gewährleisten, dass berechtigte Personen ausschließlich auf die ihrer Berechtigung unterliegenden Daten zugreifen können.
+  
+__Eingabekontrolle__  
+  
+Es ist sicherzustellen, dass nachträglich feststellbar ist, welche personen-bezogenen Daten in welcher Zeit von wem in ein Datenverarbeitungssystem eingegeben worden sind. Deshalb sind Eingabe, Veränderung und Löschung solcher Daten automatisiert zu protokollieren. Ist dies aus technischen Gründen nicht möglich, sind sie in anderer Weise zu protokollieren.
+  
+Weiterhin hat die Personalabteilung mit dem Personalrat eine Dienstvereinbarung zu treffen, welche Stellen innerhalb der Personalverwaltung welche Informationen aus dem System erhalten dürfen, sowie unter welche Voraussetzungen entsprechende Auswertungen wem zur Verfügung gestellt werden dürfen.
+  
+__Übermittlungskontrolle__  
+  
+Die Übermittlung personenbezogener Daten an Dritte ist unter Angabe des Empfängers und des Anlasses festzuhalten. Werden personenbezogene Daten als Ausdruck weitergegeben, so ist in den Auszügen auf die Geheimhaltungsvorschriften hinzuweisen.
+  
+__Transportkontrolle__  
+  
+Die Versendung von Datenträgern mit personenbezogenen Daten (z.B. Disketten) ist in einem verschlossenen Umschlag durchzuführen. Die Versendung bzw. die Übergabe ist schriftlich festzuhalten. Die Übergabe von Hand zu Hand ist vorzuziehen.
+  
+__Installation von Anwendungssoftware__  
+  
+Das eigenmächtige Installieren jeglicher Software auf den Computern der Dienststelle, soweit auf diesen personenbezogene Daten im Sinne von Abs. 1 gespeichert bzw. bearbeitet werden, wird untersagt.
