@@ -1,4 +1,12 @@
-# Hackerpraktikum
+#Aufgabe 1 Rechtliche Rahmenbedingungen  
+  
+Rechercheiren Sie die rechtlichen Normen, die informationstechnische Anlagen (ganz allgemein) und die mit ihnen erzeugten, verwalteten und verarbeiteten Daten schützen.  
+* Welche gesetze befassen sich damit? 
+* Welche strafrechtlichen Vorschriften gibt es?
+* Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
+* Welche Bedingungen stellt die Universität Trier selbst?
+  
+  
 ##EU:
 Artikel 8 der Grundrechtecharta  
 "Jede Person hat das Recht auf Achtung ihres Privat- und Familienlebens, ihrer Wohnung und ihrer Korrespondenz."
