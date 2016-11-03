@@ -63,3 +63,8 @@ Die Versendung von Datenträgern mit personenbezogenen Daten (z.B. Disketten) is
 __Installation von Anwendungssoftware__  
   
 Das eigenmächtige Installieren jeglicher Software auf den Computern der Dienststelle, soweit auf diesen personenbezogene Daten im Sinne von Abs. 1 gespeichert bzw. bearbeitet werden, wird untersagt.
+  
+__Erfassung von Log-Daten__  
+  
+Folgende Services der Uni Trier erfassen log-Daten:  
+WWW-Server, WWW-Cache, FTP-Server, Mail-System, DNS, Active Directory, Benutzerverwaltung, Computerwerkstatt, Netflow, Sonstige Server, Datenbanken, u.ä.  
