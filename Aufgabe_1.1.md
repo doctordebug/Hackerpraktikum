@@ -1,27 +1,24 @@
 #Aufgabe 1 Rechtliche Rahmenbedingungen  
   
-Rechercheiren Sie die rechtlichen Normen, die informationstechnische Anlagen (ganz allgemein) und die mit ihnen erzeugten, verwalteten und verarbeiteten Daten schützen.  
-* Welche gesetze befassen sich damit? 
+Recherchieren Sie die rechtlichen Normen, die informationstechnische Anlagen (ganz allgemein) und die mit ihnen erzeugten, verwalteten und verarbeiteten Daten schützen.  
+* Welche Gesetze befassen sich damit? 
 * Welche strafrechtlichen Vorschriften gibt es?
 * Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
 * Welche Bedingungen stellt die Universität Trier selbst?
   
-  
-##EU:
+# Welche Gesetze befassen sich damit? Unterteilt in EU, DE, Hochschulen, Universität Trier
+## EU:
 Artikel 8 der Grundrechtecharta  
 "Jede Person hat das Recht auf Achtung ihres Privat- und Familienlebens, ihrer Wohnung und ihrer Korrespondenz."
 2013/40/EU des Europäischen Parlaments und des Rates vom 12. August 2013 über Angriffe auf Informationssysteme und zur Ersetzung des Rahmenbeschlusses 2005/222/JI des Rates
-##Deutschland:
-###STGB:
+## Deutschland:
+### StGB:
 §202 Verletzung des Briefgeheimnisses  
 §202a Ausspähen von Daten  
-Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
-Abschnitt (2) grenzt den Begriff "Daten" ein.  
 §202b Abfangen von Daten  
-Erneut geht es um Daten, die nicht für einen bestimmt sind, die aus nichtöffentlicher Datenübermittlung oder aus elektromagnetischer Abstrahlung einer Datenverarbeitungsanlage erhalten werden können. Unter "nichtöffentliche Datenübermittlung" versteht man die verschlüsselte Kommunikation. Bricht man z.B. die Verschlüsselung eines WLAN-Netzes oder fängt die elektromagnetische Strahlung einer Datenverarbeitungsanlage ab macht man sich mit bis zu zwei Jahren strafbar. 
 §202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
 §202d Datenhehlerei  
-###BDSG:
+### BDSG:
 __§1 Zweck und Anwendungsbereich__   
 (1) Zweck dieses Gesetzes ist es, den Einzelnen davor zu schützen, dass er durch den Umgang mit seinen personenbezogenen Daten in seinem Persönlichkeitsrecht beeinträchtigt wird.  
 (2) Dieses Gesetz gilt für die Erhebung, Verarbeitung und Nutzung personenbezogener Daten durch   
@@ -80,3 +77,14 @@ __Erfassung von Log-Daten__
   
 Folgende Services der Uni Trier erfassen log-Daten:  
 WWW-Server, WWW-Cache, FTP-Server, Mail-System, DNS, Active Directory, Benutzerverwaltung, Computerwerkstatt, Netflow, Sonstige Server, Datenbanken, u.ä.  
+
+# Welche strafrechtlichen Vorschriften gibt es?
+## Paragraphen des StGB:
+§202 Verletzung des Briefgeheimnisses  
+§202a Ausspähen von Daten  
+Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
+Abschnitt (2) grenzt den Begriff "Daten" ein.  
+§202b Abfangen von Daten  
+Erneut geht es um Daten, die nicht für einen bestimmt sind, die aus nichtöffentlicher Datenübermittlung oder aus elektromagnetischer Abstrahlung einer Datenverarbeitungsanlage erhalten werden können. Unter "nichtöffentliche Datenübermittlung" versteht man die verschlüsselte Kommunikation. Bricht man z.B. die Verschlüsselung eines WLAN-Netzes oder fängt die elektromagnetische Strahlung einer Datenverarbeitungsanlage ab macht man sich mit bis zu zwei Jahren strafbar. 
+§202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
+§202d Datenhehlerei  
