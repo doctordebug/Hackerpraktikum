@@ -2,3 +2,4 @@
 ##TMG §7 Abschnitt (2)
 Diensteanbieter im Sinne der §§ 8 bis 10 sind nicht verpflichtet, die von ihnen übermittelten oder gespeicherten Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.  
 Dies besagt, dass aus Sicht der Diensteanbieter keine Überwachungspflicht ihrer offenen WLAN-Netze besteht.
+##Störerhaftung
