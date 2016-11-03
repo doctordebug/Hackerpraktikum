@@ -1,53 +1,29 @@
 #Aufgabe 1 Rechtliche Rahmenbedingungen  
   
-Rechercheiren Sie die rechtlichen Normen, die informationstechnische Anlagen (ganz allgemein) und die mit ihnen erzeugten, verwalteten und verarbeiteten Daten schützen.  
+
+Recherchieren Sie die rechtlichen Normen, die informationstechnische Anlagen (ganz allgemein) und die mit ihnen erzeugten, verwalteten und verarbeiteten Daten schützen.  
+
 * Welche Gesetze befassen sich damit? 
 * Welche strafrechtlichen Vorschriften gibt es?
 * Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
 * Welche Bedingungen stellt die Universität Trier selbst?
   
-  
-##EU:
+# Welche Gesetze befassen sich damit? Unterteilt in EU, DE, Hochschulen, Universität Trier
+## EU:
 Artikel 8 der Grundrechtecharta  
 "Jede Person hat das Recht auf Achtung ihres Privat- und Familienlebens, ihrer Wohnung und ihrer Korrespondenz."
 2013/40/EU des Europäischen Parlaments und des Rates vom 12. August 2013 über Angriffe auf Informationssysteme und zur Ersetzung des Rahmenbeschlusses 2005/222/JI des Rates
-##Deutschland:
-###STGB:
-__§202 Verletzung des Briefgeheimnisses__    
-*Zusammenfassung:* Wer unbefugt ein verschlossenes Schriftstück öffnet, die nicht zu seiner Kenntnis bestimmt sind macht sich starfbar
-   
-*Strafmaß: Freiheitsstrafe bis zu einem Jahr    
   
-__§202a Ausspähen von Daten__    
-Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
-Abschnitt (2) grenzt den Begriff "Daten" ein.  
-  
-*Zusammenfassung:* Wer sich Zugang zu Daten verschaft, welche besonders gesichert sind und nicht für sich gedacht sind, unter Überwindung der Zugangssicherung, macht sich strafbar.  
-  
-*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
-  
-__§202b Abfangen von Daten__   
-  
-Wer unter verwendung von technischen Hilfsmitteln nicht für Ihn bestimmte Daten aus einer nicht öffentlichen Datenübermittlung oder aus der elektromagnetischen Abstrhlung einer Datenverarbeitungsanlage verschafft, wird bestraft.
-  
-*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
-  
-__§202c Vorbereiten des Ausspähen und Abfangen von Daten__    
-(auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
-  
-Wer eine Straftat vorbereitet in dem er Passwörter, Sicherheitscodes oder Computerprograme zur Erlangung solche vorbereitet, kauft oder einem anderen überlässt, wird bestraft.  
-  
-*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
-  
-__§202d Datenhehlerei__  
 
-Wer Daten, die nicht allgemein zugänglich sind und die andere durch eine rechtswidrige Tat erlangt hat oder anderen zugänglich macht, macht sich strafbar. Insbesondere: Amtsträger.  
-  
-*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
-  
-   
-   
-###BDSG:
+## Deutschland:
+### StGB:
+§202 Verletzung des Briefgeheimnisses  
+§202a Ausspähen von Daten  
+§202b Abfangen von Daten  
+§202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
+§202d Datenhehlerei  
+### BDSG:
+
 __§1 Zweck und Anwendungsbereich__   
 (1) Zweck dieses Gesetzes ist es, den Einzelnen davor zu schützen, dass er durch den Umgang mit seinen personenbezogenen Daten in seinem Persönlichkeitsrecht beeinträchtigt wird.  
 (2) Dieses Gesetz gilt für die Erhebung, Verarbeitung und Nutzung personenbezogener Daten durch   
@@ -106,3 +82,44 @@ __Erfassung von Log-Daten__
   
 Folgende Services der Uni Trier erfassen log-Daten:  
 WWW-Server, WWW-Cache, FTP-Server, Mail-System, DNS, Active Directory, Benutzerverwaltung, Computerwerkstatt, Netflow, Sonstige Server, Datenbanken, u.ä.  
+
+# Welche strafrechtlichen Vorschriften gibt es?
+## Paragraphen des StGB:
+
+__§202 Verletzung des Briefgeheimnisses__    
+*Zusammenfassung:* Wer unbefugt ein verschlossenes Schriftstück öffnet, die nicht zu seiner Kenntnis bestimmt sind macht sich starfbar
+   
+*Strafmaß: Freiheitsstrafe bis zu einem Jahr    
+  
+__§202a Ausspähen von Daten__    
+Abschnitt (1) verbietet den Zugang zu Inhalten, die nicht für ihn bestimmt sind und dabei besonders gegen Zugriff Unbefugter abgesichert sind. Bei Überschreitung macht man sich strafbar.  
+Abschnitt (2) grenzt den Begriff "Daten" ein.  
+  
+*Zusammenfassung:* Wer sich Zugang zu Daten verschaft, welche besonders gesichert sind und nicht für sich gedacht sind, unter Überwindung der Zugangssicherung, macht sich strafbar.  
+  
+*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
+  
+__§202b Abfangen von Daten__   
+  
+Wer unter verwendung von technischen Hilfsmitteln nicht für Ihn bestimmte Daten aus einer nicht öffentlichen Datenübermittlung oder aus der elektromagnetischen Abstrhlung einer Datenverarbeitungsanlage verschafft, wird bestraft.
+  
+*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
+  
+__§202c Vorbereiten des Ausspähen und Abfangen von Daten__    
+(auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
+  
+Wer eine Straftat vorbereitet in dem er Passwörter, Sicherheitscodes oder Computerprograme zur Erlangung solche vorbereitet, kauft oder einem anderen überlässt, wird bestraft.  
+  
+*Strafmaß: Freiheitsstrafe bis zu zwei Jahren  
+  
+__§202d Datenhehlerei__  
+
+Wer Daten, die nicht allgemein zugänglich sind und die andere durch eine rechtswidrige Tat erlangt hat oder anderen zugänglich macht, macht sich strafbar. Insbesondere: Amtsträger.  
+  
+*Strafmaß: Freiheitsstrafe bis zu drei Jahren  
+
+# Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
+
+
+# Welche Bedingungen stellt die Universität Trier selbst?
+
