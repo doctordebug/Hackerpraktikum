@@ -88,3 +88,9 @@ Abschnitt (2) grenzt den Begriff "Daten" ein.
 Erneut geht es um Daten, die nicht für einen bestimmt sind, die aus nichtöffentlicher Datenübermittlung oder aus elektromagnetischer Abstrahlung einer Datenverarbeitungsanlage erhalten werden können. Unter "nichtöffentliche Datenübermittlung" versteht man die verschlüsselte Kommunikation. Bricht man z.B. die Verschlüsselung eines WLAN-Netzes oder fängt die elektromagnetische Strahlung einer Datenverarbeitungsanlage ab macht man sich mit bis zu zwei Jahren strafbar. 
 §202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph"), dazu §149 Vorbereitung der Fälschung von Geld und Wertzeichen  
 §202d Datenhehlerei  
+
+# Gibt es besondere Bedingungen, die auf die Universität Trier zutreffen?
+
+
+# Welche Bedingungen stellt die Universität Trier selbst?
+
