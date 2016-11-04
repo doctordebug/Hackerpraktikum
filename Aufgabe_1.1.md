@@ -124,4 +124,13 @@ Wer Daten, die nicht allgemein zugänglich sind und die andere durch eine rechts
 # Welche Bedingungen stellt die Universität Trier selbst?
 Die besonderen Bedingungen gehen aus der [Teilgrundordnung](https://www.uni-trier.de/index.php?id=6397) der Universität Trier, Der [Benutzerordnung](http://cip.uni-trier.de/?id=0.1) der CIP- und Poolrechner der Abteilung Informatik, sowie der [Dienstanweisung](https://www.uni-trier.de/index.php?id=17988) über den Datenschutz und die Datensicherung an der Universität Trier hevor.
   
+#NOCH AUFNEHMEN:
 
+__303a Datenveränderung__  
+  
+(1) Wer rechtswidrig Daten (§ 202a Abs. 2) löscht, unterdrückt, unbrauchbar macht oder verändert, wird mit Freiheitsstrafe bis zu zwei Jahren oder mit Geldstrafe bestraft.  
+  
+(2) Der Versuch ist strafbar.  
+  
+(3) Für die Vorbereitung einer Straftat nach Absatz 1 gilt § 202c entsprechend.  
+  
