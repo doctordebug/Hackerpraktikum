@@ -45,3 +45,6 @@ Wie jede Stromchiffre bietet auch RC4 keinen Integritätsschutz. Wenn ein Angrei
 
 
 [*] https://en.wikipedia.org/wiki/RC4
+
+#Paper
+## 1. Attacks on the RC4 stream cipher [Andreas Klein]
