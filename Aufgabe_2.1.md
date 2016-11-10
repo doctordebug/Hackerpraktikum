@@ -88,3 +88,7 @@ j = K[0] + 1 + K[1]
   
 K[0] + 1 + K[1] wird im Weiteren t genannt.
 ```
+  
+4 Spezialfälle betrachten (werde ich ergänzen, wenn diese sich im weiteren Paper als wichtig herrausstellen)  
+  
+Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] aus K[1] berechnet werden.
