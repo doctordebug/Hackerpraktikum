@@ -14,7 +14,7 @@ Um den Schlüsselstrom zu generieren, benutzt die Chiffre einen S-Box und zwei P
 
 
 ```
-k[]: gegebene Schlüssel-Zeichenfolge der Länge 5 bis 256 Byte
+  k[]: gegebene Schlüssel-Zeichenfolge der Länge 5 bis 256 Byte
   L := Länge des Schlüssels in Byte
   s[]: Byte-Vektor der Länge 256
   Für i = 0 bis 255
