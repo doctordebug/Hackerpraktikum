@@ -2,7 +2,7 @@
 
 #WLAN
 
-#RC4
+#RC4 *
 (= Rivest Cipher 4)  
 Stromverschlüsselung, die u.a. Für WEP genutzt wird.  
 Eine Pseudozufallsfolge wird aus einer Nounce erzeugt (=Keystream). Der Plaintext wird bitweise mit XOR verknüpft um die Daten zu verschlüsseln (=Vernam).  
@@ -38,3 +38,10 @@ Um den Schlüsselstrom zu generieren, benutzt die Chiffre einen S-Box und zwei P
     zufallszahl := s[(s[i] + s[j]) mod 256]
     schl[n] := zufallszahl XOR klar[n]
 ```
+
+##Sicherheit
+
+Wie jede Stromchiffre bietet auch RC4 keinen Integritätsschutz. Wenn ein Angreifer ein Bit einer verschlüsselten Nachricht ändert, so ändert er damit auch das gleiche Bit des Klartextes.
+
+
+[*] https://en.wikipedia.org/wiki/RC4
