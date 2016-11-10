@@ -52,4 +52,8 @@ Wie jede Stromchiffre bietet auch RC4 keinen Integritätsschutz. Wenn ein Angrei
 ### Kapitel 2: RC4-Algorithmus
 #### 2.1: Beschreibung
 s.o.
-#### 2.2:
+#### 2.2: Korrelationen im RC4-Pseudozufallsgenerator
+Die von RC4 erzeugte Pseudosufallsfolge unterscheidet sich in einigen Punkten von einer "richtigen" Zufallsfolge. Die Summe der letzten Bits in Schrit t und t+2 korreliert gegen 1. J.Dj. Golic kam zu dem Schluss, dass 2^40 Bytes von der RC4-Pseudosequenz unterscheidbar sind zu einer richtigen Zufallssequenz.  
+Weitere Untersuchungen von S.R. Fluhrer und D.A. McGrew haben beweisen, das die gemeinsame WK von zwei aufeinander folgenden Bytes sich signifikant von einer Zufallsfolge unterscheiden.  
+#### 2.3 Schwachstelle der Key-Scheduling-Phase
+Im Idealfall besteht ein Schlüssel aus n unabhägig, identischen und gleichverteilten Elementen aus Z/nZ und gerneriert n^n gleichwahrscheinliche Schlüssel.
