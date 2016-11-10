@@ -1,7 +1,7 @@
 #WEP
-
+[WEP](https://en.wikipedia.org/wiki/Wired_Equivalent_Privacy)
 #WLAN
-
+[WLAN/IEEE 802.11](https://de.wikipedia.org/wiki/IEEE_802.11) 
 #RC4 *
 (= Rivest Cipher 4)  
 Stromverschlüsselung, die u.a. Für WEP genutzt wird.  
@@ -88,10 +88,3 @@ j = K[0] + 1 + K[1]
   
 K[0] + 1 + K[1] wird im Weiteren t genannt.
 ```
-  
-4 Spezialfälle betrachten (werde ich ergänzen, wenn diese sich im weiteren Paper als wichtig herrausstellen)  
-  
-Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] aus K[1] berechnet werden.
-**Achtung:** Wird der Wert S[1] beim ersten Mal überschreiben, (j = 1) funktioniert dies nicht. Die WK, das die nach 2 Runden passiert liegt bei:  
-`(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge 
-**Zu klären: Was ist e? Eulerische Zahl?!**
