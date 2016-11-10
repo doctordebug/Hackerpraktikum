@@ -103,4 +103,4 @@ Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j
 
   
 **Unser Angriff hat nun folgende Form:**  
-Für verschiedene Initialisierungsverktoren (n-Stück) können wir das erste Byte 'x_i' mit `1 <= i <= n`beobachten. 
+Für verschiedene Initialisierungsverktoren (n-Stück) können wir die ersten Bytes 'x_i' mit `1 <= i <= n`beobachten und `t_i = 1 - x_i` ausrechnen. Wie Wk, das t_i den richtigen Wert annimmt liegt bei `1.36/n` alle anderen Werte haben eine WK von unter `1/n` Wenn die Anzah lder Session großgenug ist, kann man den Wert mit hoher WK bestimmen.
