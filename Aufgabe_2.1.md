@@ -53,7 +53,10 @@ Wie jede Stromchiffre bietet auch RC4 keinen Integritätsschutz. Wenn ein Angrei
 #### 2.1: Beschreibung
 s.o.
 #### 2.2: Korrelationen im RC4-Pseudozufallsgenerator
-Die von RC4 erzeugte Pseudosufallsfolge unterscheidet sich in einigen Punkten von einer "richtigen" Zufallsfolge. Die Summe der letzten Bits in Schrit t und t+2 korreliert gegen 1. J.Dj. Golic kam zu dem Schluss, dass 2^40 Bytes von der RC4-Pseudosequenz unterscheidbar sind zu einer richtigen Zufallssequenz.  
+Die von RC4 erzeugte Pseudosufallssequenz (=PZS) unterscheidet sich in einigen Punkten von einer "richtigen" Zufallsfolge. Die Summe der letzten Bits in Schrit t und t+2 korreliert gegen 1. J.Dj. Golic kam zu dem Schluss, dass 2^40 Bytes von der RC4-PZS unterscheidbar sind zu einer richtigen Zufallssequenz.  
 Weitere Untersuchungen von S.R. Fluhrer und D.A. McGrew haben beweisen, das die gemeinsame WK von zwei aufeinander folgenden Bytes sich signifikant von einer Zufallsfolge unterscheiden.  
 #### 2.3 Schwachstelle der Key-Scheduling-Phase
 Im Idealfall besteht ein Schlüssel aus n unabhägig, identischen und gleichverteilten Elementen aus Z/nZ und gerneriert n^n gleichwahrscheinliche Schlüssel.
+Jedoch ist n! kein Teiler von n^n. Daher muss sich die Verteilung der initialen Permutation von einer Gleichverteilung unterscheiden.
+(=> Siehe Studie von I.Mironov.)  
+Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht wirklich zufällig ist. Angriff von S. Fluhrer, I.martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form (b,n-1) haben, wobei b das Byte des Hauptschlüssel ist, welches rekontruiert werden soll. Wenn ein Angreifer kei neChance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich einre aus n^2 Situngen der Fall. **Die Authoren zeigen, dass dieser Angriff auf WEP angewendet warden kann.**
