@@ -76,11 +76,15 @@ Wir betrachten die Permutation im Key-Scheduling:
     swap s[i] mit s[j]
 ```
 Hier sideht man leicht, nach dem ersten Schritt gilt:  
+```
 j = 0+0+K[0] = K[0]  
 ==> S[0] <-> S[K[0]]  
+```  
   
 So lässt sich die zweite Runde (mit WK 1 - 1/n) ebenfalls rekontruieren: 
+```  
 j = K[0] + 1 + K[1]  
 ==> S[1] <-> S[ K[0] + 1 + K[1] ]  
   
 K[0] + 1 + K[1] wird im Weiteren t genannt.
+```
