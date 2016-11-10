@@ -66,7 +66,7 @@ Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)
 ### Kapitel 4: Angriff auf die erste Runde
 Annahme: Sesseion_keys habe ndie Form: *main key || Initialisierungsvektor*  
 Der Angriff bestimmt die Summe der ersten 2 Bytes des Schlüssels. Später wird auch ein Angriff gezeigt, bei welchem der Initialisierungsvektor an erster Stelle steht.
-#### Die Basisversion des Angriffes
+#### 4.1 Die Basisversion des Angriffes
 Wir betrachten die Permutation im Key-Scheduling:  
 ```
   // S = [0,1,2.....n-1]
@@ -77,4 +77,10 @@ Wir betrachten die Permutation im Key-Scheduling:
 ```
 Hier sideht man leicht, nach dem ersten Schritt gilt:  
 j = 0+0+K[0] = K[0]  
-==> S[0] <-> S[K[0]]
+==> S[0] <-> S[K[0]]  
+  
+So lässt sich die zweite Runde (mit WK 1 - 1/n) ebenfalls rekontruieren: 
+j = K[0] + 1 + K[1]  
+==> S[1] <-> S[ K[0] + 1 + K[1] ]  
+  
+K[0] + 1 + K[1] wird im Weiteren t genannt.
