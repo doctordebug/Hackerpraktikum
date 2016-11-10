@@ -7,3 +7,5 @@
 Stromverschlüsselung, die u.a. Für WEP genutzt wird.  
 Eine Pseudozufallsfolge wird aus einer Nounce erzeugt (=Keystream). Der Plaintext wird bitweise mit XOR verknüpft um die Daten zu verschlüsseln (=Vernam).  
 Die Entschlüsselung wird genauso berechnet.
+  
+Um den Schlüsselstrom zu generieren, benutzt die Chiffre einen S-Box und zwei Pointer (Hier: i und j).
