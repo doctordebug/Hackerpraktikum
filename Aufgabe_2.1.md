@@ -93,5 +93,7 @@ K[0] + 1 + K[1] wird im Weiteren t genannt.
   
 Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] aus K[1] berechnet werden.
 **Achtung:** Wird der Wert S[1] beim ersten Mal überschreiben, (j = 1) funktioniert dies nicht. Die WK, das die nach 2 Runden passiert liegt bei:  
-`(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge 
-**Zu klären: Was ist e? Eulerische Zahl?!**
+`(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge, e = Eulerische Zahl.  
+Nun wissen wir Folgendes:  
+Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK (1/e) nur von K[0] und K[1] abhängt.  
+Nun kann die Korrelation aus *Kapitel 3* benutzt werden um t aus der beobachteten RC4-PZS zu erhalten.
