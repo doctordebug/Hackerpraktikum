@@ -1,7 +1,7 @@
 #WEP
-
+[WEP](https://en.wikipedia.org/wiki/Wired_Equivalent_Privacy)
 #WLAN
-
+[WLAN/IEEE 802.11](https://de.wikipedia.org/wiki/IEEE_802.11) 
 #RC4 *
 (= Rivest Cipher 4)  
 Stromverschlüsselung, die u.a. Für WEP genutzt wird.  
@@ -56,15 +56,15 @@ s.o.
 Die von RC4 erzeugte Pseudosufallssequenz (=PZS) unterscheidet sich in einigen Punkten von einer "richtigen" Zufallsfolge. Die Summe der letzten Bits in Schrit t und t+2 korreliert gegen 1. J.Dj. Golic kam zu dem Schluss, dass 2^40 Bytes von der RC4-PZS unterscheidbar sind zu einer richtigen Zufallssequenz.  
 Weitere Untersuchungen von S.R. Fluhrer und D.A. McGrew haben beweisen, das die gemeinsame WK von zwei aufeinander folgenden Bytes sich signifikant von einer Zufallsfolge unterscheiden.  
 #### 2.3 Schwachstelle der Key-Scheduling-Phase
-Im Idealfall besteht ein Schlüssel aus n unabhägig, identischen und gleichverteilten Elementen aus Z/nZ und gerneriert n^n gleichwahrscheinliche Schlüssel.
+Im Idealfall besteht ein Schlüssel aus n unabhängig, identischen und gleichverteilten Elementen aus Z/nZ und generiert n^n gleichwahrscheinliche Schlüssel.
 Jedoch ist n! kein Teiler von n^n. Daher muss sich die Verteilung der initialen Permutation von einer Gleichverteilung unterscheiden.
 (=> Siehe Studie von I.Mironov.)  
-Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht wirklich zufällig ist. Angriff von S. Fluhrer, I.martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form (b,n-1) haben, wobei b das Byte des Hauptschlüssel ist, welches rekontruiert werden soll. Wenn ein Angreifer kei neChance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich einre aus n^2 Situngen der Fall. **Die Authoren zeigen, dass dieser Angriff auf WEP angewendet warden kann.**
+Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht wirklich zufällig ist. Angriff von S. Fluhrer, I. Martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form (b,n-1) haben, wobei b das Byte des Hauptschlüssel ist, welches rekonstruiert werden soll. Wenn ein Angreifer keine Chance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich einer aus n^2 Sitzungen der Fall. **Die Autoren zeigen, dass dieser Angriff auf WEP angewendet werden kann.**
 ### Kapitel 3: Eine Korrelation im RC4 Pseudo-Zufalls-Generator
 Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren/abfangbaren Werten i, S[k] und den internen Werten von j, S[j] und S[i] besteht. In der Zusammenfassung: Ohne Beweis.  
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)  
 ### Kapitel 4: Angriff auf die erste Runde
-Annahme: Sesseion_keys habe ndie Form: *main key || Initialisierungsvektor*  
+Annahme: Session_keys haben die Form: *main key || Initialisierungsvektor*  
 Der Angriff bestimmt die Summe der ersten 2 Bytes des Schlüssels. Später wird auch ein Angriff gezeigt, bei welchem der Initialisierungsvektor an erster Stelle steht.
 #### 4.1 Die Basisversion des Angriffes
 Wir betrachten die Permutation im Key-Scheduling:  
@@ -75,23 +75,16 @@ Wir betrachten die Permutation im Key-Scheduling:
     j := (j + s[i] + k[i mod L]) mod 256
     swap s[i] mit s[j]
 ```
-Hier sideht man leicht, nach dem ersten Schritt gilt:  
+Hier sieht man leicht, nach dem ersten Schritt gilt:  
 ```
 j = 0+0+K[0] = K[0]  
 ==> S[0] <-> S[K[0]]  
 ```  
   
-So lässt sich die zweite Runde (mit WK 1 - 1/n) ebenfalls rekontruieren: 
+So lässt sich die zweite Runde (mit WK 1 - 1/n) ebenfalls rekonstruieren: 
 ```  
 j = K[0] + 1 + K[1]  
 ==> S[1] <-> S[ K[0] + 1 + K[1] ]  
   
 K[0] + 1 + K[1] wird im Weiteren t genannt.
 ```
-  
-4 Spezialfälle betrachten (werde ich ergänzen, wenn diese sich im weiteren Paper als wichtig herrausstellen)  
-  
-Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] aus K[1] berechnet werden.
-**Achtung:** Wird der Wert S[1] beim ersten Mal überschreiben, (j = 1) funktioniert dies nicht. Die WK, das die nach 2 Runden passiert liegt bei:  
-`(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge 
-**Zu klären: Was ist e? Eulerische Zahl?!**
