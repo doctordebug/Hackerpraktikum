@@ -96,4 +96,11 @@ Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] au
 `(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge, e = Eulerische Zahl.  
 Nun wissen wir Folgendes:  
 Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK (1/e) nur von K[0] und K[1] abhängt.  
-Nun kann die Korrelation aus *Kapitel 3* benutzt werden um t aus der beobachteten RC4-PZS zu erhalten.
+Nun kann die Korrelation aus *Kapitel 3* benutzt werden um t aus der beobachteten RC4-PZS zu erhalten.  
+Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an.  
+Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: `S[j] = 1 - S[k] mod n` mit Wahrscheinlichkeit: `2/n`  Alles zusammen haben wir nun:   
+`R( t = 1 - S[k] mod n) = [...] 1.36 /n`  
+
+  
+**Unser Angriff hat nun folgende Form:**  
+Für verschiedene Initialisierungsverktoren (n-Stück) können wir das erste Byte 'x_i' mit `1 <= i <= n`beobachten. 
