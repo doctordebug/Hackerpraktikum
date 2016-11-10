@@ -63,4 +63,4 @@ Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht
 ### Kapitel 3: Eine Korrelation im RC4 Pseudo-Zufalls-Generator
 Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren/abfangbaren Werten i, S[k] und den internen Werten von j, S[j] und S[i] besteht. In der Zusammenfassung: Ohne Beweis.  
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)  
-### Kapitel 4: 
+### Kapitel 4: Angriff auf die erste Runde
