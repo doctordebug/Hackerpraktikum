@@ -60,3 +60,7 @@ Im Idealfall besteht ein Schlüssel aus n unabhägig, identischen und gleichvert
 Jedoch ist n! kein Teiler von n^n. Daher muss sich die Verteilung der initialen Permutation von einer Gleichverteilung unterscheiden.
 (=> Siehe Studie von I.Mironov.)  
 Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht wirklich zufällig ist. Angriff von S. Fluhrer, I.martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form (b,n-1) haben, wobei b das Byte des Hauptschlüssel ist, welches rekontruiert werden soll. Wenn ein Angreifer kei neChance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich einre aus n^2 Situngen der Fall. **Die Authoren zeigen, dass dieser Angriff auf WEP angewendet warden kann.**
+### Kapitel 3: Eine Korrelation im RC4 Pseudo-Zufalls-Generator
+Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren/abfangbaren Werten i, S[k] und den internen Werten von j, S[j] und S[i] besteht. In der Zusammenfassung: Ohne Beweis.  
+Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)  
+### Kapitel 4: 
