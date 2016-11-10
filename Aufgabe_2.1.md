@@ -64,3 +64,5 @@ Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht
 Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren/abfangbaren Werten i, S[k] und den internen Werten von j, S[j] und S[i] besteht. In der Zusammenfassung: Ohne Beweis.  
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)  
 ### Kapitel 4: Angriff auf die erste Runde
+Annahme: Sesseion_keys habe ndie Form: *main key|| Initialisierungsvektor*  
+Der Angriff bestimmt die Summe der ersten 2 Bytes des Schlüssels. Später wird auch ein Angriff gezeigt, bei welchem der Initialisierungsvektor an erster Stelle steht.
