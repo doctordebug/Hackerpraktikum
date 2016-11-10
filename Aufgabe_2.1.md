@@ -69,7 +69,12 @@ Der Angriff bestimmt die Summe der ersten 2 Bytes des Schlüssels. Später wird 
 #### Die Basisversion des Angriffes
 Wir betrachten die Permutation im Key-Scheduling:  
 ```
+  // S = [0,1,2.....n-1]
+  j := 0
   For i = 0 to n - 1
     j := (j + s[i] + k[i mod L]) mod 256
     swap s[i] mit s[j]
 ```
+Hier sideht man leicht, nach dem ersten Schritt gilt:  
+j = 0+0+K[0] = K[0]  
+==> S[0] <-> S[K[0]]
