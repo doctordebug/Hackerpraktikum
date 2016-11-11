@@ -17,13 +17,14 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
     :param iv_length: Length of the initializing vector
     :param key_length: Length of the key. Typically ranges from 5 to 64 with maximum of 256
     :param tuple_amount: Amount of iv and stream keys to be generated
-    :return: A set of iv and stream key tuples
+    :return: A set of iv and stream key tuples and the main key
     """
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
     # Generate random key
     main_key = bytearray(os.urandom(key_length))
     log("Using key: {}".format(main_key), level=0)
+    log("First byte: {}".format(main_key[0]), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):

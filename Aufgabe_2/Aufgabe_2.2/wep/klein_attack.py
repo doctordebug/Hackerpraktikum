@@ -1,10 +1,11 @@
 from collections import Counter
 
-from utils import log
 from wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
 
 def get_most_common_byte(data, n=256):
+    # Originally used in computing the first bytes of the main key.
+    # Not needed because we already know the iv
     t_set = []
     for pair in data:
         x_i = pair.get('stream_key')[0]
@@ -22,50 +23,42 @@ def calculate_key_byte(t, n):
         yield k_1
 
 
-if __name__ == '__main__':
-    n = 256
-    tuple_amount = 500
-    # Retrieve sample set of bytearray tuples
-    stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount)
-    # Logging
-    #log("First bytes of main key: {}".format((main_key[0], main_key[1], main_key[2])), level=0)
-    #log("Estimated value: {} = K[0] + K[1] + 1".format((main_key[0] + main_key[1] + 1) % n), level=0)
-    # Observation of first bytes
-    #t = get_most_common_byte(stream_key)
-    #log("Most common byte: {}, P({})={}".format(t[0], t[0], t[1] / tuple_amount), level=0)
-    # Calculate
-    #k_generator = calculate_key_byte(t[0], n)
-    #for k in k_generator:
-    #    for pair in stream_key:
-    #        stream_key = pair.get('stream_key')
-    #        if k == stream_key[0]:
-    #            print(k)
-
-    j_1 = stream_key[0].get('iv')[-1]
-    i_1 = stream_key[0].get('iv')[-2]
-
-    i,j = 0,0
-    # Initialization
+def simulate_permutation(key):
+    # Initialize s-box
     s = []
     for i in range(n):
         s.append(i)
-    s = bytearray(s)
 
-    k = bytearray(stream_key[0].get('iv'))
-
-    for i in range(len(k) + 1):  # TODO: check if modulo works as expected
-        j = (j + s[i] + k[i % len(k)]) % n
+    j = 0
+    i = 0
+    # Calculate permutation for first i bytes
+    for i in range(len(key)):
+        j = (j + s[i] + key[i % len(key)]) % n
         s[i], s[j] = s[j], s[i]
+    return s, i, j
 
-    output = ""
-    for i in range(len(s)):
-        output += str(s[i])+", "
-    print(output)
-    print("K[b-2]="+hex(j_1))
-    print("K[b-1]="+hex(i_1))
-    print("S[b]="+hex(s[len(stream_key[0].get('iv'))]))
-    fick = ((j_1 + i_1 - s[len(stream_key[0].get('iv'))-1])%256)
-    print("K[b]= K[b-2] + K[b-1] - S[b] ")
-    print("K[b] tatsächlich :="+str(main_key[0]))
-    print("K[b] berechnet:="+str(fick))
 
+if __name__ == '__main__':
+    n = 256
+    tuple_amount = 5000
+    # Retrieve sample set of bytearray tuples
+    stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n)
+
+    candidates = []
+    for tuple in stream_key:
+        # Internal permutation S_(i-1) and index j at (i-1)th step
+        s_box, i, j = simulate_permutation(tuple.get('iv'))
+        # K[i]
+        candidates.append((s_box[i - tuple.get('stream_key')[i - 1]] - (s_box[i] + j)) % 256)
+    print(Counter(candidates).most_common(3))
+
+
+    # j_1 = stream_key[0].get('iv')[-1]
+    # i_1 = stream_key[0].get('iv')[-2]
+    # print("K[b-2]=" + hex(j_1))
+    # print("K[b-1]=" + hex(i_1))
+    # print("S[b]=" + hex(s_box[len(stream_key[0].get('iv'))]))
+    # fick = ((j_1 + i_1 - s_box[len(stream_key[0].get('iv')) - 1]) % 256)
+    # print("K[b]= K[b-2] + K[b-1] - S[b] ")
+    # print("K[b] tatsächlich :=" + str(main_key[0]))
+    # print("K[b] berechnet:=" + str(fick))
