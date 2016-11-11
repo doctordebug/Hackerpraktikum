@@ -75,7 +75,7 @@ Wir betrachten die Permutation im Key-Scheduling:
     j := (j + s[i] + k[i mod L]) mod 256
     swap s[i] mit s[j]
 ```
-Hier sideht man leicht, nach dem ersten Schritt gilt:  
+Hier sieht man leicht, nach dem ersten Schritt gilt:  
 ```
 j = 0+0+K[0] = K[0]  
 ==> S[0] <-> S[K[0]]  
