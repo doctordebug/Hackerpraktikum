@@ -28,7 +28,7 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
         # Generate random iv and key
         iv = bytearray(os.urandom(iv_length))
         # Initial permutation
-        s_box = key_scheduling(main_key + iv, n)
+        s_box = key_scheduling(iv + main_key, n)
         # Extract (round * n) stream key bytes
         generator = pseudo_random_generator(s_box, n)
         stream_key = bytearray()
