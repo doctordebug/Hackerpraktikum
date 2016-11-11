@@ -1,7 +1,7 @@
 #WEP
-
+[WEP](https://en.wikipedia.org/wiki/Wired_Equivalent_Privacy)
 #WLAN
-
+[WLAN/IEEE 802.11](https://de.wikipedia.org/wiki/IEEE_802.11)
 #RC4 *
 (= Rivest Cipher 4)  
 Stromverschlüsselung, die u.a. Für WEP genutzt wird.  
@@ -93,14 +93,14 @@ K[0] + 1 + K[1] wird im Weiteren t genannt.
   
 Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] aus K[1] berechnet werden.
 **Achtung:** Wird der Wert S[1] beim ersten Mal überschreiben, (j = 1) funktioniert dies nicht. Die WK, das die nach 2 Runden passiert liegt bei:  
-`(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge, e = Eulerische Zahl.  
-Nun wissen wir Folgendes:  
-Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK (1/e) nur von K[0] und K[1] abhängt.  
-Nun kann die Korrelation aus *Kapitel 3* benutzt werden um t aus der beobachteten RC4-PZS zu erhalten.  
-Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an.  
-Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: `S[j] = 1 - S[k] mod n` mit Wahrscheinlichkeit: `2/n`  Alles zusammen haben wir nun:   
-`R( t = 1 - S[k] mod n) = [...] 1.36 /n`  
+`(1- (1/n))^(n-2)` das ist ungefähr gleich `1/e` mit n = Schlüssellänge, e = Eulerische Zahl.
+Nun wissen wir Folgendes:
+Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK (1/e) nur von K[0] und K[1] abhängt.
+Nun kann die Korrelation aus *Kapitel 3* benutzt werden um t aus der beobachteten RC4-PZS zu erhalten.
+Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an.
+Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: `S[j] = 1 - S[k] mod n` mit Wahrscheinlichkeit: `2/n`  Alles zusammen haben wir nun:
+`R( t = 1 - S[k] mod n) = [...] 1.36 /n`
 
-  
-**Unser Angriff hat nun folgende Form:**  
+
+**Unser Angriff hat nun folgende Form:**
 Für verschiedene Initialisierungsverktoren (n-Stück) können wir die ersten Bytes 'x_i' mit `1 <= i <= n`beobachten und `t_i = 1 - x_i` ausrechnen. Wie Wk, das t_i den richtigen Wert annimmt liegt bei `1.36/n` alle anderen Werte haben eine WK von unter `1/n` Wenn die Anzah lder Session großgenug ist, kann man den Wert mit hoher WK bestimmen.
