@@ -5,7 +5,7 @@ from rc4.pseudo_random_generator import pseudo_random_generator
 from utils import log
 
 
-def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=20000):
+def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=2000):
     """
     Method for generation of (iv, stream key) pairs as required by Exercise 2.2
     Modes:
@@ -21,7 +21,7 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
     main_key = bytearray(os.urandom(key_length))
-    log("Using key: {} with first byte: {}".format(main_key, main_key[0]), level=-1)
+    log("Using key: {} with first byte: {}".format(main_key, main_key[0]), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):

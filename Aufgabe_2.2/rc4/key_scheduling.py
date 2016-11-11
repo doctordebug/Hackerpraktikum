@@ -18,6 +18,7 @@ def key_scheduling(k=bytearray(), n=256):
     s = []
     for i in range(n):
         s.append(i)
+    s = bytearray(s)
 
     j = 0
     # Generate a random permutation
