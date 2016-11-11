@@ -41,10 +41,10 @@ if __name__ == '__main__':
     #        if k == stream_key[0]:
     #            print(k)
 
-    j = stream_key[0].get('iv')[-1]
+    j_1 = stream_key[0].get('iv')[-1]
     i_1 = stream_key[0].get('iv')[-2]
 
-
+    i,j = 0,0
     # Initialization
     s = []
     for i in range(n):
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     k = bytearray(stream_key[0].get('iv'))
 
-    for i in range(len(k)):  # TODO: check if modulo works as expected
+    for i in range(len(k) + 1):  # TODO: check if modulo works as expected
         j = (j + s[i] + k[i % len(k)]) % n
         s[i], s[j] = s[j], s[i]
 
@@ -61,10 +61,10 @@ if __name__ == '__main__':
     for i in range(len(s)):
         output += str(s[i])+", "
     print(output)
-    print("K[b-2]="+hex(j))
-    print("K[b-1]="+hex(i))
+    print("K[b-2]="+hex(j_1))
+    print("K[b-1]="+hex(i_1))
     print("S[b]="+hex(s[len(stream_key[0].get('iv'))]))
-    fick = ((j + i_1 - s[len(stream_key[0].get('iv'))])%256)
+    fick = ((j_1 + i_1 - s[len(stream_key[0].get('iv'))-1])%256)
     print("K[b]= K[b-2] + K[b-1] - S[b] ")
     print("K[b] tatsächlich :="+str(main_key[0]))
     print("K[b] berechnet:="+str(fick))
