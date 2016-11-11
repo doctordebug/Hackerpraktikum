@@ -152,7 +152,6 @@ Key length: 192 bits.
  DEC 4080 HEX  ff0:  a1 3a 7c 79  c7 e1 19 b5   ab 02 96 ab  28 c3 00 b9
  DEC 4096 HEX 1000:  f3 e4 c0 a2  e0 2d 1d 01   f7 f0 a7 46  18 af 2b 48
 
-
  Key length: 40 bits.
  key: 0x833222772a
 
@@ -196,8 +195,6 @@ Key length: 192 bits.
  DEC 3072 HEX  c00:  1b 15 56 cb  93 5f 17 33   37 70 5f bb  5d 50 1f c1
  DEC 4080 HEX  ff0:  ec d0 e9 66  02 be 7f 8d   50 92 81 6c  cc f2 c2 e9
  DEC 4096 HEX 1000:  02 78 81 fa  b4 99 3a 1c   26 20 24 a9  4f ff 3f 61
-
-
 
  Key length: 64 bits.
  key: 0x641910833222772a
@@ -243,7 +240,6 @@ Key length: 192 bits.
  DEC 4080 HEX  ff0:  43 8d d5 ea  fe a0 11 1b   6f 36 b4 b9  38 da 2a 68
  DEC 4096 HEX 1000:  5f 6b fc 73  81 58 74 d9   71 00 f0 86  97 93 57 d8
 
-
 Key length: 128 bits.
  key: 0xebb46227c6cc8b37641910833222772a
 
@@ -288,10 +284,6 @@ Key length: 128 bits.
  DEC 4080 HEX  ff0:  63 ed d6 84  fb 82 62 82   fe 52 8f 9c  0e 92 37 bc
  DEC 4096 HEX 1000:  e4 dd 2e 98  d6 96 0f ae   0b 43 54 54  56 74 33 91
 
-
-
-
-
  Key length: 256 bits.
  key: 0x1ada31d5cf688221c109163908ebe51debb46227c6cc8b37641910833222772a
 
@@ -313,5 +305,3 @@ Key length: 128 bits.
  DEC 3072 HEX  c00:  9e a3 6c 52  55 31 b8 80   ba 12 43 34  f5 7b 0b 70
  DEC 4080 HEX  ff0:  d5 a3 9e 3d  fc c5 02 80   ba c4 a6 b5  aa 0d ca 7d
  DEC 4096 HEX 1000:  37 0b 1c 1f  e6 55 91 6d   97 fd 0d 47  ca 1d 72 b8
-
-
