@@ -22,6 +22,7 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
 
     main_key = bytearray(os.urandom(key_length))
     log("Using key: {} with first bytes: {}...".format(main_key, (main_key[0],main_key[1],main_key[2])), level=0)
+    print("Estimated value: {}" .format((main_key[0] + main_key[1] + 1) % n))
 
     iv_stream_set = []
     for i in range(tuple_amount):
@@ -37,6 +38,7 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
             if len(stream_key) >= (rounds * n):
                 break
         iv_stream_set.append(dict(iv=iv, stream_key=stream_key))
+    iv_stream_set.append(dict(main_key=main_key))
 
     return iv_stream_set
 
