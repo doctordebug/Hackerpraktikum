@@ -36,7 +36,7 @@ def simulate_permutation(part_of_key):
     for i in range(n):
         s.append(i)
 
-    i,j = 0, 0
+    i, j = 0, 0
     # Calculate permutation for first i bytes
     for i in range(len(part_of_key)):
         j = (j + s[i] + part_of_key[i]) % n
@@ -78,10 +78,9 @@ if __name__ == '__main__':
             # Internal permutation S_(i-1) and index j at (i-1)th step
             s_box, i, j = simulate_permutation(compound_key)
             # Calculate possible key byte K[i]
-            candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i+1, j, n))
+            candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i + 1, j, n))
         candidate_byte = Counter(candidates).most_common(1)[0][0]
         possible_key += bytes([candidate_byte])
 
     print(possible_key)
     print(main_key)
-
