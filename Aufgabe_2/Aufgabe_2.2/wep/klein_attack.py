@@ -15,7 +15,7 @@ def get_most_common_byte(data, n=256):
     return Counter(t_set).most_common(1)[0]
 
 
-def calculate_key_byte(t, n):
+def calculate_first_key_byte(t, n):
     # Average case t = K[0] + K[1] + 1
     for i in range(n):
         k_0 = i
@@ -23,7 +23,13 @@ def calculate_key_byte(t, n):
         yield k_1
 
 
-def simulate_permutation(key):
+def simulate_permutation(part_of_key):
+    """
+    Approximate the permutation by simulating the first i steps
+    of the key scheduling of RC4
+    :param part_of_key: Known part of the main key
+    :return: S-box permuted to step i-1
+    """
     # Initialize s-box
     s = []
     for i in range(n):
@@ -32,15 +38,28 @@ def simulate_permutation(key):
     j = 0
     i = 0
     # Calculate permutation for first i bytes
-    for i in range(len(key)):
-        j = (j + s[i] + key[i % len(key)]) % n
+    for i in range(len(part_of_key)):
+        j = (j + s[i] + part_of_key[i]) % n
         s[i], s[j] = s[j], s[i]
     return s, i, j
 
 
+def calculate_key_byte(key_stream, s_box, i, j):
+    """
+    Approximate the key byte at position i
+    :param key_stream: RC4 key stream
+    :param s_box: S-box at step i-1
+    :param i: iterator
+    :param j: iterator at step i-1
+    :return: key byte at position i
+    """
+    key_byte = (s_box[i - key_stream[i - 1]] - (j + s_box[i])) % 256
+    return key_byte
+
+
 if __name__ == '__main__':
     n = 256
-    tuple_amount = 5000
+    tuple_amount = 1000
     # Retrieve sample set of bytearray tuples
     stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n)
 
@@ -48,8 +67,8 @@ if __name__ == '__main__':
     for tuple in stream_key:
         # Internal permutation S_(i-1) and index j at (i-1)th step
         s_box, i, j = simulate_permutation(tuple.get('iv'))
-        # K[i]
-        candidates.append((s_box[i - tuple.get('stream_key')[i - 1]] - (s_box[i] + j)) % 256)
+        # Calculate possible key byte K[i]
+        candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i, j))
     print(Counter(candidates).most_common(3))
 
 
