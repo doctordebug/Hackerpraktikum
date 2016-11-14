@@ -1,5 +1,6 @@
 from collections import Counter
 
+from utils import log
 from wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
 
@@ -35,8 +36,7 @@ def simulate_permutation(part_of_key):
     for i in range(n):
         s.append(i)
 
-    j = 0
-    i = 0
+    i,j = 0, 0
     # Calculate permutation for first i bytes
     for i in range(len(part_of_key)):
         j = (j + s[i] + part_of_key[i]) % n
@@ -59,25 +59,29 @@ def calculate_key_byte(key_stream, s_box, i, j, n):
 
 if __name__ == '__main__':
     n = 256
-    tuple_amount = 50000
+    tuple_amount = 100000
+    key_length = 40
     # Retrieve sample set of bytearray tuples
-    stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n)
+    stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n, cache=True)
 
-    candidates = []
-    for tuple in stream_key:
-        # Internal permutation S_(i-1) and index j at (i-1)th step
-        s_box, i, j = simulate_permutation(tuple.get('iv'))
-        # Calculate possible key byte K[i]
-        candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i, j, n))
-    print(Counter(candidates).most_common(3))
+    log("First bytes: {} {} {}".format(main_key[0], main_key[1], main_key[2]), level=0)
 
+    candidate_byte = bytes()
+    possible_key = bytearray()
+    compound_key = bytearray()
+    for r in range(key_length):
+        candidates = []
+        for tuple in stream_key:
+            compound_key = tuple.get('iv')
+            if candidate_byte:
+                compound_key += bytes([candidate_byte])
+            # Internal permutation S_(i-1) and index j at (i-1)th step
+            s_box, i, j = simulate_permutation(compound_key)
+            # Calculate possible key byte K[i]
+            candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i+1, j, n))
+        candidate_byte = Counter(candidates).most_common(1)[0][0]
+        possible_key += bytes([candidate_byte])
 
-    # j_1 = stream_key[0].get('iv')[-1]
-    # i_1 = stream_key[0].get('iv')[-2]
-    # print("K[b-2]=" + hex(j_1))
-    # print("K[b-1]=" + hex(i_1))
-    # print("S[b]=" + hex(s_box[len(stream_key[0].get('iv'))]))
-    # fick = ((j_1 + i_1 - s_box[len(stream_key[0].get('iv')) - 1]) % 256)
-    # print("K[b]= K[b-2] + K[b-1] - S[b] ")
-    # print("K[b] tatsächlich :=" + str(main_key[0]))
-    # print("K[b] berechnet:=" + str(fick))
+    print(possible_key)
+    print(main_key)
+
