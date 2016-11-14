@@ -44,7 +44,7 @@ def simulate_permutation(part_of_key):
     return s, i, j
 
 
-def calculate_key_byte(key_stream, s_box, i, j):
+def calculate_key_byte(key_stream, s_box, i, j, n):
     """
     Approximate the key byte at position i
     :param key_stream: RC4 key stream
@@ -53,13 +53,13 @@ def calculate_key_byte(key_stream, s_box, i, j):
     :param j: iterator at step i-1
     :return: key byte at position i
     """
-    key_byte = (s_box[i - key_stream[i - 1]] - (j + s_box[i])) % 256
+    key_byte = (s_box[(i - key_stream[i - 1]) % n] - (j + s_box[i])) % n
     return key_byte
 
 
 if __name__ == '__main__':
     n = 256
-    tuple_amount = 1000
+    tuple_amount = 50000
     # Retrieve sample set of bytearray tuples
     stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n)
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         # Internal permutation S_(i-1) and index j at (i-1)th step
         s_box, i, j = simulate_permutation(tuple.get('iv'))
         # Calculate possible key byte K[i]
-        candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i, j))
+        candidates.append(calculate_key_byte(tuple.get('stream_key'), s_box, i, j, n))
     print(Counter(candidates).most_common(3))
 
 
