@@ -2,7 +2,7 @@ import datetime
 from collections import Counter
 
 from utils import log
-from wep.arp_generator import generate_arp_request_package, generate_arp_response_package
+from wep.arp_utils import generate_arp_request_package, generate_arp_response_package, load_requests
 from wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
 
@@ -60,22 +60,29 @@ def calculate_key_byte(key_stream, s_box, i, j, n):
 
 
 if __name__ == '__main__':
+    # 77:65:70:31:36 [HEX] wep16 [ASCII]
+    # print hex(0x12ef ^ 0xabcd)
 
-    print(  generate_arp_request_package() )
-    print(  generate_arp_response_package() )
+    #    llc_header = base64.b16decode(b'AAAA030000000806')
+    #    arp_header = base64.b16decode(b'0001080006040002')
 
-    """
     start = datetime.datetime.now()
+    log("Started at {}".format(start), level = 0)
+    # Test params 40 bits
     n = 256
     tuple_amount = 100000
-    key_length = 40
-    # Retrieve sample set of bytearray tuples
-    log("Collection Key Stream ... ",level=0)
-    stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n, cache=True)
-    log("Key Stream collected after {}ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)),level=0)
+    key_length = 5
+    use_cache = False
 
+    log("Collection Key Stream ... ", level=0 )
+    stream_key, main_key = iv_and_stream_key_generator(n=n, cache=use_cache, key="wep16", key_length=0)
+    log("Key Stream collected after {}ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)),level=0)
     log("First bytes: {} {} {}".format(main_key[0], main_key[1], main_key[2]), level=0)
     log("Start Hacking {}ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)),level=0)
+
+    log("Firstbyte of Data {}".format(stream_key[0].get('stream_key')[0]), level = 0)
+    log("Firstbyte of Keystream {}".format(stream_key[0].get('stream_key')[0]), level = 0)
+
     candidate_byte = bytes()
     possible_key = bytearray()
     compound_key = bytearray()
@@ -95,6 +102,9 @@ if __name__ == '__main__':
     ms_end = int((datetime.datetime.now() - start).total_seconds() * 1000)
     s_end = int((datetime.datetime.now() - start).total_seconds())
     log("Key found after {}ms ({}seconds)".format(ms_end,s_end),level=0)
+
     print(possible_key)
     print(main_key)
-    """
+
+
+
