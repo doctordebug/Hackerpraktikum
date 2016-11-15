@@ -1,4 +1,3 @@
-import os
 import random
 import struct
 from pathlib import Path

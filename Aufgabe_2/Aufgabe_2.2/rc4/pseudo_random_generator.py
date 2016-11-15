@@ -24,4 +24,3 @@ def pseudo_random_generator(s, n=256):
         s[i], s[j] = s[j], s[i]
         k = (s[i] + s[j]) % n
         yield bytes([s[k]])
-
