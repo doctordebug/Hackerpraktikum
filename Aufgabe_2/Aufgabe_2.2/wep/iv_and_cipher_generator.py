@@ -1,12 +1,11 @@
 import os
+from pathlib import Path
 
-from rc4.key_scheduling import key_scheduling
-from rc4.pseudo_random_generator import pseudo_random_generator
 from rc4.rc4 import fixed_rc4
 from utils import log
 
 
-def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=2000):
+def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=1000, cache=False):
     """
     Method for generation of (iv, stream key) pairs as required by Exercise 2.2
     Modes:
@@ -19,12 +18,17 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
     :param tuple_amount: Amount of iv and stream keys to be generated
     :return: A set of iv and stream key tuples and the main key
     """
+    key_file_name = "key"
+    data_file_name = "key_stream"
+    if cache:
+        if all(Path(file).exists() for file in [key_file_name, data_file_name]):
+            return load_cache(key_file_name, data_file_name)
+
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
     # Generate random key
     main_key = bytearray(os.urandom(key_length))
     log("Using key: {}".format(main_key), level=0)
-    log("First byte: {}".format(main_key[0]), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):
@@ -32,17 +36,23 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
         iv = bytearray(os.urandom(iv_length))
         stream_key = fixed_rc4(iv + main_key, cipher_length=rounds * n, n=n)
         iv_stream_set.append(dict(iv=iv, stream_key=stream_key))
+
+    if cache:
+        export_cache(iv_stream_set, main_key, key_file_name, data_file_name)
+
     return iv_stream_set, main_key
 
 
-def export_sample(file_name="sample_data.txt"):
-    data = iv_and_stream_key_generator()
-    output = ""
-    for pair in data:
-        output += str(pair) + "\n"
-    with open(file_name, 'w') as file:
-        file.write(output)
+def export_cache(iv_stream_set, main_key, key_file_name, data_file_name):
+    with open(key_file_name, 'wb') as output:
+        output.write(main_key)
+    with open(data_file_name, 'w') as output:
+        output.write(str(iv_stream_set))
 
 
-if __name__ == '__main__':
-    export_sample()
+def load_cache(key_file_name, data_file_name):
+    with open(key_file_name, 'rb') as file:
+        main_key = file.read()
+    with open(data_file_name, 'r') as file:
+        iv_and_stream_set = eval(file.read())
+    return iv_and_stream_set, main_key

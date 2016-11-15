@@ -35,10 +35,9 @@ class TestRC4(unittest.TestCase):
 
         for entry in test_set:
             id = entry.get('id')
-            log("Testing set {}".format(id + 1), level=0)
             key = bytearray.fromhex(entry.get('key')[2:])
             vector_set = entry.get('vectors')
-
+            log("Testing set {}, using key {} ".format(id + 1, key), level=0)
             for vector in vector_set:
                 offset = int(vector.get('offset'))
                 expected_output = bytearray.fromhex(vector.get('value'))
