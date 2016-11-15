@@ -1,4 +1,5 @@
-import os
+import random
+import struct
 from pathlib import Path
 
 from rc4.rc4 import fixed_rc4
@@ -27,19 +28,18 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
     # Generate random key
-    main_key = bytearray(os.urandom(key_length))
+    main_key = bytearray(struct.pack("f", random.getrandbits(key_length)))
     log("Using key: {}".format(main_key), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):
         # Generate random iv
-        iv = bytearray(os.urandom(iv_length))
+        iv = bytearray(struct.pack("f", random.getrandbits(iv_length)))
         stream_key = fixed_rc4(iv + main_key, cipher_length=rounds * n, n=n)
         iv_stream_set.append(dict(iv=iv, stream_key=stream_key))
 
     if cache:
         export_cache(iv_stream_set, main_key, key_file_name, data_file_name)
-
     return iv_stream_set, main_key
 
 
