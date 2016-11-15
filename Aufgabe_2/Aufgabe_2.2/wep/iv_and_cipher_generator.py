@@ -1,12 +1,12 @@
-import os
-import binascii
+import random
+import struct
 from pathlib import Path
 
 from rc4.rc4 import fixed_rc4
 from utils import log
 
 
-def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=1000, cache=False, key=None):
+def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=1000, cache=False):
     """
     Method for generation of (iv, stream key) pairs as required by Exercise 2.2
     Modes:
@@ -25,34 +25,21 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
         if all(Path(file).exists() for file in [key_file_name, data_file_name]):
             return load_cache(key_file_name, data_file_name)
 
-
-    # Generate key
-
-    if key == None:
-        main_key = bytearray(os.urandom(key_length))
-    else:
-        main_key = bytearray()
-        k = "".join(["/x%02x" % ord(c) for c in key])
-        main_key.extend(map(ord,k))
-
-    if key_length == 0:
-        key_length = len(main_key)
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
-
-    print(type(main_key))
+    # Generate random key
+    main_key = bytearray(struct.pack("f", random.getrandbits(key_length)))
     log("Using key: {}".format(main_key), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):
         # Generate random iv
-        iv = bytearray(os.urandom(iv_length))
+        iv = bytearray(struct.pack("f", random.getrandbits(iv_length)))
         stream_key = fixed_rc4(iv + main_key, cipher_length=rounds * n, n=n)
         iv_stream_set.append(dict(iv=iv, stream_key=stream_key))
 
     if cache:
         export_cache(iv_stream_set, main_key, key_file_name, data_file_name)
-
     return iv_stream_set, main_key
 
 
