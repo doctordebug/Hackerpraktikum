@@ -1,13 +1,13 @@
 import base64
 
 
-def load_requests(filename = '../hexdump.hex', offest = 64):
+def load_requests(filename = '../output-03.cap', offest = 64):
     # 77:65:70:31:36 [HEX] wep 16
     with open(filename) as f:
         return f.read(offest)
 
 
-def generate_arp_request_package():
+def generate_arp_request_package_plaintext():
     llc_header = base64.b16decode(b'AAAA030000000806')
     arp_header = base64.b16decode(b'0001080006040001')
     source_mac =  base64.b16decode(b'AAAAAAAAAAAA')
@@ -18,7 +18,7 @@ def generate_arp_request_package():
 
     return llc_header+arp_header+source_mac+source_ip+target_mac+target_ip
 
-def generate_arp_response_package():
+def generate_arp_response_package_plaintext():
     """
     LLC-header: AA AA 03 00 00 00 08 06
     ARP-HEADER: 00 01 08 00 06 04 00 02
