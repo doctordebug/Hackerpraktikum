@@ -1,3 +1,4 @@
+import datetime
 from collections import Counter
 
 from utils import log
@@ -58,14 +59,17 @@ def calculate_key_byte(key_stream, s_box, i, j, n):
 
 
 if __name__ == '__main__':
+    start = datetime.datetime.now()
     n = 256
     tuple_amount = 100000
     key_length = 40
     # Retrieve sample set of bytearray tuples
+    log("Collection Key Stream ... ",level=0)
     stream_key, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, n=n, cache=True)
+    log("Key Stream collected after {}ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)),level=0)
 
     log("First bytes: {} {} {}".format(main_key[0], main_key[1], main_key[2]), level=0)
-
+    log("Start Hacking {}ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)),level=0)
     candidate_byte = bytes()
     possible_key = bytearray()
     compound_key = bytearray()
@@ -82,5 +86,8 @@ if __name__ == '__main__':
         candidate_byte = Counter(candidates).most_common(1)[0][0]
         possible_key += bytes([candidate_byte])
 
+    ms_end = int((datetime.datetime.now() - start).total_seconds() * 1000)
+    s_end = int((datetime.datetime.now() - start).total_seconds())
+    log("Key found after {}ms ({}seconds)".format(ms_end,s_end),level=0)
     print(possible_key)
     print(main_key)
