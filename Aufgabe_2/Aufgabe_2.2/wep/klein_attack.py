@@ -2,6 +2,7 @@ import datetime
 from collections import Counter
 
 from utils import log
+from wep.arp_generator import generate_arp_request_package, generate_arp_response_package
 from wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
 
@@ -59,6 +60,11 @@ def calculate_key_byte(key_stream, s_box, i, j, n):
 
 
 if __name__ == '__main__':
+
+    print(  generate_arp_request_package() )
+    print(  generate_arp_response_package() )
+
+    """
     start = datetime.datetime.now()
     n = 256
     tuple_amount = 100000
@@ -91,3 +97,4 @@ if __name__ == '__main__':
     log("Key found after {}ms ({}seconds)".format(ms_end,s_end),level=0)
     print(possible_key)
     print(main_key)
+    """
