@@ -2,7 +2,7 @@ import struct
 
 class PCAP:
 	def __init__( self, filename ):
-		self.f = open("output-05.cap", "rb")
+		self.f = open(filename, "rb")
 		byte = self.f.read(4)
 		self.pcap = self.parse_pcap_header( self.f.read(20) )
 		self.phead = self.f.read(16)

@@ -6,13 +6,11 @@ class WEP:
 		self.wep = self.parse_wep( packet )
 	
 	def parse_wep( self, packet ):
-		frame = IEEE802_11(packet)
-		payload = frame.get_payload()
 		wep = {}
-		wep['iv'] = payload[:3]
-		wep['k'] = payload[3:4]
-		wep['ciphertext'] = payload[4:-4]
-		wep['icv'] = payload[-4:]
+		wep['iv'] = packet[:3]
+		wep['k'] = packet[3:4]
+		wep['ciphertext'] = packet[4:-4]
+		wep['icv'] = packet[-4:]
 		return wep
 
 	def iv( self ):
