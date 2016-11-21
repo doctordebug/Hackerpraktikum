@@ -1,0 +1,103 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+%\usepackage{fullpage}
+
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.5cm}
+
+\author{Lukas Jung, Marc Narres-Schulz, Oliver Sänger, Tobias Zeimetz}
+\title{Teil I: \\Rechtliche Rahmenbedingungen}
+\begin{document}
+\maketitle
+
+\section*{Aufgabe 1}
+\subsection*{Welche Gesetze sich mit dem Thema befassen}
+Zum Thema Netzwerksicherheit bzw. auch Internetsicherheit, befassen sich mehrere verschiedene Gesetze. Diese lassen sich grob in drei Kategorien unterteilen:
+\begin{itemize}
+	\item EU-Gesetze
+	\item Deutschlandweite Gesetze
+	\item Hochschulgesetze
+\end{itemize}
+Auf EU-Ebene greift zu diesem Thema nur die Grundrechtecharta. Doch dort fehlt es an genaueren Gesetzten und es heißt lediglich nach \emph{Artikel 8 der Grundrechtecharta}:
+\begin{quote}
+(1) Jede Person hat das Recht auf Schutz der sie betreffenden personenbezogenen Daten.\\
+(2) Diese Daten dürfen nur nach Treu und Glauben für festgelegte Zwecke und mit Einwilligung
+der betroffenen Person oder auf einer sonstigen gesetzlich geregelten legitimen Grundlage verarbeitet
+werden. Jede Person hat das Recht, Auskunft über die sie betreffenden erhobenen Daten zu erhalten
+und die Berichtigung der Daten zu erwirken.\\
+(3) Die Einhaltung dieser Vorschriften wird von einer unabhängigen Stelle überwacht.
+\end{quote} 
+Was genau unter \glqq Recht auf Schutz\grqq \ gemeint ist und der genauere rechtliche Rahmen wird den einzelnen Ländern überlassen. In Deutschland befassen sich das Bundesdatenschutzgesetz (BDSG) und das Gesetz über den Schutz von zugangskontrollierten Diensten und von Zugangskontrolldiensten (ZKDSG) mit diesem Thema. 
+
+Das BDSG umfasst alles was die Privatsphäre personenbezogener Daten betrifft auch im Kontext polizeilicher Überwachung. Einzelne Paragraphen können hier leider nicht aufgezählt werden, da dass BDSG einen zu großen Umfang besitzt. Daher lässt sich das BDSG in sechs Abschnitte unterteilen:
+\begin{itemize}
+	\item In (§§ 1–11) werden allgemeine und gemeinsame Bestimmungen erläutert.
+	\item In (§§ 12–26) wird die Datenverarbeitung für öffentliche Stellen geregelt.
+	\item In (§§ 27–38a) wird die Datenverarbeitung für private Stellen geregelt.
+	\item In (§§ 39–42) werden Sondervorschriften geregelt.
+	\item In (§§ 43–44) werden Straf- und Bußgeldvorschriften geregelt.
+	\item In (§§ 45–48) werden Übergangsvorschriften genannt.
+\end{itemize}
+Als letzter Punkt muss für den Fall der Forschung und Lehre auch noch das Hochschulgesetz für Rheinland-Pfalz berücksichtigt werden. 
+\begin{itemize}
+	\item §3 Freiheit von Kunst und Wissenschaft, Forschung, Lehre und Studium
+\end{itemize}
+Dort heißt es, dass die Gesetze des Landes und Bundes die Rahmenbedingungen für Forschung und Lehre bilden. Das heißt, dass neben den bereits erwähnten Gesetzen keine weiteren rechtlichen Bedingungen oder Gesetze hinzukommen.
+
+\subsection*{Welche Strafrechtlichen Vorschriften es gibt}
+Im Strafgesetzbuch (StGB) gibt es einige Paragraphen die sich mit dem Thema Datensicherheit befassen. Zuerst folgt eine Auflistung von diesen Paragraphen und anschließend folgt eine detaillierte Erklärung. Im StGB befassen sich folgende Paragraphen mit dem Thema:
+\begin{itemize}
+	\item §202 Verletzung des Briefgeheimnisses
+	\item §202a Ausspähen von Daten
+	\item §202b Abfangen von Daten
+	\item §202c Vorbereiten des Ausspähen und Abfangen von Daten (auch bekannt als "Hackerparagraph") in Verbindung mit §149 Vorbereitung der Fälschung von Geld und Wertzeichen
+	\item §202d Datenhehlerei
+	\item §303a Datenveränderung
+	\item §303b Computersabotage
+	\item §303c Strafantrag 
+\end{itemize}
+Begonnen wird mit einer Erläuterung zu Paragraph §202a. In diesem steht
+\begin{quote}
+(1) Wer unbefugt sich oder einem anderen Zugang zu Daten, die nicht für ihn bestimmt und die gegen unberechtigten Zugang besonders gesichert sind, unter Überwindung der Zugangssicherung verschafft, wird mit Freiheitsstrafe bis zu drei Jahren oder mit Geldstrafe bestraft.\\
+(2) Daten im Sinne des Absatzes 1 sind nur solche, die elektronisch, magnetisch oder sonst nicht unmittelbar wahrnehmbar gespeichert sind oder übermittelt werden.
+\end{quote}
+
+Wie man Punkt (1) entnehmen kann, ist es verboten sich Zugang zu Inhalten zu verschaffen, welche normalerweise nicht für einen bestimmt wären. Somit ist es also Strafbar sich mittels SQL-Injection zugriff auf eine Datenbank zu verschaffen. Das liegt daran, dass man die Zugangssicherung umgehen musste. Auch wenn diese sehr schwach ist, reicht vom StGB her um eine gültige Sicherung vor dem Zugriff Anderer darzustellen. Ebenfalls zählen hier Verfahren wie Keylogger. Dabei handelt es sich um nichts anderes als sich Zugang zu Daten zu beschaffen, in dem man das Opfer infiziert, und anschließend dessen Passwörter ausspäht. 
+
+Der Absatz (2) grenzt den Begriff der Daten ein, in dem es diese als elektronisch oder magnetisch festschreibt und somit auf den Computer fixiert. 
+
+
+Als nächstes wird auf Paragraph §202b (Abfangen von Daten) eingegangen. Dieser lautet:
+\begin{quote}
+Wer unbefugt sich oder einem anderen unter Anwendung von technischen Mitteln nicht für ihn bestimmte Daten (§202a Abs. 2) aus einer nichtöffentlichen Datenübermittlung oder aus der elektromagnetischen Abstrahlung einer Datenverarbeitungsanlage verschafft, wird mit Freiheitsstrafe bis zu zwei Jahren oder mit Geldstrafe bestraft, wenn die Tat nicht in anderen Vorschriften mit schwererer Strafe bedroht ist.
+\end{quote}
+Unter \glqq unbefugter Beschaffung\grqq \ versteht man das Beschaffen von Daten ohne vorherige Erlaubnis des Eigentümers. Des Weiteren ist von \glqq nichtöffentliche Datenübermittlung\grqq die Rede. Darunter versteht man verschlüsselte Funknetzwerke und auch Übertragungen durch Kabel oder andere Wege. Das bedeutet aber auch, dass das mitlesen von unverschlüsselten Daten nicht Strafbar ist, da es sich hierbei um eine \glqq öffentliche Datenübermittlung\grqq \ handelt. Ausnahmen in welchen man auch \glqq öffentliche Datenübermittlungen\grqq \  nicht mitlesen oder abfangen darf, bilden Datenverarbeitungsanlagen. Das heißt ein Router, welcher offenes WLAN-Netz betreibt, kann im weitesten Sinne als Datenverarbeitungsanlage bezeichnet werden, da es die Daten zwischen den Computern und den Servern regelt.
+
+Der eigentliche \glqq Hackerparagraph\grqq ist §202c und besteht aus zwei Absätzen. Der Paragraph lautet wie folgt:
+\begin{quote}
+(1) Wer eine Straftat nach § 202a oder § 202b vorbereitet, indem er 
+\begin{itemize}
+	\item[1.] Passwörter oder sonstige Sicherungscodes, die den Zugang zu Daten (§ 202a Abs. 2) ermöglichen, oder 
+	\item[2.] Computerprogramme, deren Zweck die Begehung einer solchen Tat ist,
+\end{itemize}
+herstellt, sich oder einem anderen verschafft, verkauft, einem anderen überlässt, verbreitet oder sonst zugänglich macht, wird mit Freiheitsstrafe bis zu zwei Jahren oder mit Geldstrafe bestraft.\\
+(2) Nach Absatz 1 wird nicht bestraft, wer freiwillig 
+\begin{itemize}
+	\item[1.] die Ausführung der vorbereiteten Tat aufgibt und eine von ihm verursachte Gefahr, dass andere die Tat weiter vorbereiten oder sie ausführen, abwendet oder die Vollendung der Tat verhindert und 
+	\item[2.] die Fälschungsmittel, soweit sie noch vorhanden und zur Fälschung brauchbar sind, vernichtet, unbrauchbar macht, ihr Vorhandensein einer Behörde anzeigt oder sie dort abliefert.
+\end{itemize}
+(3) Wird ohne Zutun des Täters die Gefahr, dass andere die Tat weiter vorbereiten oder sie ausführen, abgewendet oder die Vollendung der Tat verhindert, so genügt an Stelle der Voraussetzungen des Absatzes 2 Nr. 1 das freiwillige und ernsthafte Bemühen des Täters, dieses Ziel zu erreichen.
+\end{quote}
+[Absatz 1 noch erklären]\\
+Wer also eine Tat anfängt diese aber nicht zu Ende durchführt, das heißt bevor er Daten stiehlt, manipuliert etc., macht sich nicht strafbar. Wird der Angriff jedoch nicht erfolgreich ausgeführt oder andere Angreifer führen den Angriff fort, macht man sich dennoch strafbar. Was vor allem ein Problem bei sogenannten \glqq Hackertools\grqq \ darstellen könnte. Laut StGB gilt hier, wenn die Tools dazu genutzt wurden um einen Angriff auszuführen, so waren die Tools vorbereitender Natur. Dadurch haben sich auch die Entwickler solcher Tools in Deutschland strafbar gemacht. Was auch dazu führt, dass Gruppen wie der Chaos Computer Clubs (CCC) gegen dieses Gesetz sind. Schließlich werden solche Tools auch dazu verwenden, um die eigene Netzstruktur auf Sicherheit zu überprüfen. Vor allem ist zu kritisieren, dass allein entscheidend sei, dass ein Programm oder eine Information genutzt werden könnte, in fremde Computer einzudringen und keine Ausnahmeregelungen bestehen, die den Einsatz für legale Zwecke erlaubt. 
+
+\subsection*{Besondere Bedingungen für die Universität Trier}
+\subsection*{Welche Bedingungen die Universität selbst stellt}
+
+\section*{Aufgabe 2}
+\subsection*{Rechtlicher Schutz von Funknetzwerken gegenüber der Nutzung Dritter}
+\subsection*{Abhören von verschlüsselten Funkdaten}
+
+\end{document}
