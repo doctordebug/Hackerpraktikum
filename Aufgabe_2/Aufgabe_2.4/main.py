@@ -23,9 +23,6 @@ def parse_pcap(filename):
             iv_stream_pair.append(dict(iv=iv, stream_key=stream_key))
     return iv_stream_pair
 
-print(crack_simulation(tuple_amount=30000))
-exit()
-
 
 key_length = 40
 n = 256

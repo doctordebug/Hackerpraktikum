@@ -1,5 +1,3 @@
-from rc4 import rc4
-
 # Set log_level to zero to disable logging
 log_level = 2
 
