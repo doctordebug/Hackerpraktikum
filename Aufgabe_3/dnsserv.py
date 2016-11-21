@@ -1,5 +1,6 @@
 # Use scapy2.3.1+ from pip (secdev original) or for Python3 use the
 # https://github.com/phaethon/scapy Scapy3K version.
+# Using pip3: pip3 install scapy-python3
 #
 # Example DNS server that resolves NAME.IPV4.example.com A record
 # requests to an A:IPV4 response.
