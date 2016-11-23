@@ -119,6 +119,7 @@ def approximate(key_stream, s_box, s_box_prev, i, j, n):
 
     # Calculate next key byte
     key_byte = (s_invert[((i + 1) - key_stream[(i + 1) - 1]) % n] - (s_box[i + 1] + j + s_box_prev[i]) % n) % n
+
     return key_byte
 
 
@@ -149,6 +150,7 @@ def crack_simulation(n=256, tuple_amount=30000, rounds=1, key_length=40, iv_leng
         # Calculate possible key byte K[i]
         next_key_byte = approximate(tuple.get('stream_key'), s_box, s_box_prev, i + 1, j, n)
         candidates.append(next_key_byte)
+        print("next candidates: {}".format(len(candidates)))
 
     # Save bytes with probability
     candidates_and_percentages = []
@@ -162,7 +164,7 @@ def crack_simulation(n=256, tuple_amount=30000, rounds=1, key_length=40, iv_leng
     print("Approximated key byte: {}".format(
         crack_wep(iv_stream_pair, n, tuple_amount, candidate_amount=5)))
     # Some probability described in 60 sec paper
-    print(((1 - 1 / n) ** (n - 2)) * (2 / n) + (1 - (1 - 1 / n) ** (n - 2)) * ((n - 2) / (n * (n - 1))))
+    print("Prob: {}".format((((1 - 1 / n) ** (n - 2)) * (2 / n) + (1 - (1 - 1 / n) ** (n - 2)) * ((n - 2) / (n * (n - 1))))))
 
     # Parallel execution using multiprocessing module
     # pool = multiprocessing.Pool()
@@ -173,6 +175,67 @@ def crack_simulation(n=256, tuple_amount=30000, rounds=1, key_length=40, iv_leng
     # pool.join()
     # print(result_list)
 
+def crack_simulation_oli(n=256, tuple_amount=50000, rounds=1, key_length=40, iv_length=24, possible_key=""):
+    # Get iv and stream_key pairs
+    iv_stream_pair, main_key = iv_and_stream_key_generator(tuple_amount=tuple_amount, rounds=rounds, n=n,
+                                                           key_length=key_length, iv_length=iv_length,cache=True)
+    # Print main wep key
+    print("New key:")
+    print(main_key[0], main_key[1], main_key[2], main_key[3])
+    print("Expecting value:")
+    print((main_key[0] + main_key[1]) % 256)
+    count_arr = []
+    top_10 = []
+
+    for index, tuple in enumerate(iv_stream_pair):
+        if index > tuple_amount:
+            break
+        compound_key = bytearray()
+        compound_key.extend(tuple.get('iv'))
+        s_box, i, j, s_box_prev = simulate_permutation_2(compound_key)
+        x = tuple.get('stream_key')
+        key_byte_sum_of_first_two_bytes_long_var_name = approximate(x, s_box, s_box_prev, i + 1, j, n)
+        count_arr.append(key_byte_sum_of_first_two_bytes_long_var_name)
+
+    for candidate_tuple in Counter(count_arr).most_common(10):
+        top_10.append(candidate_tuple[0])
+    print(top_10)
+
+    key_candidates = crack_wep(iv_stream_pair, n, tuple_amount, candidate_amount=10)
+
+    #krank! Wer baut solche Funktionsrückgaben?
+    k_0 = key_candidates[0][0][0]
+    print("First Keybyte: "+str(k_0))
+
+    key_candidates_2 = crack_wep(iv_stream_pair, n, tuple_amount, candidate_amount=10, possible_key=bytearray([k_0]))
+    k_1 = key_candidates_2[0][0][0]
+    print("Second Keybyte: " + str(k_1))
+
+    sum_1 = (k_0 + k_1) % 256
+
+    if sum_1 in top_10:
+        print("the first two bytes seem to be correct!")
+        key_candidates_3 = crack_wep(iv_stream_pair, n, tuple_amount, candidate_amount=10, possible_key=bytearray([k_0,k_1]))
+        k_2 = key_candidates_3[0][0][0]
+        print("Third Keybyte: " + str(k_2))
+
+        # und so weiter ......
+        key_candidates_4 = crack_wep(iv_stream_pair, n, tuple_amount, candidate_amount=10, possible_key=bytearray([k_0, k_1,k_2]))
+        k_3 = key_candidates_4[0][0][0]
+        print("Fourth Keybyte: " + str(k_3))
+    else:
+        print("The first tow bytes seem to be not correct!")
+
+def invert_s(s_box,  n):
+    s_invert = []
+    for init in range(n):
+        s_invert.append(init)
+     # Invert s-box
+    for r in range(len(s_box)):
+        s_invert[s_box[r]] = r
+    return s_invert
+
 
 if __name__ == '__main__':
-    crack_simulation()
+    #for i in range(5):
+    crack_simulation_oli()

@@ -3,7 +3,7 @@ import struct
 from pathlib import Path
 
 from rc4.rc4 import fixed_rc4
-from utils import log
+from utils import log, bytes_to_str
 
 
 def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=1000, cache=False):
@@ -25,11 +25,11 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
         if all(Path(file).exists() for file in [key_file_name, data_file_name]):
             return load_cache(key_file_name, data_file_name)
 
-    log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
+    #log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
     # Generate random key
     main_key = bytearray(struct.pack("f", random.getrandbits(key_length)))
-    log("Using key: {}".format(main_key), level=0)
+
 
     iv_stream_set = []
     for i in range(tuple_amount):
