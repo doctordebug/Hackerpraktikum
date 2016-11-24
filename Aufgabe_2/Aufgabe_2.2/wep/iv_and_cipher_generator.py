@@ -1,3 +1,4 @@
+import os
 import random
 import struct
 from pathlib import Path
@@ -6,7 +7,7 @@ from rc4.rc4 import fixed_rc4
 from utils import log
 
 
-def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tuple_amount=1000, cache=False):
+def iv_and_stream_key_generator(n=256, rounds=2, iv_length=3, key_length=5, tuple_amount=1000, cache=False):
     """
     Method for generation of (iv, stream key) pairs as required by Exercise 2.2
     Modes:
@@ -28,13 +29,13 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=24, key_length=40, tu
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
     # Generate random key
-    main_key = bytearray(struct.pack("f", random.getrandbits(key_length)))
+    main_key = bytearray(os.urandom(key_length))
     log("Using key: {}".format(main_key), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):
         # Generate random iv
-        iv = bytearray(struct.pack("f", random.getrandbits(iv_length)))
+        iv = bytearray(os.urandom(iv_length))
         stream_key = fixed_rc4(iv + main_key, cipher_length=rounds * n, n=n)
         iv_stream_set.append(dict(iv=iv, stream_key=stream_key))
 

@@ -66,7 +66,7 @@ def calculate_key_byte(key_stream, s_box, i, j, n):
         s_invert[s_box[r]] = r
 
     # Calculate next key byte
-    key_byte = (s_invert[(i - key_stream[i - 1]) % n] - (j + s_invert[i]) % n) % n
+    key_byte = (s_invert[(i - key_stream[i - 1]) % n] - (s_box[i] + j) % n) % n
     return key_byte
 
 

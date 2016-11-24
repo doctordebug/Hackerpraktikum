@@ -118,6 +118,6 @@ def crack_simulation(n=256, tuple_amount=90000, rounds=1, key_length=40):
 
 if __name__ == '__main__':
     keys = []
-    for i in reversed(range(0, 90000, 10000)):
+    for i in reversed(range(0, 50000, 10000)):
         keys.append(dict(tuple_amount=i, key=crack_simulation(tuple_amount=i)))
     print(keys)
