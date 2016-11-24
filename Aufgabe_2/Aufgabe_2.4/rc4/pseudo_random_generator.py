@@ -12,7 +12,7 @@ def pseudo_random_generator(s, n=256):
         print("Length of S-Box and n doesn't match")
         exit()
 
-    log("Proceeding with: s={}, n={}".format(s, n))
+    #log("Proceeding with: s={}, n={}".format(s, n))
 
     # Initialization
     i, j = 0, 0

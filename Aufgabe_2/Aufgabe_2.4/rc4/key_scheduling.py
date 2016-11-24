@@ -12,7 +12,7 @@ def key_scheduling(k=bytearray(), n=256):
         print("Invalid parameter for k")
         exit()
 
-    log("Proceeding with: k={}, n={}".format(k, n))
+    #log("Proceeding with: k={}, n={}".format(k, n))
 
     # Initialization
     s = []
