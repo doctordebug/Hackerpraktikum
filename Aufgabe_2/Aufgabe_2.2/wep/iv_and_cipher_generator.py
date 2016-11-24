@@ -4,9 +4,10 @@ import struct
 from pathlib import Path
 
 from rc4.rc4 import fixed_rc4
-from utils import log
+from utils import log, log_timing
 
 
+@log_timing()
 def iv_and_stream_key_generator(n=256, rounds=2, iv_length=3, key_length=5, tuple_amount=1000, cache=False):
     """
     Method for generation of (iv, stream key) pairs as required by Exercise 2.2
