@@ -2,6 +2,9 @@ from collections import Counter
 from itertools import product
 
 from Aufgabe_2.utils import log, log_timing
+from pcap_tools.pcap.pcap import PCAP
+from pcap_tools.wep.wep import WEP
+from pcap_tools.wlan.wlan import IEEE802_11
 from rc4.rc4 import fixed_rc4
 from wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
@@ -91,7 +94,6 @@ def get_key_vote_dict(key_length_bytes):
 
 def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
     """
-
     :param key_vote_dict:
     :param candidate_amount: Big values may cause high runtime
     :return:
@@ -102,6 +104,7 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         most_common.update({i: []})
     for t, i in key_vote_dict.items():
         bytes_at_pos_t = Counter(i).most_common(candidate_amount)
+        print(bytes_at_pos_t)
         for j in bytes_at_pos_t:
             tmp = most_common.get(t)
             p = j[1] / tuple_amount
@@ -153,15 +156,43 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         possible_key_set[candidate_position].append(candidate_without_delta)
 
 
+def read_cap_file(file_path, tuple_amount=50000):
+    mypcap = PCAP(file_path)
+    pcaph = mypcap.header()
+
+    print("===== Lese folgende Datei ein: \"{}\" =====".format(file_path))
+    print("Verison: " + str(pcaph['major']) + "." + str(pcaph['minor']))
+    print("Type: " + str(pcaph['captypestring']) + "(" + str(pcaph['captype']) + ") MaxLen: " + str(pcaph['maxlen']))
+    print("Number of Packets: " + str(sum(1 for _ in mypcap)))
+
+    known_headers = bytearray(
+        [0xAA, 0xAA, 0x03, 0x00, 0x00, 0x00, 0x08, 0x06, 0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x02])
+    iv_stream_pair = []
+    for packet in mypcap:
+        if packet['len'] == 68:
+            iv, k, ciphertext, icv = WEP(IEEE802_11(packet['data']).get_payload()).get()
+            stream_key = bytearray([a ^ b for (a, b) in zip(ciphertext, known_headers)])
+            iv_stream_pair.append(dict(iv=iv, stream_key=stream_key))
+        if (len(iv_stream_pair) > tuple_amount):
+            print("Tupel-Limit reached:{} iv-stream-pairs found!".format(tuple_amount))
+            return iv_stream_pair
+    return iv_stream_pair
+
+
 if __name__ == '__main__':
     key_length_bytes = 5
-    tuple_amount = 35000
+    tuple_amount = 911260
+
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
-    iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
+    # iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
+    iv_stream_pair = read_cap_file("../Aufgabe_2_3/output-03.cap", tuple_amount=tuple_amount)
+    iv_stream_pair = iv_stream_pair + read_cap_file("../Aufgabe_2_3/output-05.cap", tuple_amount=tuple_amount)
     print("Start Hacking")
 
-    key = get_key_vote_dict(key_length_bytes)
-    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
-    test_keys(key_set_iterator, (iv_stream_pair[0].get('iv'), iv_stream_pair[0].get('stream_key')))
+    key = get_key_vote_dict(key_length_bytes)
+
+    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=10)
+
+    test_keys(key_set_iterator, (iv_stream_pair[1].get('iv'), iv_stream_pair[0].get('stream_key')))
