@@ -89,7 +89,7 @@ def get_key_vote_dict(key_length_bytes):
     return key
 
 
-def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=50):
+def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
     """
 
     :param key_vote_dict:
@@ -112,8 +112,8 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=50):
     possible_key_set = []
     # Initialize with only the most common bytes
     for i in range(len(key_vote_dict)):
-        tuple = list(most_common.values())[i][0]
-        possible_key_set.append([tuple])
+        key_byte_and_p = list(most_common.values())[i][0]
+        possible_key_set.append([key_byte_and_p])
 
     while True:
         old_set = list()
@@ -130,13 +130,16 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=50):
         for key, value in most_common.items():
             for v in value:
                 if v not in possible_key_set[key]:
-                    candidate_list.append(v)
+                    max_p = possible_key_set[key][0][1]
+                    p = max_p - v[1]
+                    c = (v[0], v[1], p)
+                    candidate_list.append(c)
                     break
         # Break if all candidates are used in combination process
         if len(candidate_list) == 0:
             log("Out of candidates.", level=0)
             return None
-        candidate = sorted(candidate_list, key=lambda x: x[1])[-1]
+        candidate = sorted(candidate_list, key=lambda x: x[2])[1]
         candidate_position = candidate_list.index(candidate)
         # Append key byte to set at position
         possible_key_set[candidate_position].append(candidate)
@@ -144,13 +147,13 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=50):
 
 if __name__ == '__main__':
     key_length_bytes = 5
-    tuple_amount = 50000
+    tuple_amount = 35000
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
     iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
     print("Start Hacking")
 
     key = get_key_vote_dict(key_length_bytes)
-    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=5)
+    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
     test_keys(key_set_iterator, (iv_stream_pair[0].get('iv'), iv_stream_pair[0].get('stream_key')))
