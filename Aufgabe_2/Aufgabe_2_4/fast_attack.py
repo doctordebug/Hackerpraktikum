@@ -128,21 +128,29 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         # calculate byte with smallest distance in probability
         candidate_list = []
         for key, value in most_common.items():
-            for v in value:
+            for index, v in enumerate(value):
                 if v not in possible_key_set[key]:
+                    # Calculate and add probability delta
                     max_p = possible_key_set[key][0][1]
                     p = max_p - v[1]
                     c = (v[0], v[1], p)
                     candidate_list.append(c)
                     break
+                # If all candidates are used, append placeholder
+                if index == len(value) - 1:
+                    candidate_list.append((0, 0, 1))
+
+        # Take byte with smallest probability distance to top voted at its key byte position
+        candidate = sorted(candidate_list, key=lambda x: x[2])[0]
         # Break if all candidates are used in combination process
-        if len(candidate_list) == 0:
+        if candidate[2] == 1:
             log("Out of candidates.", level=0)
             return None
-        candidate = sorted(candidate_list, key=lambda x: x[2])[1]
+        # Remove probability delta
         candidate_position = candidate_list.index(candidate)
+        candidate_without_delta = (candidate[0], candidate[1])
         # Append key byte to set at position
-        possible_key_set[candidate_position].append(candidate)
+        possible_key_set[candidate_position].append(candidate_without_delta)
 
 
 if __name__ == '__main__':
