@@ -57,6 +57,7 @@ def vote_generator(iv, key_stream, key_length):
     key = []
     for i in range(key_length):
         key.append(calculate_key_byte_vote(i, key_stream, s_box_3, s_box_3_invert, j_3))
+    print(key)
     return key
 
 
@@ -166,7 +167,7 @@ def read_cap_file(file_path, tuple_amount=50000):
     print("Number of Packets: " + str(sum(1 for _ in mypcap)))
 
     known_headers = bytearray(
-        [0xAA, 0xAA, 0x03, 0x00, 0x00, 0x00, 0x08, 0x06, 0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x02])
+        [0xAA, 0xAA, 0x03, 0x00, 0x00, 0x00, 0x08, 0x06, 0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x01])
     iv_stream_pair = []
     for packet in mypcap:
         if packet['len'] == 68:
@@ -181,20 +182,21 @@ def read_cap_file(file_path, tuple_amount=50000):
 
 if __name__ == '__main__':
     key_length_bytes = 5
-    tuple_amount = 911260
+    candidate_amount = 5
+    tuple_amount = 30
+    simulate = False
 
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
-    # iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
-    iv_stream_pair = read_cap_file("../Aufgabe_2_3/output-03.cap", tuple_amount=tuple_amount)
-    iv_stream_pair = iv_stream_pair + read_cap_file("../Aufgabe_2_3/output-05.cap", tuple_amount=tuple_amount)
+    if simulate:
+        iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
+    else:
+        iv_stream_pair = read_cap_file("../Aufgabe_2_3/output-03.cap", tuple_amount=tuple_amount)
+        iv_stream_pair = iv_stream_pair + read_cap_file("../Aufgabe_2_3/output-05.cap", tuple_amount=tuple_amount)
+
     print("Start Hacking")
-
-
     key = get_key_vote_dict(key_length_bytes)
-
-    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=10)
-
+    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=candidate_amount)
     test_keys(key_set_iterator, (iv_stream_pair[1].get('iv'), iv_stream_pair[0].get('stream_key')))
 
 
