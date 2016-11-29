@@ -14,6 +14,7 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 \newpage
 
 \section{Einführung}
@@ -60,7 +61,7 @@ def keyScheduling(sessionKey=bytearray(), n=256):
 
     return sBox
 \end{lstlisting}
-Bei der key scheduling phase wird eine Substitutionsbox (sBox) verwendet. Diese wird zu beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die sBox wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der For-Schleife werden zwei Einträge der sBox vertauscht. 
+Bei der key scheduling phase wird eine Substitutionsbox (sBox) verwendet. Diese wird zu beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die sBox wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der For-Schleife werden zwei Einträge der sBox vertauscht um eine zufällige Permutation zu erzeugen. 
 
 Nachdem die key scheduling phase eine zufällige sBox generiert hat, beginnt die zweite Phase des RC4-Algorithmus. In dieser Phase wird eine Zufallsfolge, auch Stromchiffre genannt, erstellt. Der Algorithmus dazu gestalltet sich wie folgt:
 \begin{lstlisting}[language=Python]
@@ -77,9 +78,21 @@ def pseudoRandomGenerator(sBox=bytearray(),n=256):
 
         yield bytes([sBox[k]])
 \end{lstlisting}
-Hierbei handelt es sich um den Hauptteil des RC4-Algorithmus. Der pseudo random generator erstelt in jedem Schritt ein Byte, mit einem Wert zwischen $0$ bis $n-1$, als Ausgabe.
+Hierbei handelt es sich um den Hauptteil des RC4-Algorithmus.  Der pseudo random generator startet mit dem permutierten Array sBox, dass in der key scheduling phase generiert wurde. Anschließend wird ein Index $j$ mit Hilfe der zufällig permutierten S-Box gewählt und zwei Einträge ($sBox[i]$ und $sBox[j]$) werden wie bereits in der key scheduling phase vertauscht. Der nächste Schritt besteht darin einen Index $k$ zu ermitteln, welcher aus den addierten Werten aus der S-Box bestehen. Durch den anschließenden Modulo-Operator wird sichergestellt, dass es sich um Werte aus dem Zahlenraum $/mathbb{Z}_n$ handelt. Der pseudo random generator erstelt somit in jedem Schritt ein Byte, mit einem Wert zwischen $0$ bis $n-1$, als Ausgabe.
 
 \subsection{WEP}
+Wired Equivalent Privacy (WEP) ist das ehemalige Standard-Verschlüsselungsprotokoll für WLAN. Das Protokoll wurde dazu verwendet um die Vertraulichkeit und Integrität einer Nachricht sicherzustellen. Die Verschlüsselung unter WEP gestaltet sich wie folgt:
+$$
+C = (M || c(M)) \oplus RC4(v,k)
+$$
+Zuerst wird über eine Nachricht $M$ eine Prüfsumme $c(M)$ gebildet. Anschließend wird die Nachricht $M$ mit $c(M)$ konkateniert in der Form $(M || c(M))$. Der nächste Schritt besteht darin den RC4-Algorithmus aufzurufen und so viele zufällige Bytes zu produzieren wie der Term $(M || c(M))$ besitzt. Bei den Variablen die der RC4-Funktion übergeben werden, handelt es sich zum einen um den Initialisierungsvektor $v$ und den main key $k$.
+
+Der letzte Schritt besteht darin die zufällige Bytefolge $RC4(v,k)$ und den Term $(M || c(M)$ mittels XOR zu verrechnen. Dadurch entsteht eine Vernamchiffre $C$ die nur bei Kenntnis von $v$ und $k$ (und letztendlich $RC4(v,k)$) entschlüsselt werden kann.
+
+Über das Netzwerk werden durch den Router Nachrichten verschickt, welche die Form $v || C$ besitzen. Der Initialisierungsvektor wird dabei vorne and die Vernamchiffre konkateniert. Da die Länge des Initialisierungsvektors $v$ bekannt ist, kann der Empfänger der Nachrichten diesen \glqq abschneiden\grqq und durch Kenntnis des main keys $k$ die Stromchiffre $RC4(v,k)$ erzeugen. Anschließend kann durch $RC4(v,k) \oplus C$ die Chiffre $C$ entschlüsselt werden.
+
+Durch die Prüfsumme $c(M)$ ist der Empfänger außerdem in der Lage, die Integrität der eigentlichen Nachricht $M$ zu gewährleisten. 
+
 \section{Der Angriff}
 \subsection{Der Angriff nach Klein}
 \subsection{Verbesserung des Angriffs}
