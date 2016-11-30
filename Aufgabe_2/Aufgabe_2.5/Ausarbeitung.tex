@@ -26,7 +26,7 @@ Die letzte Aufgabe dieses Abschnitts im Praktikum bestand darin, den Hauptschlü
 
 Wie bereits erwähnt bestand die letzte Aufgabe darin, aus den ARP-Paketen Paare von IV und und Schlüsselstrom zu berechnen und dadurch den Angriff von Klein auszuführen. Der Angriff lieferte als Ergebnis den Hauptschlüssel und somit wurde die Verschlüsselung von WEP gebrochen.
 
-Das Protokoll besteht aus drei Abschnitten. Der erste Abschnitt dreht sich um die Verschlüsselung und wie diese Funktion. Dort wird genauer erläutert wie die RC4-Stromchiffre funktioniert, wie das WEP-Protokoll arbeitet und was unter den einzelnen Begrifflichkeiten zu verstehen ist. Anschließend wird im Detail auf den ausgeführten Angriff eingegangen. Dieser Abschnitt unterteilt sich zum einen in den Angriff nach Klein und anschließend folgt eine Verbesserung des Angriffs. Der letzte Abschnitt.... muss noch ausformuliert werden...
+Das Protokoll besteht aus drei Abschnitten. Der erste Abschnitt dreht sich um die Verschlüsselung und wie diese Funktion. Dort wird genauer erläutert wie die RC4-Stromchiffre funktioniert, wie das WEP-Protokoll arbeitet und was unter den einzelnen Begrifflichkeiten zu verstehen ist. Anschließend wird im Detail auf den ausgeführten Angriff eingegangen. Dieser Abschnitt unterteilt sich zum einen in den Angriff nach Klein und anschließend folgt eine Verbesserung des Angriffs. \textbf{Der letzte Abschnitt.... muss noch ausformuliert werden...}
 %TODO 
 
 \section{Grundlagen der Verschlüsselung}
@@ -94,9 +94,11 @@ Der letzte Schritt besteht darin die zufällige Bytefolge $RC4(v,k)$ und den Ter
 Durch die Prüfsumme $c(M)$ ist der Empfänger außerdem in der Lage, die Integrität der eigentlichen Nachricht $M$ zu gewährleisten. 
 
 \section{Der Angriff}
+In diesem Abschnitt werden die verschiedenen Angriffe die wir in den Aufgaben 2 bis 4 durchführen sollten genauer dargelegt. Der erste Abschnitt wird darüber handeln wie Kleins Angriff unter einer \glqq simulierten Umgebung\grqq \ getestet wurde. Anschließend wird darauf eingegangen wie man das Auftreten von ARP-Paketen erhöht mit Hilfe einer Technik namens \glqq re-injection\grqq. Danach werden aus diesen Paketen paare von IV und Schlüsselstrom extrahiert und der Angriff von Klein wird auf diese Daten angewendet. Abschließend wird erläutert wie man den Angriff deutlich effizienter machen kann.
+
 \subsection{Der Angriff nach Klein}
-\subsection{Verbesserung des Angriffs}
 \subsection{ARP-Pakete generieren}
+\subsection{Verbesserung des Angriffs}
 \section{Statistische Analyse}
 \subsection{Versuchsanordnung}
 \subsection{Versuchsdurchführung}
