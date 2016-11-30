@@ -4,13 +4,17 @@
 \usepackage[T1]{fontenc}
 \usepackage{fullpage}
 \usepackage{amssymb}
-\usepackage{listings}
 
+
+\include{pythonColor}
+\lstset{language=python-color}
 \setlength{\parindent}{0pt}
 \setlength{\columnsep}{0.5cm}
 
 \title{Teil II:\\Ausarbeitung zum WEP-Protokoll}
 \author{Lukas Jung, Marc Narres-Schulz, Oliver Sänger, Tobias Zeimetz}
+
+
 
 \begin{document}
 \maketitle
@@ -44,9 +48,9 @@ Das Symbol || stellt den Operator für die Konkatenation dar. Die länge von $k$
 Die maximale Größe von $l_K$ beträgt $n$, liegt jedoch typischerweise zwischen 5 und 128 Bit.
 
 In der ersten Phase des RC4-Algorithmus, der key scheduling phase, wird eine initiale Permutation mit Hilfe des session keys $K$ erzeugt. Die erste Phase lässt sich wie folgt darstellen:
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}
 def keyScheduling(sessionKey=bytearray(), n=256):
-    #initialization
+    # initialization
     sBox = []
     for i in range(n):
         sBox.append(i)
@@ -54,7 +58,7 @@ def keyScheduling(sessionKey=bytearray(), n=256):
     sBox = bytearray(sBox)
     i,j = 0,0
 
-    #generate a random permutation
+    # generate a random permutation
     for i in range(n):
         j = (j + sBox[i] + sessionKey[i % len(sessionKey)]) % n
         sBox[i], sBox[j] = sBox[j], sBox[i]
@@ -64,7 +68,7 @@ def keyScheduling(sessionKey=bytearray(), n=256):
 Bei der key scheduling phase wird eine Substitutionsbox (sBox) verwendet. Diese wird zu beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die sBox wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der For-Schleife werden zwei Einträge der sBox vertauscht um eine zufällige Permutation zu erzeugen. 
 
 Nachdem die key scheduling phase eine zufällige sBox generiert hat, beginnt die zweite Phase des RC4-Algorithmus. In dieser Phase wird eine Zufallsfolge, auch Stromchiffre genannt, erstellt. Der Algorithmus dazu gestalltet sich wie folgt:
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}
 def pseudoRandomGenerator(sBox=bytearray(),n=256):
     #initialization
     i,j = 0,0
