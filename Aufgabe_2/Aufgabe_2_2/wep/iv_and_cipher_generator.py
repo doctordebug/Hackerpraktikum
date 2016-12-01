@@ -19,8 +19,8 @@ def iv_and_stream_cipher_generator(n=256, rounds=2, iv_length=3, key_length=5, t
     :param tuple_amount: Amount of iv and stream keys to be generated
     :return: A set of iv and stream key tuples and the main key
     """
-    key_file_name = "key"
-    data_file_name = "key_stream"
+    key_file_name = "main_key"
+    data_file_name = "stream_cipher"
     if cache:
         if all(Path(file).exists() for file in [key_file_name, data_file_name]):
             return load_cache(key_file_name, data_file_name)
