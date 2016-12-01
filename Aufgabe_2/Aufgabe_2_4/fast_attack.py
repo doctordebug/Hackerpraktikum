@@ -2,9 +2,9 @@ from collections import Counter
 from itertools import product
 
 from Aufgabe_2.utils import log, log_timing
-from pcap_tools.pcap.pcap import PCAP
-from pcap_tools.wep.wep import WEP
-from pcap_tools.wlan.wlan import IEEE802_11
+from Aufgabe_2.Aufgabe_2_3.pcap_tools.pcap.pcap import PCAP
+from Aufgabe_2.Aufgabe_2_3.pcap_tools.wep.wep import WEP
+from Aufgabe_2.Aufgabe_2_3.pcap_tools.wlan.wlan import IEEE802_11
 from rc4.rc4 import fixed_rc4
 from wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
@@ -57,7 +57,6 @@ def vote_generator(iv, key_stream, key_length):
     key = []
     for i in range(key_length):
         key.append(calculate_key_byte_vote(i, key_stream, s_box_3, s_box_3_invert, j_3))
-    print(key)
     return key
 
 
@@ -95,6 +94,7 @@ def get_key_vote_dict(key_length_bytes):
 
 def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
     """
+
     :param key_vote_dict:
     :param candidate_amount: Big values may cause high runtime
     :return:
@@ -105,7 +105,6 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         most_common.update({i: []})
     for t, i in key_vote_dict.items():
         bytes_at_pos_t = Counter(i).most_common(candidate_amount)
-        print(bytes_at_pos_t)
         for j in bytes_at_pos_t:
             tmp = most_common.get(t)
             p = j[1] / tuple_amount
@@ -182,21 +181,13 @@ def read_cap_file(file_path, tuple_amount=50000):
 
 if __name__ == '__main__':
     key_length_bytes = 5
-    candidate_amount = 5
-    tuple_amount = 30
-    simulate = False
-
+    tuple_amount = 35000
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
-    if simulate:
-        iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
-    else:
-        iv_stream_pair = read_cap_file("../Aufgabe_2_3/output-03.cap", tuple_amount=tuple_amount)
-        iv_stream_pair = iv_stream_pair + read_cap_file("../Aufgabe_2_3/output-05.cap", tuple_amount=tuple_amount)
-
+    iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
     print("Start Hacking")
+
     key = get_key_vote_dict(key_length_bytes)
-    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=candidate_amount)
-    test_keys(key_set_iterator, (iv_stream_pair[1].get('iv'), iv_stream_pair[0].get('stream_key')))
+    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
-
+    test_keys(key_set_iterator, (iv_stream_pair[0].get('iv'), iv_stream_pair[0].get('stream_key')))
