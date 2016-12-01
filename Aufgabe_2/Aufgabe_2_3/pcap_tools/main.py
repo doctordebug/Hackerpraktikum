@@ -1,6 +1,6 @@
-from Aufgabe_2.Aufgabe_2_3.pcap_tools.pcap.pcap import PCAP
-from Aufgabe_2_3.pcap_tools.wep.wep import WEP
-from Aufgabe_2_3.pcap_tools.wlan.wlan import IEEE802_11
+from pcap_tools.pcap.pcap import PCAP
+from pcap_tools.wep.wep import WEP
+from pcap_tools.wlan.wlan import IEEE802_11
 
 mypcap = PCAP("../output-05.cap")
 pcaph = mypcap.header()

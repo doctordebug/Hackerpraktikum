@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 
-from Aufgabe_2.utils import log, log_timing
-from rc4.rc4 import fixed_rc4
+from Aufgabe_2.utils import log_timing, log
+from Aufgabe_2.Aufgabe_2_2.rc4.rc4 import fixed_rc4
 
 
 @log_timing()

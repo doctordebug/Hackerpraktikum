@@ -1,12 +1,12 @@
 from collections import Counter
 from itertools import product
 
-from Aufgabe_2.utils import log, log_timing
+from Aufgabe_2.utils import log_timing, log
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.pcap.pcap import PCAP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wep.wep import WEP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wlan.wlan import IEEE802_11
-from rc4.rc4 import fixed_rc4
-from wep.iv_and_cipher_generator import iv_and_stream_key_generator
+from Aufgabe_2.Aufgabe_2_2.rc4.rc4 import fixed_rc4
+from Aufgabe_2.Aufgabe_2_2.wep.iv_and_cipher_generator import iv_and_stream_key_generator
 
 
 def simulate_permutation(iv, n=256):
