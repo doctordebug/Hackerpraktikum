@@ -1,12 +1,12 @@
 from collections import Counter
 from itertools import product
 
-from Aufgabe_2.utils import log_timing, log
+from Aufgabe_2.Aufgabe_2_2.rc4.rc4 import fixed_rc4
+from Aufgabe_2.Aufgabe_2_2.wep.iv_and_cipher_generator import iv_and_stream_key_generator
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.pcap.pcap import PCAP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wep.wep import WEP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wlan.wlan import IEEE802_11
-from Aufgabe_2.Aufgabe_2_2.rc4.rc4 import fixed_rc4
-from Aufgabe_2.Aufgabe_2_2.wep.iv_and_cipher_generator import iv_and_stream_key_generator
+from Aufgabe_2.utils import log_timing, log
 
 
 def simulate_permutation(iv, n=256):
@@ -90,6 +90,17 @@ def get_key_vote_dict(key_length_bytes):
             key_votes.append(key_s)
             key.update({index: key_votes})
     return key
+
+
+def test_strong_bytes(i, main_key, n):
+    sum = 0
+    result = [False] * len(main_key)
+    for l in range(i):
+        for k in range(l, i):
+            sum += main_key[k] + 3 + k
+        if sum % n == 0:
+            result[l] = main_key[l]
+    return result
 
 
 def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
@@ -180,8 +191,10 @@ def read_cap_file(file_path, tuple_amount=50000):
 
 
 if __name__ == '__main__':
-    key_length_bytes = 5
+    key_length_bytes = 13
     tuple_amount = 35000
+    print("Using key length of {} bytes".format(key_length_bytes))
+    print("Using {} tuples".format(tuple_amount))
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
     iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
