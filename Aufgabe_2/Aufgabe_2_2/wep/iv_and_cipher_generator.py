@@ -6,16 +6,16 @@ from Aufgabe_2.Aufgabe_2_2.rc4.rc4 import fixed_rc4
 
 
 @log_timing()
-def iv_and_stream_key_generator(n=256, rounds=2, iv_length=3, key_length=5, tuple_amount=1000, cache=False):
+def iv_and_stream_cipher_generator(n=256, rounds=2, iv_length=3, key_length=5, tuple_amount=1000, cache=False):
     """
-    Method for generation of (iv, stream key) pairs as required by Exercise 2.2
+    Method for generation of (iv, main key and stream key) pairs as required by Exercise 2.2
     Modes:
         64-bit WEP(WEP-40): 40 bit key, 24-bit iv
         128-bit WEP(WEP-104): 104 bit key, 26-bit iv
     :param n: Base of the integer group
     :param rounds: Amount of rounds the pseudo random generator should be called
-    :param iv_length: Length of the initializing vector
-    :param key_length: Length of the key. Typically ranges from 5 to 64 with maximum of 256
+    :param iv_length: Length of the initializing vector in bytes
+    :param key_length: Length of the key in bytes. Typically ranges from 5 to 64 with maximum of 256
     :param tuple_amount: Amount of iv and stream keys to be generated
     :return: A set of iv and stream key tuples and the main key
     """
@@ -29,14 +29,14 @@ def iv_and_stream_key_generator(n=256, rounds=2, iv_length=3, key_length=5, tupl
 
     # Generate random key
     main_key = bytearray(os.urandom(key_length))
-    log("Using key: {}".format(main_key), level=0)
+    log("Using main key: {}".format(main_key), level=0)
 
     iv_stream_set = []
     for i in range(tuple_amount):
         # Generate random iv
         iv = bytearray(os.urandom(iv_length))
-        stream_key = fixed_rc4(iv + main_key, cipher_length=rounds * n, n=n)
-        iv_stream_set.append(dict(iv=iv, stream_key=stream_key))
+        stream_cipher = fixed_rc4(iv, main_key, cipher_length=rounds * n, n=n)
+        iv_stream_set.append((iv, stream_cipher))
 
     if cache:
         export_cache(iv_stream_set, main_key, key_file_name, data_file_name)
