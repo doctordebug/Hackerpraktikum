@@ -252,6 +252,7 @@ def read_cap_file(file_path, tuple_amount=50000):
 if __name__ == '__main__':
     key_length_bytes = 13
     tuple_amount = 85000
+    # Info
     print("Using key length of {} bytes".format(key_length_bytes))
     print("Using {} tuples".format(tuple_amount))
     print("Generating Keystream")
