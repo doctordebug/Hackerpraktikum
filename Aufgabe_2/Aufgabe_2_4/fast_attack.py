@@ -6,7 +6,7 @@ from Aufgabe_2.Aufgabe_2_3.pcap_tools.pcap.pcap import PCAP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wep.wep import WEP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wlan.wlan import IEEE802_11
 from Aufgabe_2.utils import log_timing, log
-from wep.iv_and_cipher_generator import iv_and_stream_cipher_generator
+from Aufgabe_2.Aufgabe_2_2.wep.iv_and_cipher_generator import iv_and_stream_cipher_generator
 
 
 def simulate_permutation(iv, n=256):
