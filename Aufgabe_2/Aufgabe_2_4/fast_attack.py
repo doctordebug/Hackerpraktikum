@@ -2,11 +2,11 @@ from collections import Counter
 from itertools import product
 
 from Aufgabe_2.Aufgabe_2_2.rc4.rc4 import fixed_rc4
-from Aufgabe_2.Aufgabe_2_2.wep.iv_and_cipher_generator import iv_and_stream_key_generator
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.pcap.pcap import PCAP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wep.wep import WEP
 from Aufgabe_2.Aufgabe_2_3.pcap_tools.wlan.wlan import IEEE802_11
 from Aufgabe_2.utils import log_timing, log
+from wep.iv_and_cipher_generator import iv_and_stream_cipher_generator
 
 
 def simulate_permutation(iv, n=256):
@@ -71,45 +71,93 @@ def test_keys(key_set_iterator, tuple, n=256):
             for i in range(1, len(key)):
                 calculated_key_bytes.append((key[i][0] - key[i - 1][0]) % n)
             main_key = bytearray(calculated_key_bytes)
-            calculated_stream = fixed_rc4(iv + main_key, cipher_length=len(stream))
+            calculated_stream = fixed_rc4(iv, main_key, cipher_length=len(stream))
             if calculated_stream == stream:
                 log("Key found: {}".format(main_key), level=0)
                 return main_key
 
 
+def get_p_correct(i, n=256):
+    q_i = get_q_i(i, n)
+    return q_i * (1 - (1 / n)) ** (n - 2) * (2 / n) + (1 - q_i * (1 - (1 / n)) ** (n - 2)) * ((n - 2) / (n * (n - 1)))
+
+
+def get_q_i(i, n):
+    product = 1
+    for k in range(1, i + 1):
+        product *= (1 - (k / n))
+    return (1 - (1 / n)) ** i * (1 - (i / n)) * product
+
+
+def get_err_normal_at_pos(i, votes, n=256):
+    p_correct = get_p_correct(i)
+    p_wrong = (1 - p_correct) / (n - 1)
+    arithmetic_sum = 0
+    max_p = 0
+    max_b = 0
+    for l in range(n):
+        fraction = get_fraction_of_votes(votes, l)
+        if fraction > max_p:
+            max_p = fraction
+            max_b = l
+
+    for j in range(n):
+        if j == max_b:
+            break
+        arithmetic_sum += (get_fraction_of_votes(votes, j) - p_wrong) ** 2
+    return (max_p - p_correct) ** 2 + arithmetic_sum
+
+
+def get_err_strong_at_pos(votes, n=256):
+    err_strong = 0
+    p_equal = 1 / n
+    for j in range(n):
+        fraction = get_fraction_of_votes(votes, j)
+        err_strong += (fraction - p_equal) ** 2
+    return err_strong
+
+
+def get_fraction_of_votes(votes, j):
+    amount = sum(list(map(lambda x: x[0] == j, votes)))
+    fraction = amount / len(votes)
+    return fraction
+
+
+def handle_strong_key_bytes(i, key, n=256):
+    arithmetic_sum = 0
+    for j in range(i - 1):
+        arithmetic_sum += key[j] + 3 + j
+    return (-3 - i - arithmetic_sum) % n
+
+
 @log_timing()
-def get_key_vote_dict(key_length_bytes):
+def get_key_vote_dict(key_length_bytes, tuple_amount):
     # Initialize dict
     key = dict()
     for i in range(key_length_bytes):
         key.update({i: []})
     for tuple in iv_stream_pair:
-        single_vote = vote_generator(tuple.get('iv'), tuple.get('stream_key'), key_length_bytes)
+        single_vote = vote_generator(tuple[0], tuple[1], key_length_bytes)
         for index, key_s in enumerate(single_vote):
             key_votes = key.get(index)
             key_votes.append(key_s)
             key.update({index: key_votes})
+
+    key_p = dict()
+    for k, v in key.items():
+        key_p.update({k: list(map(lambda x: (x, x / tuple_amount), v))})
+    # test if err_strong is smaller than err_normal
+    for b in list(key_p.values()):
+        err_strong = get_err_strong_at_pos(b)
+        err_normal = get_err_normal_at_pos(1, b)
+        threshold = 3.109642788418655e-05
+
+        print(err_strong < err_normal, err_strong - err_normal, (err_strong - err_normal) < threshold)
+
     return key
 
 
-def test_strong_bytes(i, main_key, n):
-    sum = 0
-    result = [False] * len(main_key)
-    for l in range(i):
-        for k in range(l, i):
-            sum += main_key[k] + 3 + k
-        if sum % n == 0:
-            result[l] = main_key[l]
-    return result
-
-
-def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
-    """
-
-    :param key_vote_dict:
-    :param candidate_amount: Big values may cause high runtime
-    :return:
-    """
+def get_most_common_sorted(key_vote_dict, tuple_amount, candidate_amount):
     # Create dict of lists for key positions
     most_common = dict()
     for i in range(len(key_vote_dict)):
@@ -122,7 +170,17 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
             tmp.append((j[0], p))
             most_common.update({t: tmp})
 
-    # Begin of combination process
+    return most_common
+
+
+def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
+    """
+
+    :param key_vote_dict:
+    :param candidate_amount: Big values may cause high runtime
+    :return:
+    """
+    most_common = get_most_common_sorted(key_vote_dict, tuple_amount, candidate_amount)
     possible_key_set = []
     # Initialize with only the most common bytes
     for i in range(len(key_vote_dict)):
@@ -133,6 +191,7 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         old_set = list()
         # Calculate possible key combinations
         cartesian_product_set_of_tuples = list(product(*possible_key_set))
+
         # Exclude already tested keys
         cartesian_product_set_of_tuples = set(cartesian_product_set_of_tuples) - set(old_set)
         # Return list of keys
@@ -192,15 +251,15 @@ def read_cap_file(file_path, tuple_amount=50000):
 
 if __name__ == '__main__':
     key_length_bytes = 13
-    tuple_amount = 35000
+    tuple_amount = 85000
     print("Using key length of {} bytes".format(key_length_bytes))
     print("Using {} tuples".format(tuple_amount))
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
-    iv_stream_pair, main_key = iv_and_stream_key_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
+    iv_stream_pair, main_key = iv_and_stream_cipher_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
     print("Start Hacking")
 
-    key = get_key_vote_dict(key_length_bytes)
+    key = get_key_vote_dict(key_length_bytes, tuple_amount)
     key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
-    test_keys(key_set_iterator, (iv_stream_pair[0].get('iv'), iv_stream_pair[0].get('stream_key')))
+    test_keys(key_set_iterator, (iv_stream_pair[0][0], iv_stream_pair[0][1]))
