@@ -1,3 +1,4 @@
+from base64 import b64encode, b64decode
 from collections import Counter
 from itertools import product
 
@@ -242,24 +243,25 @@ def read_cap_file(file_path, tuple_amount=50000):
         if packet['len'] == 68:
             iv, k, ciphertext, icv = WEP(IEEE802_11(packet['data']).get_payload()).get()
             stream_key = bytearray([a ^ b for (a, b) in zip(ciphertext, known_headers)])
-            iv_stream_pair.append(dict(iv=iv, stream_key=stream_key))
-        if (len(iv_stream_pair) > tuple_amount):
-            print("Tupel-Limit reached:{} iv-stream-pairs found!".format(tuple_amount))
-            return iv_stream_pair
-    return iv_stream_pair
+            iv_stream_pair.append((b64encode(iv), b64encode(stream_key)))
+    return set(iv_stream_pair)
 
 
 if __name__ == '__main__':
     key_length_bytes = 13
-    tuple_amount = 85000
+    tuple_amount = 120000
     # Info
     print("Using key length of {} bytes".format(key_length_bytes))
-    print("Using {} tuples".format(tuple_amount))
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
-    iv_stream_pair, main_key = iv_and_stream_cipher_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
+    #iv_stream_pair, main_key = iv_and_stream_cipher_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
+    iv_stream_pair_str_1 = read_cap_file("../Aufgabe_2_3/wep-128_1min.cap", tuple_amount=tuple_amount)
+    iv_stream_pair_str_2 = read_cap_file("../Aufgabe_2_3/wep-128_2min.cap", tuple_amount=tuple_amount)
+    iv_stream_pair_str = iv_stream_pair_str_1.union(iv_stream_pair_str_2)
+    iv_stream_pair = list(map(lambda x:(b64decode(x[0]),b64decode(x[1])), iv_stream_pair_str))
     print("Start Hacking")
-
+    tuple_amount = min(len(iv_stream_pair), tuple_amount)
+    print("Using {} tuples".format(tuple_amount))
     key = get_key_vote_dict(key_length_bytes, tuple_amount)
     key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
