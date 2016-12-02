@@ -144,16 +144,16 @@ def get_key_vote_dict(key_length_bytes, tuple_amount):
             key_votes.append(key_s)
             key.update({index: key_votes})
 
-    key_p = dict()
-    for k, v in key.items():
-        key_p.update({k: list(map(lambda x: (x, x / tuple_amount), v))})
+    #key_p = dict()
+    #for k, v in key.items():
+    #    key_p.update({k: list(map(lambda x: (x, x / tuple_amount), v))})
     # test if err_strong is smaller than err_normal
-    for b in list(key_p.values()):
-        err_strong = get_err_strong_at_pos(b)
-        err_normal = get_err_normal_at_pos(1, b)
-        threshold = 3.109642788418655e-05
+    #for b in list(key_p.values()):
+    #    err_strong = get_err_strong_at_pos(b)
+    #    err_normal = get_err_normal_at_pos(1, b)
+    #    threshold = 3.109642788418655e-05
 
-        print(err_strong < err_normal, err_strong - err_normal, (err_strong - err_normal) < threshold)
+     #   print(err_strong < err_normal, err_strong - err_normal, (err_strong - err_normal) < threshold)
 
     return key
 
