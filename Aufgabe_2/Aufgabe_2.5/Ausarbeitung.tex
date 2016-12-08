@@ -162,37 +162,30 @@ Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)
 In WEP-Protokoll haben SessionKeys die folgende Form: $main key || Initialisierungsvektor$. Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus.
 Die Basisversion des Angriffes
 
-Wir betrachten die Permutation im Key-Scheduling:
+Wir betrachten die Permutation in der Key-Scheduling-Phase:
 
 \begin{verbatim}
-// S = [0,1,2.....n-1]
-j := 0
-For i = 0 to n - 1
-j := (j + s[i] + k[i mod L]) mod 256
-swap s[i] mit s[j]
+
 Hier sieht man leicht, nach dem ersten Schritt gilt:
 
 j = 0+0+K[0] = K[0]  
 ==> S[0] <-> S[K[0]] 
- 
+\end{verbatim}
 So lässt sich die zweite Runde (mit WK 1 - 1/n) ebenfalls rekontruieren:
-
+\begin{verbatim}
 j = K[0] + 1 + K[1]  
 ==> S[1] <-> S[ K[0] + 1 + K[1] ]  
 
 K[0] + 1 + K[1] wird im Weiteren t genannt.
-
 \end{verbatim}
 
-4 Spezialfälle betrachten (werde ich ergänzen, wenn diese sich im weiteren Paper als wichtig herrausstellen)
-
-Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] aus K[1] berechnet werden. Achtung: Wird der Wert S[1] beim ersten Mal überschreiben, (j = 1) funktioniert dies nicht. Die WK, das die nach 2 Runden passiert liegt bei:
-$(1- (1/n))^(n-2)$ das ist ungefähr gleich $1/e$ mit n = Schlüssellänge, e = Eulerische Zahl. Nun wissen wir Folgendes: Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK $(1/e)$ nur von K[0] und K[1] abhängt. Nun kann die Korrelation aus Kapitel 3 benutzt werden um t aus der beobachteten RC4-PZS zu erhalten. Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an. Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: S[j] = 1 - S[k] mod n mit Wahrscheinlichkeit: 2/n Alles zusammen haben wir nun: $R( t = 1 - S[k] mod n) = [...] 1.36 /n$
-
+Auftretende Speziallfälle, wie zum Beispiel der Fall, dass k[0] =1 und k[1] = 0 gilt und somit t = 1 gilt sind unwahrscheinlich und werden nicht betrachtet. Wir wissen nun, dass für ein festes K[0] der Wert t und S[1] sich aus K[1] berechnen lassen. In den weiteren Schritten der Key-Sheduling-Phase wird S[1] nicht mehr geändert, sofern j nie den Wert 1 annimmt. Die Wahrscheinlickkeit, dass dies in einem Schritt dennoch passiert liegt bei $1 - (1/n)$ falls der SessionKey die Länge n hat. Sind alle Keybytes von einander unabhängig, folgt S[1] wird mit der Wahrscheinlichkeit $(1-(1/n))^{n-2} \approx 1/e$ nicht verändert.
+Nun wissen wir Folgendes: Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK $(1/e)$ nur von K[0] und K[1] abhängt. Nun kann die Korrelation aus Kapitel 3 benutzt werden um t aus der beobachteten RC4-PZS zu erhalten. Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an.
+Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: S[j] = 1 - S[k] mod n mit Wahrscheinlichkeit: 2/n Alles zusammen haben wir nun: $R( t = 1 - S[k] mod n) = [...] 1.36 /n$
 Unser Angriff hat nun folgende Form: Für verschiedene Initialisierungsverktoren (n-Stück) können wir die ersten Bytes $x_i$ mit $1 <= i <= n$ beobachten und $t_i = 1 - x_i$ ausrechnen. Wie Wk, das $t_i$ den richtigen Wert annimmt liegt bei $1.36/n$ alle anderen Werte haben eine WK von unter $1/n$ Wenn die Anzahl der Session groß ist, kann man den Wert mit hoher WK bestimmen.
 
-
-\paragraph{Permutieren der S-Box} Bla %Approximate the permutation by simulating the first i steps of the key scheduling of RC4
+\paragraph{Permutieren der S-Box}\ 
+%Approximate the permutation by simulating the first i steps of the key scheduling of RC4
 \begin{lstlisting}
 def simulate_permutation(part_of_key, n):
     # Initialize s-box
