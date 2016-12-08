@@ -101,11 +101,17 @@ Der letzte Schritt besteht darin die zufällige Bytefolge $RC4(v,k)$ und den Ter
 Durch die Prüfsumme $c(M)$ ist der Empfänger außerdem in der Lage, die Integrität der eigentlichen Nachricht $M$ zu gewährleisten. 
 
 \section{Der Angriff}
-In diesem Abschnitt werden die verschiedenen Angriffe die wir in den Aufgaben 2 bis 4 durchführen sollten genauer dargelegt. Der erste Abschnitt handelt darüber wie Kleins Angriff auf den RC4-Algorithmus unter einer \glqq simulierten Umgebung\grqq \ getestet wurde. Anschließend wird darauf eingegangen wie man das Auftreten von ARP-Paketen  mit Hilfe einer Technik namens \glqq re-injection\grqq \ erhöht. Danach werden aus diesen Paketen paare von IV und Schlüsselstrom extrahiert und der Angriff von Klein wird auf diese Daten angewendet. Abschließend wird erläutert wie man den Angriff deutlich effizienter machen kann.
+%TODO Anpassen
+In diesem Abschnitt werden die verschiedenen Angriffe die wir in den Aufgaben 2 bis 4 durchführen sollten genauer dargelegt. Der erste Abschnitt handelt darüber wie Kleins Angriff auf den RC4-Algorithmus unter einer \glqq simulierten Umgebung\grqq \ getestet wurde. Anschließend wird darauf eingegangen wie man das Auftreten von ARP-Paketen  mit Hilfe einer Technik namens \glqq re-injection\grqq \ erhöht. Danach werden aus diesen Paketen Paare von IV und Schlüsselstrom extrahiert und der Angriff von Klein wird auf diese Daten angewendet. Abschließend wird erläutert wie man den Angriff deutlich effizienter machen kann.
 
-\subsection{Kleins Angriff in der simulierten Umgebung}
+\subsection{Schwächen in RC4}
+% Auf Korrelation in RC4 PRNG eingehen(Klein paper), auf Besonderheiten unserer situation eingehen (iv vorne, 
+
+\subsection{Angriff von Klein}
+
+\subsubsection{Angriff in der simulierten Umgebung}
 %TODO das mit dem IV sollte noch festgehalten werden
-Wie bereits erwähnt, bestand ein Teil der Aufgaben darin, den Angriff von Klein auf selbst generierte Paare von Initialisierungsvektoren und Stromchiffren anzuwenden. Dazu wurde ein Package "RC4" erstellt, indem die Methoden für die key scheduling phase und den pseudo random generator enthalten waren. Außerdem beinhaltet das Package eine Methode mit dem Namen $fixed\_rc4(key, cipher\_length=4096, n=256)$.
+Wie bereits erwähnt, bestand ein Teil der Aufgaben darin, den Angriff von Klein auf selbst generierte Paare von Initialisierungsvektoren und Stromchiffren anzuwenden. Dazu wurde ein Package \grqq RC4\grqq\ erstellt, indem die Methoden für die key scheduling phase und den pseudo random generator enthalten waren. Außerdem beinhaltet das Package eine Methode mit dem Namen $fixed\_rc4(key, cipher\_length=4096, n=256)$.
 \begin{lstlisting}[backgroundcolor=\color{grey}]
 		def fixed_rc4(key, cipher_length=4096, n=256):
     		# Initial permutation
@@ -118,15 +124,22 @@ Wie bereits erwähnt, bestand ein Teil der Aufgaben darin, den Angriff von Klein
             		break
     		return cipher
 \end{lstlisting}
-Die Methode ruft den key scheduling Algorithmus auf und erzeugt somit eine permutierte S-Box. Neben dem Zahlenraum $\mathbb{Z_n}$ der mittels $n$ übergeben wird, wird auch der main key $k$ und die Länge der Chiffre (Standardmäßig 4096 Byte) übergeben. Dadurch werden in der For-Schleife genau so viele zufällige Bytes generiert wie gefordert. Wurde die maximale Anzahl an zufälligen Bytes generiert bricht der Algorithmus ab und gib die zufällige Bytefolge aus.
+Die Methode ruft den key scheduling Algorithmus auf und erzeugt somit eine permutierte S-Box. Neben dem Zahlenraum $\mathbb{Z}_n$ der mittels $n$ übergeben wird, wird auch der main key $k$ und die Länge der Chiffre (Standardmäßig 4096 Byte) übergeben. Dadurch werden in der For-Schleife genau so viele zufällige Bytes generiert wie gefordert. Wurde die maximale Anzahl an zufälligen Bytes generiert bricht der Algorithmus ab und gib die zufällige Bytefolge aus.
+\subsubsection{Angriff in realer Umgebung}
+\paragraph{ARP-Pakete generieren}
 
-%%Angriff
+\subsection{Verbesserungen des Angriffs}
+% Parallel Berechnung der key bytes, durch Umformulierung...
 
-\subsection{ARP-Pakete generieren}
-\subsection{Kleins Angriff auf echte Paare}
-\subsection{Verbesserung des Angriffs}
-\section{Statistische Analyse}
-\subsection{Versuchsanordnung}
-\subsection{Versuchsdurchführung}
-\subsection{Versuchsauswertung}
+\subsection{Vergleich der Angriffe}
+% Siehe 60 sekunden paper
+
+\subsubsection{Versuchsanordnung}
+% Skript für cip pool, auf simulierten daten
+
+\subsubsection{Ergebnis}
+% Diagramme aus R
+
+\section{Fazit}
+% Verbesserungen ?
 \end{document}
