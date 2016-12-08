@@ -106,23 +106,27 @@ In diesem Abschnitt werden die verschiedenen Angriffe die wir in den Aufgaben 2 
 
 \subsection{Schwächen in RC4}
 % Auf Korrelation in RC4 PRNG eingehen(Klein paper), auf Besonderheiten unserer situation eingehen (iv vorne, 
-Die von RC4 erzeugte Pseudosufallssequenz (=PZS) unterscheidet sich in einigen Punkten von einer echten Zufallsfolge. Die Summe der letzten Bits in Schrit t und t+2 korreliert gegen 1. J.Dj. Golic kam zu dem Schluss, dass $2^40$ Bytes von der RC4-PZS unterscheidbar sind zu einer richtigen Zufallssequenz.
+Die von RC4 erzeugte Pseudosufallssequenz (=PZS) unterscheidet sich in einigen Punkten von einer echten Zufallsfolge. Die Summe der letzten Bits in Schritt t und t+2 korreliert gegen 1.
+J.Dj. Golic kam zu dem Schluss, dass $2^40$ Bytes von der RC4-PZS unterscheidbar sind zu einer echten Zufallssequenz.
 Weitere Untersuchungen von S.R. Fluhrer und D.A. McGrew haben beweisen, das die gemeinsame WK von zwei aufeinander folgenden Bytes sich signifikant von einer Zufallsfolge unterscheiden. Im Idealfall besteht ein Schlüssel aus n unabhägig, identischen und gleichverteilten Elementen aus Z/nZ und gerneriert $n^n$ gleichwahrscheinliche Schlüssel. Jedoch ist $n!$ kein Teiler von $n^n$. Daher muss sich die Verteilung der initialen Permutation von einer Gleichverteilung unterscheiden. (Siehe Studie von I.Mironov)
-Eine weitere, frühbekannte Schwachstelle ist, dass das erste Byte der PZS nicht wirklich zufällig ist. Angriff von S. Fluhrer, I.martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form $(b,n-1)$ haben, wobei $b$ das Byte des Hauptschlüssel ist, welches rekonstruiert werden soll. Wenn ein Angreifer keine Chance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich eine aus $n^2$ Situngen der Fall. Die Authoren zeigen, dass dieser Angriff auf WEP angewendet warden kann.
-Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren und abfangbaren Werten $i, S[k]$ und den internen Werten von $j, S[j]$ und $S[i]$ besteht. In der Zusammenfassung: Ohne Beweis.
+Für das weitere Vorgehen ist jedoch folgende Schwachstelle wichtig:\\
+Das erste Byte der PZS ist nicht wirklich zufällig. Der Angriff von S. Fluhrer, I. Martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form $(b,n-1)$ haben, wobei $b$ das Byte des Hauptschlüssel ist, welches rekonstruiert werden soll. Wenn ein Angreifer keine Chance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich eine aus $n^2$ Situngen der Fall. Die Authoren zeigen, dass dieser Angriff auf WEP angewendet warden kann.
+Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren und abfangbaren Werten $i, S[k]$ und den internen Werten von $j, S[j]$ und $S[i]$ besteht.
+\\\\
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)
 
 \subsection{Angriff von Klein}
-Annahme: SessionKeys habe ndie Form: $main key || Initialisierungsvektor$
-Der Angriff bestimmt die Summe der ersten 2 Bytes des Schlüssels. Später wird auch ein Angriff gezeigt, bei welchem der Initialisierungsvektor an erster Stelle steht. 
+In WEP-Protokoll haben SessionKeys die folgende Form: $main key || Initialisierungsvektor$. Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus. 
+. 
 \paragraph{Permutieren der S-Box} %Approximate the permutation by simulating the first i steps of the key scheduling of RC4
+
+%TODO form this to algorithm
 \begin{lstlisting}
 def simulate_permutation(part_of_key, n=256):
     # Initialize s-box
     s = []
     for i in range(n):
         s.append(i)
-
     i, j = 0, 0
     # Calculate permutation for first i bytes
     for i in range(len(part_of_key)):
