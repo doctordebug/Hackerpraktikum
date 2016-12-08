@@ -5,12 +5,15 @@
 \usepackage{fullpage}
 \usepackage{amssymb}
 \usepackage{listings}
+\usepackage{caption}
 \usepackage{color}
 \usepackage{amsmath}
 
 \include{pythonColor}
 \lstset{language=python-color}
+\lstset{framexleftmargin=5pt, framextopmargin=5pt, framexbottommargin=5pt, frame=tb, framerule=0pt}
 \definecolor{grey}{rgb}{0.9,0.9,0.9}
+\include{pseudo}
 
 \setlength{\parindent}{0pt}
 \setlength{\columnsep}{0.5cm}
@@ -50,41 +53,80 @@ Das Symbol || stellt den Operator für die Konkatenation dar. Die länge von $k$
 \end{quote}
 Die maximale Größe von $l_K$ beträgt $n$, liegt jedoch typischerweise zwischen 5 und 128 Bit.
 
-In der ersten Phase des RC4-Algorithmus, der key scheduling phase, wird eine initiale Permutation mit Hilfe des session keys $K$ erzeugt. Die erste Phase lässt sich wie folgt darstellen:
-\begin{lstlisting}
-		def keyScheduling(sessionKey=bytearray(), n=256):
-    		# initialization
-    		sBox = []
-    		for i in range(n):
-        		sBox.append(i)
+In der ersten Phase des RC4-Algorithmus, der key scheduling phase, wird eine initiale Permutation mit Hilfe des session keys $K$ erzeugt. Die erste Phase lässt sich wie folgt darstellen:\\
+\begin{center}
+\hspace{5pt}
+\begin{minipage}[t]{.35\textwidth}
+\begin{algorithm}
+{initialization}
+for i from 0 to n-1 do
+    S[i] := i
+end for
+j := 0
+{generate a random permutation}
+for i from 0 to n-1 do
+    j := (j+S[i]+K[i mod l]) mod n
+    Swap S[i] and S[j]
+end for
+\end{algorithm}
+\end{minipage}\hspace{0.4cm}
+\begin{minipage}[t]{.60\textwidth}
+  \begin{lstlisting}
+def keyScheduling(sessionKey=bytearray(), n=256):
+	# initialization
+	sBox = []
+	for i in range(n):
+   		sBox.append(i)
+   		sBox = bytearray(sBox)
 
-    		sBox = bytearray(sBox)
-    		i,j = 0,0
+   	i,j = 0,0
+   	# generate a random permutation
+   	for i in range(n):
+     	j = (j + sBox[i] + sessionKey[i % len(sessionKey)]) % n
+    	sBox[i], sBox[j] = sBox[j], sBox[i]
 
-    		# generate a random permutation
-    		for i in range(n):
-        		j = (j + sBox[i] + sessionKey[i % len(sessionKey)]) % n
-        		sBox[i], sBox[j] = sBox[j], sBox[i]
-
-    		return sBox
+	return sBox
 \end{lstlisting}
+\end{minipage}
+\end{center}
+
 Bei der key scheduling phase wird eine Substitutionsbox (S-Box) verwendet. Diese wird zu beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die S-Box wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der For-Schleife werden zwei Einträge der S-Box vertauscht um eine zufällige Permutation zu erzeugen. 
 
 Nachdem die key scheduling phase eine zufällige S-Box generiert hat, beginnt die zweite Phase des RC4-Algorithmus. In dieser Phase wird eine Zufallsfolge, auch Stromchiffre genannt, erstellt. Der Algorithmus dazu gestalltet sich wie folgt:
+\begin{center}
+\hspace{5pt}
+\begin{minipage}[t]{.35\textwidth}
+\begin{algorithm}
+{initialization}
+i := 0
+j := 0
+{generate pseudo random sequence}
+loop
+    i := (i + 1) mod n
+    j := (j + S[i]) mod n
+    Swap S[i] and S[j]
+    k := (S[i] + S[j]) mod n
+    print S[k]
+end loop
+\end{algorithm}
+\end{minipage}\hspace{0.4cm}
+\begin{minipage}[t]{.60\textwidth}
 \begin{lstlisting}
-		def pseudoRandomGenerator(sBox=bytearray(),n=256):
-    		# initialization
-    		i,j = 0,0
+def pseudoRandomGenerator(sBox=bytearray(),n=256):
+   	# initialization
+	i,j = 0,0
 
-    		# generate pseudo random sequence
-    		while True:
-        		i = (i + 1) % n
-        		j = (j + sBox[i]) % n
-        		sBox[i], sBox[j] = sBox[j], sBox[i]
-        		k = (sBox[i] + sBox[j]) % n
+	# generate pseudo random sequence
+	while True:
+   		i = (i + 1) % n
+   		j = (j + sBox[i]) % n
+   		sBox[i], sBox[j] = sBox[j], sBox[i]
+   		k = (sBox[i] + sBox[j]) % n
 
-        		yield bytes([sBox[k]])
+   		yield bytes([sBox[k]])
 \end{lstlisting}
+\end{minipage}
+\end{center}
 Hierbei handelt es sich um den Hauptteil des RC4-Algorithmus.  Der pseudo random generator startet mit dem permutierten Array $sBox$, dass in der key scheduling phase generiert wurde. Anschließend wird ein Index $j$ mit Hilfe der zufällig permutierten S-Box gewählt und zwei Einträge ($sBox[i]$ und $sBox[j]$) werden wie bereits in der key scheduling phase vertauscht. Der nächste Schritt besteht darin einen Index $k$ zu ermitteln, welcher aus den addierten Werten aus der S-Box bestehen. Durch den anschließenden Modulo-Operator wird sichergestellt, dass es sich um Werte aus dem Zahlenraum $/mathbb{Z}_n$ handelt. Der pseudo random generator erstellt somit in jedem Schritt ein Byte, mit einem Wert zwischen $0$ bis $n-1$, als Ausgabe.
 
 \subsection{WEP}
@@ -116,46 +158,8 @@ Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren un
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)
 
 \subsection{Angriff von Klein}
-In WEP-Protokoll haben SessionKeys die folgende Form: $main key || Initialisierungsvektor$. Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus. 
-. 
-\paragraph{Permutieren der S-Box} %Approximate the permutation by simulating the first i steps of the key scheduling of RC4
 
-%TODO form this to algorithm
-\begin{lstlisting}
-def simulate_permutation(part_of_key, n=256):
-    # Initialize s-box
-    s = []
-    for i in range(n):
-        s.append(i)
-    i, j = 0, 0
-    # Calculate permutation for first i bytes
-    for i in range(len(part_of_key)):
-        j = (j + s[i] + part_of_key[i]) % n
-        s[i], s[j] = s[j], s[i]
-    return s, i, j
-\end{lstlisting}
-\paragraph{Berechnung von Bytes im Schlüssel} 
-%Approximate the key byte at position i
-\begin{lstlisting}
-def calculate_key_byte(stream_cipher, s_box, i, j, n):
-    s_invert = []
-    for init in range(n):
-        s_invert.append(init)
-
-    # Invert s-box
-    for r in range(len(s_box)):
-        s_invert[s_box[r]] = r
-
-    # Calculate nex key byte
-    key_byte = (s_invert[(i - stream_cipher[i - 1]) % n] - (j + s_invert[i]) % n) % n
-    return key_byte
-\end{lstlisting}
-
-Kapitel 4: Angriff auf die erste Runde
-
-Annahme: SessionKeys haben die Form: $main key || Initialisierungsvektor$
-Der Angriff bestimmt die Summe der ersten 2 Bytes des Schlüssels. Später wird auch ein Angriff gezeigt, bei welchem der Initialisierungsvektor an erster Stelle steht.
-
+In WEP-Protokoll haben SessionKeys die folgende Form: $main key || Initialisierungsvektor$. Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus.
 Die Basisversion des Angriffes
 
 Wir betrachten die Permutation im Key-Scheduling:
@@ -186,10 +190,42 @@ Zusammengefasst kann man sagen, dass für fixes K[0] kann der Wert t von S[1] au
 $(1- (1/n))^(n-2)$ das ist ungefähr gleich $1/e$ mit n = Schlüssellänge, e = Eulerische Zahl. Nun wissen wir Folgendes: Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK $(1/e)$ nur von K[0] und K[1] abhängt. Nun kann die Korrelation aus Kapitel 3 benutzt werden um t aus der beobachteten RC4-PZS zu erhalten. Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an. Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: S[j] = 1 - S[k] mod n mit Wahrscheinlichkeit: 2/n Alles zusammen haben wir nun: $R( t = 1 - S[k] mod n) = [...] 1.36 /n$
 
 Unser Angriff hat nun folgende Form: Für verschiedene Initialisierungsverktoren (n-Stück) können wir die ersten Bytes $x_i$ mit $1 <= i <= n$ beobachten und $t_i = 1 - x_i$ ausrechnen. Wie Wk, das $t_i$ den richtigen Wert annimmt liegt bei $1.36/n$ alle anderen Werte haben eine WK von unter $1/n$ Wenn die Anzahl der Session groß ist, kann man den Wert mit hoher WK bestimmen.
-\paragraph{Iterierte Anwendung} 
+
+
+\paragraph{Permutieren der S-Box} Bla %Approximate the permutation by simulating the first i steps of the key scheduling of RC4
+\begin{lstlisting}
+def simulate_permutation(part_of_key, n):
+    # Initialize s-box
+    s = []
+    for i in range(n):
+        s.append(i)
+    i, j = 0, 0
+    # Calculate permutation for first i bytes
+    for i in range(len(part_of_key)):
+        j = (j + s[i] + part_of_key[i]) % n
+        s[i], s[j] = s[j], s[i]
+    return s, i, j
+\end{lstlisting}
+\paragraph{Berechnung von Bytes im Schlüssel} Bla Bla
+%Approximate the key byte at position i
+\begin{lstlisting}
+def calculate_key_byte(stream_cipher, s_box, i, j, n):
+    s_invert = []
+    for init in range(n):
+        s_invert.append(init)
+
+    # Invert s-box
+    for r in range(len(s_box)):
+        s_invert[s_box[r]] = r
+
+    # Calculate nex key byte
+    key_byte = (s_invert[(i - stream_cipher[i - 1]) % n] - (j + s_invert[i]) % n) % n
+    return key_byte
+\end{lstlisting}
+\paragraph{Iterierte Anwendung} Bla Bla
 %Method to approximate the main key of wep. The stream cipher is the RC4 stream cipher generated by running RC with arguments iv and main\_key.
 \begin{lstlisting}
-def crack_wep(iv_stream_pair, key_length_bytes, n, tuple_amount=sys.maxsize):
+def crack_wep(iv_stream_pair, key_length_bytes, n, tuple_amount):
     possible_key = bytearray()
     key_length = key_length_bytes - len(possible_key) % key_length_bytes
 
@@ -216,7 +252,7 @@ def crack_wep(iv_stream_pair, key_length_bytes, n, tuple_amount=sys.maxsize):
 %TODO das mit dem IV sollte noch festgehalten werden
 Wie bereits erwähnt, bestand ein Teil der Aufgaben darin, den Angriff von Klein auf selbst generierte Paare von Initialisierungsvektoren und Stromchiffren anzuwenden. Dazu wurde ein Package \glqq RC4\grqq\ erstellt, indem die Methoden für die key scheduling phase und den pseudo random generator enthalten waren. Außerdem beinhaltet das Package eine Methode mit dem Namen $fixed\_rc4(key, cipher\_length=4096, n=256)$.
 \begin{lstlisting}
-		def fixed_rc4(key, cipher_length=4096, n=256):
+		def fixed_rc4(key, cipher_length, n):
     		# Initial permutation
     		s_box = key_scheduling(key, n=n)
     		cipher = bytearray()
@@ -228,6 +264,21 @@ Wie bereits erwähnt, bestand ein Teil der Aufgaben darin, den Angriff von Klein
     		return cipher
 \end{lstlisting}
 Die Methode ruft den key scheduling Algorithmus auf und erzeugt somit eine permutierte S-Box. Neben dem Zahlenraum $\mathbb{Z}_n$ der mittels $n$ übergeben wird, wird auch der main key $k$ und die Länge der Chiffre (Standardmäßig 4096 Byte) übergeben. Dadurch werden in der For-Schleife genau so viele zufällige Bytes generiert wie gefordert. Wurde die maximale Anzahl an zufälligen Bytes generiert bricht der Algorithmus ab und gib die pseudozufällige Bytefolge aus.
+% Paar generierung erklären
+% Method for generation of (iv, main key and stream key) pairs as required by Exercise 2.2 (Modes: 64-bit WEP(WEP-40): 40 bit key, 24-bit iv, 128-bit WEP(WEP-104): 104 bit key, 26-bit iv )
+\begin{lstlisting}
+def iv_and_stream_cipher_generator(n, rounds, iv_length, key_length, tuple_amount):
+    # Generate random key
+    main_key = bytearray(os.urandom(key_length))
+
+    iv_stream_set = []
+    for i in range(tuple_amount):
+        # Generate random iv
+        iv = bytearray(os.urandom(iv_length))
+        stream_cipher = fixed_rc4(iv, main_key, cipher_length=rounds * n, n=n)
+        iv_stream_set.append((iv, stream_cipher))
+    return iv_stream_set, main_key
+\end{lstlisting}
 \subsubsection{Angriff in realer Umgebung}
 \paragraph{ARP-Pakete generieren}
 
