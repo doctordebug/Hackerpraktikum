@@ -161,7 +161,7 @@ Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren un
 \\\\
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)
 
-\subsection{Angriff von Klein}
+\subsection{Angriff von Klein}\label{ssec:klein}
 Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus. Wir betrachten die Permutation in der Key-Scheduling-Phase.\\
 Hier sieht man leicht, nach dem ersten Schritt gilt:
 
@@ -284,9 +284,45 @@ def iv_and_stream_cipher_generator(n, rounds, iv_length, key_length, tuple_amoun
 \subsubsection{Angriff in realer Umgebung}
 
 \paragraph{ARP-Pakete generieren}
+% \cite[chapter 5]{TWP07} vielleicht nützlich ?
 
 \subsection{Verbesserungen des Angriffs}
-% Parallel Berechnung der key bytes, durch Umformulierung...
+\paragraph{Überblick}
+Folgende Verbesserungen gehen aus dem Paper \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \cite{TWP07}\ hervor.
+In Klein's Angriff werden die Schlüsselbytes iterativ berechnet, das bedeutet die Berechnung des Bytes $K[i]$ ist abhängig von seinen Vorgängern $K[0]\cdot\cdot\cdot K[i-1]$. Dies ist nicht optimal, denn die Paare aus Initialisierungsvektor und Stromchiffre müssen gespeichert werden und das korrigieren potenzieller Fehler ist teuer \cite[chapter 4]{TWP07}.\\ Die von Tews et al. vorgestellte Methode verwendet eine parallelisierte Berechnung von sogenannten \glqq votes\grqq\ für Schlüsselbytes und einem anschließenden \glqq key ranking\grqq. Diese ist wesentlich schneller und fehlertoleranter, da sie nicht auf den Werten vorangegangener Schlüsselbytes beruht. Ihr Ansatz macht Annahmen über den Zustand der S-Box und basiert auf einer Umformung des Angriffs von Klein. Dieser erlaubt die Berechnung von $K[i]$ ohne zusätzliches Wissen über die Werte $K[0]\cdot\cdot\cdot K[i-1]$. Die Annahme führt jedoch dazu, dass besonders geformte Schlüsselbytes, sogenannte \glqq strong key bytes\grqq\ im Schlüssel auftreten können. Handelt es sich um ein starkes Schlüsselbyte muss dieses erkannt und korrigiert werden. Sollte der Schlüssel aus vielen starken Schlüsselbytes bestehen, bei WEP-104 12 Bytes, wird die Methode mit Schlüsselranking ineffizient und muss ohne Schlüsselranking ausgeführt werden.
+\paragraph{Umsetzung}
+Am Anfang, genau wie im Angriff von Klein \ref{ssec:klein}, wird die Permutierung der S-Box simuliert. Wir behandeln WEP-40 und WEP-104, der Initialisierungsvektor ist in diesem Fall 24 Bit oder 3 Byte lang. Die S-Box wird mit Hilfe des bekannten Initialisierungsvektors bis zur dritten Stelle berechnet.
+% Approximate the permutation by simulating the first i steps of the key scheduling of RC4
+\begin{lstlisting}
+def simulate_permutation(iv, n):
+    # Initialize s-box
+    s = []
+    for i in range(n):
+        s.append(i)
+    s_invert = list(s)
+
+    j = 0
+    # Calculate permutation for bytes K[0] to K[2]
+    for i in range(3):
+        j = (j + s[i] + iv[i]) % n
+        s[i], s[j] = s[j], s[i]
+
+    # Invert s-box at step 3
+    for r in range(len(s)):
+        s_invert[s[r]] = r
+
+    return s, j, s_invert
+\end{lstlisting}
+% Approximate the key byte at position i
+\begin{lstlisting}
+def calculate_key_byte_vote(i, key_stream, s_box_3, s_box_3_invert, j_3, n):
+    # Calculate key byte
+    sum = s_box_3[3]
+    for l in range(4, i + 4):
+        sum = (sum + s_box_3[l]) % n
+    key_byte = (s_box_3_invert[((3 + i) - key_stream[2 + i]) % n] - (j_3 + sum) % n) % n
+    return key_byte
+\end{lstlisting}
 
 \subsection{Vergleich der Angriffe}
 \label{subsec:vergleich}
