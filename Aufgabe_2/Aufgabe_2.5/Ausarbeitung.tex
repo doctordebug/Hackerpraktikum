@@ -51,7 +51,7 @@ Das Symbol || stellt den Operator für die Konkatenation dar. Die länge von $k$
 Die maximale Größe von $l_K$ beträgt $n$, liegt jedoch typischerweise zwischen 5 und 128 Bit.
 
 In der ersten Phase des RC4-Algorithmus, der key scheduling phase, wird eine initiale Permutation mit Hilfe des session keys $K$ erzeugt. Die erste Phase lässt sich wie folgt darstellen:
-\begin{lstlisting}[backgroundcolor=\color{grey}]
+\begin{lstlisting}
 		def keyScheduling(sessionKey=bytearray(), n=256):
     		# initialization
     		sBox = []
@@ -71,7 +71,7 @@ In der ersten Phase des RC4-Algorithmus, der key scheduling phase, wird eine ini
 Bei der key scheduling phase wird eine Substitutionsbox (S-Box) verwendet. Diese wird zu beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die S-Box wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der For-Schleife werden zwei Einträge der S-Box vertauscht um eine zufällige Permutation zu erzeugen. 
 
 Nachdem die key scheduling phase eine zufällige S-Box generiert hat, beginnt die zweite Phase des RC4-Algorithmus. In dieser Phase wird eine Zufallsfolge, auch Stromchiffre genannt, erstellt. Der Algorithmus dazu gestalltet sich wie folgt:
-\begin{lstlisting}[backgroundcolor=\color{grey}]
+\begin{lstlisting}
 		def pseudoRandomGenerator(sBox=bytearray(),n=256):
     		# initialization
     		i,j = 0,0
@@ -112,7 +112,7 @@ In diesem Abschnitt werden die verschiedenen Angriffe die wir in den Aufgaben 2 
 \subsubsection{Angriff in der simulierten Umgebung}
 %TODO das mit dem IV sollte noch festgehalten werden
 Wie bereits erwähnt, bestand ein Teil der Aufgaben darin, den Angriff von Klein auf selbst generierte Paare von Initialisierungsvektoren und Stromchiffren anzuwenden. Dazu wurde ein Package \grqq RC4\grqq\ erstellt, indem die Methoden für die key scheduling phase und den pseudo random generator enthalten waren. Außerdem beinhaltet das Package eine Methode mit dem Namen $fixed\_rc4(key, cipher\_length=4096, n=256)$.
-\begin{lstlisting}[backgroundcolor=\color{grey}]
+\begin{lstlisting}
 		def fixed_rc4(key, cipher_length=4096, n=256):
     		# Initial permutation
     		s_box = key_scheduling(key, n=n)
