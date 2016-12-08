@@ -8,7 +8,11 @@
 \usepackage{caption}
 \usepackage{color}
 \usepackage{amsmath}
-
+\usepackage[backend=bibtex]{biblatex}
+\usepackage{hyperref}
+% Bibliography
+\addbibresource{bibliography.bib}
+% Code snippet style
 \include{pythonColor}
 \lstset{language=python-color}
 \lstset{framexleftmargin=5pt, framextopmargin=5pt, framexbottommargin=5pt, frame=tb, framerule=0pt}
@@ -28,7 +32,7 @@
 \newpage
 
 \section{Einführung}
-Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Die erste Aufgabe bestand darin, sich in WEP und damit auch in RC4 einzuarbeiten. Hauptbestandteil für das Verständnis von WEP und RC4 waren die Artikel \glqq Attacks on the RC4 stream cipher\grqq, \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \ und \glqq Intercepting Mobile Communications: The Insecurity of 802.11\grqq.
+Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Die erste Aufgabe bestand darin, sich in WEP und damit auch in RC4 einzuarbeiten. Hauptbestandteil für das Verständnis von WEP und RC4 waren die Artikel \glqq Attacks on the RC4 stream cipher\grqq \cite{Kle08}, \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \cite{TWP07}\ und \glqq Intercepting Mobile Communications: The Insecurity of 802.11\grqq \cite{BGW01}.
 
 Anschließend sollte eine Test-Umgebung und der Angriff nach Klein implementiert werden. Diese Testumgebung war eine programmierte Simulation der RC4-Stromchiffre. Die Testumgebung wurde in Python programmiert und lieferte als Ergebnis paare aus Initialisierungsvektoren (IV) und Stromchiffren. Dass Ziel bei dem Angriff nach Klein war es, den Hauptschlüssel zu berechnen und somit die Verschlüsselung zu brechen. 
 
@@ -40,7 +44,7 @@ Das Protokoll besteht aus drei Abschnitten. Der erste Abschnitt dreht sich um di
 %TODO
 
 \section{Grundlagen der Verschlüsselung}
-Zuerst folgt eine Einführung in die Verschlüsselung die verwendet wird. Dazu unterteilt sich dieses Kapitel in zwei Abschnitte; wie ist die Funktionsweise der RC4-Stromchiffre und des WEP-Protokolls. Die hier verwendete Literatur waren die Artikel \glqq Attacks on the RC4 stream cipher\grqq, \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \ und \glqq Intercepting Mobile Communications: The Insecurity of 802.11\grqq. Zuerst folgt eine Erklärung zum Verfahren der RC4-Stromchiffre und im Anschluss folgt eine Erklärung zum WEP-Protokoll.
+Zuerst folgt eine Einführung in die Verschlüsselung die verwendet wird. Dazu unterteilt sich dieses Kapitel in zwei Abschnitte; wie ist die Funktionsweise der RC4-Stromchiffre und des WEP-Protokolls. Die hier verwendete Literatur waren die Artikel \glqq Attacks on the RC4 stream cipher\grqq \cite{Kle08}, \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \cite{TWP07}\ und \glqq Intercepting Mobile Communications: The Insecurity of 802.11\grqq \cite{BGW01}. Zuerst folgt eine Erklärung zum Verfahren der RC4-Stromchiffre und im Anschluss folgt eine Erklärung zum WEP-Protokoll.
 
 \subsection{RC4-Stromchiffre}
 Der Algorithmus zu RC4 wurde 1987 von Ron Rivest entwickelt und besteht aus zwei Teilen. Der erste Teil ist das \glqq key scheduling\grqq \ und der zweite Teil ist eine \glqq pseudo random generation\grqq. Der RC4-Algorithmus bekommt zwei Übergabeparameter. Der erste Parameter ist ein zufällig gewählter Initialisierungsvektor (IV). Beim IV handelt es sich um ein Feld mit Einträgen aus $\mathbb{Z}_n$ und $n \in \mathbb{N}$. Beim zweiten Parameter $k$ handelt es sich um den \glqq main key\grqq. Die Konkatenation von IV und \glqq main key\grqq \ bilden den session key. Der session key wird meist als ein ein Feld $K$ implementiert. Da in WEP der IV immer vorne an die verschlüsselte Nachricht angefügt wird, hat der session key folgende Form:
@@ -138,7 +142,7 @@ Zuerst wird über eine Nachricht $M$ eine Prüfsumme $c(M)$ gebildet. Anschließ
 
 Der letzte Schritt besteht darin die zufällige Bytefolge $RC4(v,k)$ und den Term $(M || c(M)$ mittels XOR zu verrechnen. Dadurch entsteht eine Vernamchiffre $C$ die nur bei Kenntnis von $v$ und $k$ (und letztendlich $RC4(v,k)$) entschlüsselt werden kann.
 
-Über das Netzwerk werden durch den Router Nachrichten verschickt, welche die Form $v || C$ besitzen. Der Initialisierungsvektor wird dabei vorne and die Vernamchiffre konkateniert. Da die Länge des Initialisierungsvektors $v$ bekannt ist, kann der Empfänger der Nachrichten diesen \glqq abschneiden\grqq und durch Kenntnis des main keys $k$ die Stromchiffre $RC4(v,k)$ erzeugen. Anschließend kann durch $RC4(v,k) \oplus C$ die Chiffre $C$ entschlüsselt werden.
+Über das Netzwerk werden durch den Router Nachrichten verschickt, welche die Form $v || C$ besitzen. Der Initialisierungsvektor wird dabei vorne and die Vernamchiffre konkateniert. Da die Länge des Initialisierungsvektors $v$ bekannt ist, kann der Empfänger der Nachrichten diesen \glqq abschneiden\grqq\ und durch Kenntnis des main keys $k$ die Stromchiffre $RC4(v,k)$ erzeugen. Anschließend kann durch $RC4(v,k) \oplus C$ die Chiffre $C$ entschlüsselt werden.
 
 Durch die Prüfsumme $c(M)$ ist der Empfänger außerdem in der Lage, die Integrität der eigentlichen Nachricht $M$ zu gewährleisten. 
 
@@ -289,4 +293,7 @@ def iv_and_stream_cipher_generator(n, rounds, iv_length, key_length, tuple_amoun
 
 \section{Fazit}
 % Verbesserungen ?
+
+\nocite{*}
+\printbibliography
 \end{document}
