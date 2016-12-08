@@ -20,22 +20,56 @@ while True:
 
     try:
         dns = DNS(request)
-        assert dns.opcode == 0, dns.opcode  # QUERY
-        assert dnsqtypes[dns[DNSQR].qtype] == 'A', dns[DNSQR].qtype
+#        assert dns.opcode == 0, dns.opcode  # QUERY
+#        assert dnsqtypes[dns[DNSQR].qtype] == 'A', dns[DNSQR].qtype
         query = dns[DNSQR].qname.decode('ascii') 
-        head, domain, tld, tail = query.rsplit('.', 3)
-        assert head == 'www' and domain == 'bank' and tld == 'com' and tail == ''
+#        head, domain, tld, tail = query.rsplit('.', 3)
 
-        rdata="12.34.56.78"
+#        print("__________________________________________")
+#        dns.show()
+#        print("__________________________________________")
 
-        response = DNS(
-            id=dns.id, ancount=1, qr=1,
-            an=DNSRR(rrname=str(query), type='A', rdata=rdata, ttl=1234))
-        print(repr(response))
+#        assert head == 'www' and domain == 'bank' and tld == 'com' and tail == ''
+
+        if dnsqtypes[dns[DNSQR].qtype] == 'A':
+            rdata="12.34.56.78"
+
+            response = DNS(
+                id=dns.id, ancount=1, qr=1, aa=0, ra=0, rd=0,
+                qdcount=1,
+                qd=dns.qd,
+                an=DNSRR(rrname=str(query), type='A', rdata=rdata, ttl=1234))
+        if dnsqtypes[dns[DNSQR].qtype] == 'MX':
+            dns.show()
+            rdata=query
+
+            response = DNS(
+                id=dns.id, ancount=1, qr=1, aa=0, ra=0, rd=0,
+                nscount=dns.nscount,
+                ns=dns.ns,
+                arcount=dns.arcount,
+                ar=dns.ar,
+                qdcount=dns.qdcount,
+                qd=dns.qd,
+                an=DNSRR(rrname=str(query), type='MX', rdata=rdata, ttl=1234))
+        else:
+            response = DNS(id=dns.id, ancount=0, rcode=3, aa=1, ra=0, rd=0,
+                nscount=dns.nscount,
+                ns=dns.ns,
+                arcount=dns.arcount,
+                ar=dns.ar,
+                qdcount=dns.qdcount,
+                qd=dns.qd)
+			#            print(dnsqtypes[dns[DNSQR].qtype])
+
+#        print("__________________________________________")
+#        response.show()
+#        print("__________________________________________")
+
+#        print(repr(response))
         sock.sendto(bytes(response), addr)
 
     except Exception as e:
         print('')
         print_exc()
         print('garbage from {!r}? data {!r}'.format(addr, request))
-        sock.sendto(DNS(id=dns.id, ancount=1, qr=1, an=DNSRR(type='NXDOMAIN')), addr)
