@@ -162,31 +162,36 @@ Es wird festgestellt, dass eine starke Korrelation zwischen den beobachtbaren un
 Genaue Formel steht auf Seite 5 Unten. (bitte noch einpflegen)
 
 \subsection{Angriff von Klein}
-
-In WEP-Protokoll haben SessionKeys die folgende Form: $main key || Initialisierungsvektor$. Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus.
-Die Basisversion des Angriffes
-
-Wir betrachten die Permutation in der Key-Scheduling-Phase:
-
-\begin{verbatim}
-
+Der Angriff von Klein nutzt nun die oben beschriebene Schwäche von RC4 aus. Wir betrachten die Permutation in der Key-Scheduling-Phase.\\
 Hier sieht man leicht, nach dem ersten Schritt gilt:
 
-j = 0+0+K[0] = K[0]  
-==> S[0] <-> S[K[0]] 
-\end{verbatim}
-So lässt sich die zweite Runde (mit WK 1 - 1/n) ebenfalls rekontruieren:
-\begin{verbatim}
-j = K[0] + 1 + K[1]  
-==> S[1] <-> S[ K[0] + 1 + K[1] ]  
+$ j = 0+0+K[0] = K[0] $\\
+$\Rightarrow S[0] \textit{ wird vertauscht mit }  S[K[0]] $\\
 
-K[0] + 1 + K[1] wird im Weiteren t genannt.
-\end{verbatim}
+So lässt sich die zweite Runde (mit Wahrscheinlichkeit $1 - (1/n)$ ebenfalls rekonstruieren:
 
-Auftretende Speziallfälle, wie zum Beispiel der Fall, dass k[0] =1 und k[1] = 0 gilt und somit t = 1 gilt sind unwahrscheinlich und werden nicht betrachtet. Wir wissen nun, dass für ein festes K[0] der Wert t und S[1] sich aus K[1] berechnen lassen. In den weiteren Schritten der Key-Sheduling-Phase wird S[1] nicht mehr geändert, sofern j nie den Wert 1 annimmt. Die Wahrscheinlickkeit, dass dies in einem Schritt dennoch passiert liegt bei $1 - (1/n)$ falls der SessionKey die Länge n hat. Sind alle Keybytes von einander unabhängig, folgt S[1] wird mit der Wahrscheinlichkeit $(1-(1/n))^{n-2} \approx 1/e$ nicht verändert.
-Nun wissen wir Folgendes: Wir wissen, dass der Wert von S[1] zu Beginn des RC4-PZG t ist. Wobei T mit hoher WK $(1/e)$ nur von K[0] und K[1] abhängt. Nun kann die Korrelation aus Kapitel 3 benutzt werden um t aus der beobachteten RC4-PZS zu erhalten. Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an.
-Zuerst wird i auf 1 gesetzt. So werden S[1] und S[j] getauscht. Nun enthält S[j] den interessanten Wert t. Nach Kapitel 3 wissen wir: S[j] = 1 - S[k] mod n mit Wahrscheinlichkeit: 2/n Alles zusammen haben wir nun: $R( t = 1 - S[k] mod n) = [...] 1.36 /n$
-Unser Angriff hat nun folgende Form: Für verschiedene Initialisierungsverktoren (n-Stück) können wir die ersten Bytes $x_i$ mit $1 <= i <= n$ beobachten und $t_i = 1 - x_i$ ausrechnen. Wie Wk, das $t_i$ den richtigen Wert annimmt liegt bei $1.36/n$ alle anderen Werte haben eine WK von unter $1/n$ Wenn die Anzahl der Session groß ist, kann man den Wert mit hoher WK bestimmen.
+$ j = K[0] + 1 + K[1]$\\  
+$\Rightarrow S[1] \textit{ wird vertauscht mit } S[ K[0] + 1 + K[1] ] $ ( $K[0] + 1 + K[1]$ ) wird im Weiteren mit  $t$ bezeichnet.\\
+
+Wir wissen nun, dass für ein festes $K[0]$ der Wert $t$ und $S[1]$ sich aus $K[1]$ berechnen lassen.
+In den weiteren Schritten der Key-Sheduling-Phase wird $S[1]$ nicht mehr geändert, sofern $j$ nie den Wert 1 annimmt.
+Die Wahrscheinlickkeit, dass dies in einem Schritt dennoch passiert liegt bei $1 - (1/n)$ falls der SessionKey die Länge n hat.
+Sind alle Keybytes von einander unabhängig, folgt $S[1]$ wird mit der Wahrscheinlichkeit $(1-(1/n))^{n-2} \approx 1/e$ nicht verändert.\\
+Nun wissen wir Folgendes:\\
+Der Wert von $S[1]$ ist zu Beginn des RC4-PZG $t$. Wobei $t$ mit Wahrscheinlichkeit $(1/e)$ nur von $K[0]$ und $K[1]$ abhängt. Somit kann das in der Arbeit von Klein hergeleitete Theorem 1 \cite{Kle08} benutzt werden um $t$ aus der beobachteten RC4-PZS zu erhalten.\\
+Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an:\\
+Zuerst wird $i$ auf $1$ gesetzt. Daher werden $S[1]$ und $S[j]$ getauscht. Nun enthält $S[j]$ den interessanten Wert t.\\
+Nach Theorem 1 folgt: $S[j] = 1 - S[k] mod n$ mit Wahrscheinlichkeit $2/n$.\\
+Nutzt man diese Aussagen, kommt man zu folgender Aproximation für t:\\\\
+$Prob( t = 1 - S[k] mod n) \approx \dfrac{1}{e} * \dfrac{2}{n} + ( 1- \dfrac{1}{e}) * \dfrac{n-2}{n(n-1)} \approx 1.36/n$\\\\
+Unser Angriff hat nun folgende Form:\\
+Für verschiedene Initialisierungsverktoren (n-Stück) können wir die ersten Bytes $x_i$ mit $1 <= i <= n$ beobachten und $t_i = 1 - x_i$ ausrechnen. Wie Wk, das $t_i$ den richtigen Wert annimmt liegt bei $1.36/n$ alle anderen Werte haben eine WK von unter $1/n$. Wenn die Anzahl der Sessions groß ist, kann man das Schlüsselbyte an der ersten Stelle mit hoher WK bestimmen.\\
+Die folgenden Schlüsselbytes können nun iterativ berechnet werden. Kennt man die Schlüsselbytes bis zur Stelle $i\ ( mit\  i < |Key|)$, so kennt man auch den internen Zustand der S-Box bis zu dieser Stelle und den Index $j$ im Schritt $i - 1$ des RC4-Key-Setup-Algorithmus. \\
+Die weiteren Schlüsselbytes sind folglich berechenbar durch:\\\\\
+$S^{-1}_{i-1}[i-X[i-1]] - (j_{i-1}+S_{i-1}[i]) \ mod \ n = \begin{cases} K[i], mit \ Prob \approx 1.36/e \\ \alpha \neq K[i], mit \ Prob < 1/n \\\end{cases}$ 
+
+\subsubsection{Anwendung auf WEP}
+In WEP-Protokoll haben die Pakete die folgende Form: $Initialisierungsvektor || Chiffreschlüsselstrom $. Wir haben den Angriff von Klein erfolgreich auf WEP40 und WEP104 angewand. Bei beiden Protokollen haben die Initialisierungsvektor eine Länge von 24 Bit (= 3 Byte). Aus diesem Grunde ist es nicht nötig die ersten 3 Bytes des Hauptschlüssels mit der Methode von Klein zu berechnen. Es kann direkt mit der iterativen Berechnung der Schlüsselbytes begonnen werden. Mithilfe von ARP reinjektion haben wir circa 35.000 IV und Chiffreschlüsselstrom generiert. Die ersten 16 Bytes eines ARP-Paketes sind immer gleich. Da der erzeugte Schlüsselstrom mit dem Klartext lediglich über eine XOR-Operation zur Stromchiffre verknüpft wird, erhalten wir durch die erneute Anwendung der XOR-Opertion den erzeugten Schlüsselstrom. Hat man nun genug Paare gesammelt, lässt sich mithilfe des zuvor beschriebenen Angriffes der Hauptschlüssel berechnen. Bereits nach 35.000 untersuchten ARP-Paketen konnten wir zuverlässig den Hauptschlüssel für WEP40 errechnen. Für WEP104 benötigten wir für eine zuverlässige Aussage ca. 45.000 Pakete. Die Laufzeit betrug hierbei im Mittel 5 Sekunden für WEP40 und 60Sekunden für WEP104. Beide Werte berücksichtigen nicht das Sammeln von ARP-Paketen. Im Abschnitt \ref{subsec:vergleich} werden wir noch genauer auf die Lauzeit eingehen.
 
 \paragraph{Permutieren der S-Box}\ 
 %Approximate the permutation by simulating the first i steps of the key scheduling of RC4
@@ -277,23 +282,26 @@ def iv_and_stream_cipher_generator(n, rounds, iv_length, key_length, tuple_amoun
     return iv_stream_set, main_key
 \end{lstlisting}
 \subsubsection{Angriff in realer Umgebung}
+
 \paragraph{ARP-Pakete generieren}
 
 \subsection{Verbesserungen des Angriffs}
 % Parallel Berechnung der key bytes, durch Umformulierung...
 
 \subsection{Vergleich der Angriffe}
+\label{subsec:vergleich}
 % Siehe 60 sekunden paper
 
 \subsubsection{Versuchsanordnung}
 % Skript für cip pool, auf simulierten daten
+
 
 \subsubsection{Ergebnis}
 % Diagramme aus R
 
 \section{Fazit}
 % Verbesserungen ?
-
+\newpage
 \nocite{*}
 \printbibliography
 \end{document}
