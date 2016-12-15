@@ -125,14 +125,41 @@ def get_fraction_of_votes(votes, j):
 
 
 def handle_strong_key_bytes(i, key, n=256):
+    corrected_bytes = []
     arithmetic_sum = 0
-    for j in range(i - 1):
-        arithmetic_sum += key[j] + 3 + j
-    return (-3 - i - arithmetic_sum) % n
+    corrected_bytes.append((-3 - i - arithmetic_sum) % n)
+    for l in range(i):
+        result = 0
+        for j in range(l, i):
+            result += key[j] + 3 + j
+        corrected_bytes.append((-3 - i - result) % n)
+    return corrected_bytes
+
+
+def check_strong_key_bytes(key):
+    key_p = dict()
+    for k, v in key.items():
+        key_p.update({k: list(map(lambda x: (x, x / tuple_amount), v))})
+    key_prob = []
+    for k, b in key_p.items():
+        err_strong = get_err_strong_at_pos(b)
+        err_normal = get_err_normal_at_pos(k, b)
+        key_prob.append(err_strong - err_normal)
+    return key_prob
+
+
+def contains_strong_key_byte(main_key, n=256):
+    strong_bytes = []
+    for l in range(len(main_key)):
+        arithmetic_sum = main_key[l] + 3 + l
+        for k in range(len(main_key), l):
+            arithmetic_sum += main_key[k] + 3 + k
+        strong_bytes.append(arithmetic_sum % n == 0)  # bytearray(b'\xa7\x83xS\xeb\xe4OJ\xfb1\x01\xb8\xf0')
+    return strong_bytes
 
 
 @log_timing()
-def get_key_vote_dict(key_length_bytes, tuple_amount):
+def get_key_vote_dict(key_length_bytes):
     # Initialize dict
     key = dict()
     for i in range(key_length_bytes):
@@ -143,18 +170,6 @@ def get_key_vote_dict(key_length_bytes, tuple_amount):
             key_votes = key.get(index)
             key_votes.append(key_s)
             key.update({index: key_votes})
-
-    #key_p = dict()
-    #for k, v in key.items():
-    #    key_p.update({k: list(map(lambda x: (x, x / tuple_amount), v))})
-    # test if err_strong is smaller than err_normal
-    #for b in list(key_p.values()):
-    #    err_strong = get_err_strong_at_pos(b)
-    #    err_normal = get_err_normal_at_pos(1, b)
-    #    threshold = 3.109642788418655e-05
-
-     #   print(err_strong < err_normal, err_strong - err_normal, (err_strong - err_normal) < threshold)
-
     return key
 
 
@@ -174,20 +189,27 @@ def get_most_common_sorted(key_vote_dict, tuple_amount, candidate_amount):
     return most_common
 
 
-def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
+def combine_key_votes(key_vote_dict, tuple_amount, key_length, candidate_amount=3, threshold=0):
     """
 
     :param key_vote_dict:
     :param candidate_amount: Big values may cause high runtime
     :return:
     """
-    most_common = get_most_common_sorted(key_vote_dict, tuple_amount, candidate_amount)
-    possible_key_set = []
-    # Initialize with only the most common bytes
-    for i in range(len(key_vote_dict)):
-        key_byte_and_p = list(most_common.values())[i][0]
-        possible_key_set.append([key_byte_and_p])
+    # Take only the top most voted key bytes
+    most_common, possible_key_set, corrected = get_most_voted_key(candidate_amount, key_vote_dict, tuple_amount, {})
 
+    # Handle strong key bytes iteratively, this only works for threshold=0 if enough samples are available (>300000)
+    while correct_key_bytes(key_vote_dict, possible_key_set, threshold, corrected):
+        if key_length - 1 in corrected:
+            break
+    most_common, possible_key_set, corrected = get_most_voted_key(candidate_amount, key_vote_dict, tuple_amount,
+                                                                  corrected)
+    print('after loop')
+    print(corrected)
+    print(possible_key_set)
+    print(most_common)
+    # Key combination process
     while True:
         old_set = list()
         # Calculate possible key combinations
@@ -196,6 +218,7 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         # Exclude already tested keys
         cartesian_product_set_of_tuples = set(cartesian_product_set_of_tuples) - set(old_set)
         # Return list of keys
+        print(cartesian_product_set_of_tuples)
         yield cartesian_product_set_of_tuples
 
         old_set += cartesian_product_set_of_tuples
@@ -227,6 +250,56 @@ def combine_key_votes(key_vote_dict, tuple_amount, candidate_amount=3):
         possible_key_set[candidate_position].append(candidate_without_delta)
 
 
+def get_most_voted_key(candidate_amount, key_vote_dict, tuple_amount, bytes_to_correct):
+    most_common = get_most_common_sorted(key_vote_dict, tuple_amount, candidate_amount)
+
+    # Replace corrected key bytes at position
+    for key, value in most_common.items():
+        corrected_bytes_at_position = bytes_to_correct.get(key)
+        if corrected_bytes_at_position:
+            most_common.update({key: corrected_bytes_at_position})
+
+    possible_key_set = []
+    # Initialize with only the most common bytes
+    for i in range(len(key_vote_dict)):
+        key_byte_and_p = list(most_common.values())[i][0]
+        possible_key_set.append([key_byte_and_p])
+
+    return most_common, possible_key_set, bytes_to_correct
+
+
+def correct_key_bytes(key_vote_dict, possible_key_set, threshold, corrected, n=256):
+    # Check for strong key bytes and eventually correct them
+
+    # TODO: refactor this to function
+    calculated_key_bytes = [possible_key_set[0][0][0]]
+    for i in range(1, len(possible_key_set)):
+        calculated_key_bytes.append((possible_key_set[i][0][0] - possible_key_set[i - 1][0][0]) % 256)
+    main_key = bytearray(calculated_key_bytes)
+
+    err_delta_at_positions = check_strong_key_bytes(key_vote_dict)
+    # (err_strong - err_normal) < threshold or err_strong < err_normal
+    strong_byte_at_position = list(map(lambda x: x < threshold, err_delta_at_positions))
+    if True in strong_byte_at_position:
+        bytes_to_correct = []
+        position_to_correct = 0
+        for index, strong in enumerate(strong_byte_at_position):
+            if index not in corrected and strong:
+                bytes_to_correct = handle_strong_key_bytes(index, main_key)
+                position_to_correct = index
+                break
+        tmp = corrected.get(position_to_correct)
+        if not tmp:
+            tmp = []
+        for byte in bytes_to_correct:
+            byte = (main_key[max(0, position_to_correct - 1)] + byte) % n
+            tmp.append((byte, 1))
+        corrected.update({position_to_correct: tmp})
+        return True
+
+    return False
+
+
 def read_cap_file(file_path, tuple_amount=50000):
     mypcap = PCAP(file_path)
     pcaph = mypcap.header()
@@ -248,21 +321,26 @@ def read_cap_file(file_path, tuple_amount=50000):
 
 
 if __name__ == '__main__':
-    key_length_bytes = 13
-    tuple_amount = 120000
+    key_length_bytes = 5
+    tuple_amount = 500000
     # Info
     print("Using key length of {} bytes".format(key_length_bytes))
     print("Generating Keystream")
     # Retrieve sample set of bytearray tuples
-    #iv_stream_pair, main_key = iv_and_stream_cipher_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
-    iv_stream_pair_str_1 = read_cap_file("../Aufgabe_2_3/wep-128_1min.cap", tuple_amount=tuple_amount)
-    iv_stream_pair_str_2 = read_cap_file("../Aufgabe_2_3/wep-128_2min.cap", tuple_amount=tuple_amount)
-    iv_stream_pair_str = iv_stream_pair_str_1.union(iv_stream_pair_str_2)
-    iv_stream_pair = list(map(lambda x:(b64decode(x[0]),b64decode(x[1])), iv_stream_pair_str))
+    iv_stream_pair_str, main_key = iv_and_stream_cipher_generator(key_length=key_length_bytes,
+                                                                  tuple_amount=tuple_amount, cache=True)
+    # iv_stream_pair_str_1 = read_cap_file("../Aufgabe_2_3/wep-128_1min.cap", tuple_amount=tuple_amount)
+    # iv_stream_pair_str_2 = read_cap_file("../Aufgabe_2_3/wep-128_2min.cap", tuple_amount=tuple_amount)
+    # iv_stream_pair_str = iv_stream_pair_str_1.union(iv_stream_pair_str_2)
+    # iv_stream_pair = list(map(lambda x: (b64decode(x[0]), b64decode(x[1])), iv_stream_pair_str))
+    iv_stream_pair = list(map(lambda x: (b64decode(x[0]), b64decode(x[1])), iv_stream_pair_str))
     print("Start Hacking")
+    print(main_key)
     tuple_amount = min(len(iv_stream_pair), tuple_amount)
     print("Using {} tuples".format(tuple_amount))
-    key = get_key_vote_dict(key_length_bytes, tuple_amount)
-    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
+
+    key = get_key_vote_dict(key_length_bytes)
+
+    key_set_iterator = combine_key_votes(key, tuple_amount, key_length_bytes)
 
     test_keys(key_set_iterator, (iv_stream_pair[0][0], iv_stream_pair[0][1]))

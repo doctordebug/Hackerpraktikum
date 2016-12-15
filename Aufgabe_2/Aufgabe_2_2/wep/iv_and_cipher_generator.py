@@ -1,4 +1,5 @@
 import os
+from base64 import b64encode
 from pathlib import Path
 
 from Aufgabe_2.utils import log_timing, log
@@ -27,8 +28,9 @@ def iv_and_stream_cipher_generator(n=256, rounds=2, iv_length=3, key_length=5, t
 
     log("Proceeding with: length={}, amount={}, rounds={}, n={}".format(key_length, tuple_amount, rounds, n))
 
-    # Generate random key
-    main_key = bytearray(os.urandom(key_length))
+    # Generate random key #TODO: remove strong key byte
+    main_key = bytearray(os.urandom(key_length-1))
+    main_key.extend(bytes([249]))
     log("Using main key: {}".format(main_key), level=0)
 
     iv_stream_set = []
@@ -36,7 +38,7 @@ def iv_and_stream_cipher_generator(n=256, rounds=2, iv_length=3, key_length=5, t
         # Generate random iv
         iv = bytearray(os.urandom(iv_length))
         stream_cipher = fixed_rc4(iv, main_key, cipher_length=rounds * n, n=n)
-        iv_stream_set.append((iv, stream_cipher))
+        iv_stream_set.append((b64encode(iv), b64encode(stream_cipher)))
 
     if cache:
         export_cache(iv_stream_set, main_key, key_file_name, data_file_name)
