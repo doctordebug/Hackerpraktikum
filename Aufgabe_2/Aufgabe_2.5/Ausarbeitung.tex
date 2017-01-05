@@ -293,7 +293,7 @@ def iv_and_stream_cipher_generator(n, rounds, iv_length, key_length, tuple_amoun
 \subsection{Verbesserungen des Angriffs}
 \paragraph{Überblick}
 Folgende Verbesserungen gehen aus dem Paper \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \cite{TWP07}\ hervor.
-In Klein's Angriff werden die Schlüsselbytes iterativ berechnet, das bedeutet die Berechnung des Bytes $K[i]$ ist abhängig von seinen Vorgängern $K[0] \cdot\ \cdot\ \cdot\ K[i-1]$. Dies ist nicht optimal, denn die Paare aus Initialisierungsvektor und Stromchiffre müssen gespeichert werden und das korrigieren potenzieller Fehler ist teuer \cite[Kapitel 4]{TWP07}.\\ Die von Tews et al. vorgestellte Methode verwendet eine parallelisierte Berechnung von sogenannten \glqq votes\grqq\ für Schlüsselbytes und einem anschließenden \glqq key ranking\grqq. Diese ist wesentlich schneller und fehlertoleranter, da sie nicht auf den Werten vorangegangener Schlüsselbytes beruht.\\Ihr Ansatz macht Annahmen über den Zustand der S-Box und basiert auf einer Umformung des Angriffs von Klein. Dieser erlaubt die Berechnung von $K[i]$ ohne zusätzliches Wissen über die Werte $K[0] \cdot\ \cdot\ \cdot\ K[i-1]$. Die Annahme führt jedoch dazu, dass besonders geformte Schlüsselbytes, sogenannte \glqq strong key bytes\grqq\ im Schlüssel auftreten können. Handelt es sich um ein starkes Schlüsselbyte muss dieses erkannt und korrigiert werden. Sollte der Schlüssel aus vielen starken Schlüsselbytes bestehen, bei WEP-104 12 Bytes, wird die Methode mit Schlüsselranking ineffizient und muss ohne Schlüsselranking ausgeführt werden.
+In Klein's Angriff werden die Schlüsselbytes iterativ berechnet, das bedeutet die Berechnung des Bytes $K[i]$ ist abhängig von seinen Vorgängern $K[0] \cdot\ \cdot\ \cdot\ K[i-1]$. Dies ist nicht optimal, denn die Paare aus Initialisierungsvektor und Stromchiffre müssen gespeichert werden und das korrigieren potenzieller Fehler ist teuer \cite[Kapitel 4]{TWP07}.\\ Die von Tews et al. vorgestellte Methode verwendet eine parallelisierte Berechnung von sogenannten \glqq votes\grqq\ für Schlüsselbytes und einem anschließenden \glqq key ranking\grqq. Diese ist wesentlich schneller und fehlertoleranter, da sie nicht auf den Werten vorangegangener Schlüsselbytes beruht.\\Ihr Ansatz macht Annahmen über den Zustand der S-Box und basiert auf einer Umformung des Angriffs von Klein. Dieser erlaubt die Berechnung von $K[i]$ ohne zusätzliches Wissen über die Werte $K[0] \cdot\ \cdot\ \cdot\ K[i-1]$. Die Annahme führt jedoch dazu, dass besonders geformte Schlüsselbytes, sogenannte \glqq strong key bytes\grqq\ im Schlüssel auftreten können. Handelt es sich um ein starkes Schlüsselbyte muss dieses erkannt und korrigiert werden. Sollte der Schlüssel aus vielen starken Schlüsselbytes bestehen, bei WEP-104 z.B. 12 Bytes, wird die Methode mit Schlüsselranking ineffizient und muss ohne Schlüsselranking ausgeführt werden.
 \paragraph{Parallelisierte Berechnung}\label{ssec:p2}
 Aus den von Klein postulierten Formeln zur iterativen Berechnung von Schlüsselbytes \ref{ssec:klein}, wird durch eine Reihe von Umformungen \cite[Kapitel 4, Formeln (3)-(5)]{TWP07} die folgende Formel gewonnen. Rk bezeichne den Hauptschlüssel aus IV || Rk.
 \begin{center}
@@ -301,24 +301,33 @@ Aus den von Klein postulierten Formeln zur iterativen Berechnung von Schlüsselb
 \\\vspace{0.2em}
 \[\sigma_i = \sum_{l=3}^{3+i} K[l] = \sum_{l=0}^{i} Rk[l]\]
 \end{center}
+\vspace{1em}
+Diese Umformung basiert nur noch auf den folgenden Angaben:\\
+\begin{itemize}
+\item $S_3$ und $S_3^{-1}$ (Die normale und invertierte S-Box, permutiert bis zur dritten Stelle mit Hilfe der Schlüsselbytes K[0] bis K[2] bzw. dem IV[0] bis IV[2])
+\item X (die Stromchiffre)
+\item Indizes i (Position des zu berechnenden Schlüsselbytes) und j (Laufindex aus der Permutation der S-Box)
+\end{itemize}
 \vspace{0.5em}
-Hier werden nur noch $ S_3$ und $S_3^{-1}$ (die normale und invertierte S-Box, permutiert bis zur dritten Stelle mit Hilfe der Schlüsselbytes K[0] bis K[2] bzw. dem IV[0] bis IV[2]), X (die Stromchiffre) und die Indizes i (Position des zu berechnenden Schlüsselbytes) und j (Laufindex aus der Permutation der S-Box) benötigt.\\
 Die Wahrscheinlichkeit, dass $\sigma_i$ mit dem berechneten Wert übereinstimmt und das richtige Schlüsselbyte liefert liegt bei 0.5342\% \cite[Kapitel 4, Formel (6)]{TWP07}.\\
-Die Formel wird dazu verwendet um \glqq votes\grqq\ für alle Positionen im Schlüssel zu errechnen. Können genügend \glqq votes\grqq\ gesammelt werden beziehungsweise stehen genug Paare aus IV und Stromchiffre zur Verfügung, ergibt sich ein Kandidat für den Schlüssel indem man die am häufigsten auftretenden \glqq votes\grqq\ wie folgt auswertet:
+Die Formel wird dazu verwendet um \glqq votes\grqq\ für alle Positionen im Schlüssel zu errechnen. Können genügend \glqq votes\grqq\ gesammelt werden, d.h. es stehen genug Paare aus IV und Stromchiffre zur Verfügung, ergibt sich ein Kandidat für den Schlüssel indem man die am häufigsten auftretenden \glqq votes\grqq\ wie folgt auswertet:
 \begin{center}
 $Rk[i] = \begin{cases}\hspace{0.3em} \sigma_0 \hspace{3.5em}, f\ddot{u}r\ i=0 \\ \hspace{0.3em}\sigma_i - \sigma_{i-1}\hspace{0.5em}, sonst \\\end{cases}$
 \end{center}
 Die Differenz muss gebildet werden, da die umgeformte Gleichung \ref{ssec:p2} eine Schätzung für die Summe der Schlüsselbytes bis zur Position i ergibt.\\
-Bei wenigen Paaren aus IV und Stromchiffre ist der richtige Wert für $\sigma_i$ nicht immer der häufigste unter den \glqq votes\grqq , ist aber meist unter den populärsten Einträgen zu finden. Dies erfordert ein Verfahren zur Kombination von möglichen Schlüsseln aus der Abbildung von Schlüsselpositionen zu \glqq votes\grqq .
+Bei wenigen Paaren aus IV und Stromchiffre ist der richtige Wert für $\sigma_i$ nicht immer der am häufigsten auftretende Wert unter den \glqq votes\grqq , ist aber meist unter den populärsten Einträgen zu finden. Dies erfordert ein Verfahren zur Kombination von möglichen Schlüsseln aus der zuvor gewonnenen Abbildung von Schlüsselpositionen zu \glqq votes\grqq .
 \paragraph{Key Ranking}
-Das \glqq key ranking\grqq\ verwendet eine Abbildung von Schlüsselbytes K[i] zu Mengen von Schlüsselbytes M[i]. Aus dieser Abbildung werden mögliche Schlüssel kombiniert und an eine Testfunktion weitergegeben. Diese validiert die Korrektheit des möglichen Schlüssels, indem sie RC4 mit IV und dem Kandidatenschlüssel ausführt und die Ausgabe mit der Stromchiffre vergleicht.\\
-Die Abbildung wird einmal mit dem populärste Schlüssel initialisiert.
+Das \glqq key ranking\grqq\ verwendet eine Abbildung von Schlüsselbytes K[i] zu Mengen von Schlüsselbytes M[i]. Aus dieser Abbildung werden mögliche Schlüssel kombiniert und an eine Testfunktion weitergegeben. Diese validiert die Korrektheit des möglichen Schlüssels, indem sie RC4 mit IV und dem Kandidatenschlüssel ausführt und die Ausgabe mit der Stromchiffre vergleicht.
+\vspace{0.5em}
+\\Die Menge V bezeichne eine Abbildung von Schlüsselpositionen auf Mengen von Tupeln aus \glqq vote\grqq\ und Prozent ihres Auftretens (v, p). Sei T eine Menge von Tupeln (v, p), dann sei
+\[ \max(T) := x_v,\ mit\ x \in T \wedge x_p = \max (\{p | x \in T \wedge p=x_p\}) \]
+Die Abbildung wird einmal mit dem populärste Schlüssel initialisiert.\\
 \begin{center}
-$ M[i] \leftarrow \sigma_i,\ \sigma_i$ = Byte mit den meisten votes
+$ M[i] \leftarrow \sigma_i\ ,mit\ \sigma_i = max(V[i])$
 \end{center}
-Und Fügt in jedem weiteren Schritt der Menge M[i] ein Byte hinzu, welches den geringsten Abstand zum am häufigsten gewählten Byte in der jeweiligen Menge besitzt.
+In jedem weiteren Schritt wird einer der Mengen M[i] ein Byte hinzugefügt, welches den geringsten Abstand zum am häufigsten gewählten Byte in der jeweiligen Menge besitzt.
 \begin{center}
-$\sigma_i = \sigma_i \notin M[i]\ \wedge$ min(Differenz in votes zu Byte mit den meisten votes)
+\[ \sigma_i = \max_{1 \leq i \leq |K|} (\{x | x \in V[i] \wedge x_v \notin M[i]\}) \]
 \\\vspace{0.8em}
 $ M[i] \leftarrow M[i] \cup \sigma_i$
 \end{center}
