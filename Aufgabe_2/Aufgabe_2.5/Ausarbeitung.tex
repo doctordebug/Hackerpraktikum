@@ -8,6 +8,7 @@
 \usepackage{caption}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \usepackage[backend=bibtex]{biblatex}
 \usepackage{hyperref}
 % Bibliography
@@ -326,18 +327,140 @@ def calculate_key_byte_vote(i, key_stream, s_box_3, s_box_3_invert, j_3, n):
 
 \subsection{Vergleich der Angriffe}
 \label{subsec:vergleich}
-% Siehe 60 sekunden paper
+Wir wollen nun den Geschwindigkeitsvorteil des verbesserten Klein-Angriffes messen. Dazu haben wir mehrere Angriffe durch geführt. Der verbesserte Angriff ist so effektiv, dass sich zwischen dem Angriff auf WEP40 und WEP104 keinen erwähnenswerten Performancevorteil messen lässt. Daher haben wir uns dazu entschieden den Standartangriff von klein auf WEP40 und den verbesserten Angriff auf WEP104 zu vergeleichen.
+
 
 \subsubsection{Versuchsanordnung}
 % Skript für cip pool, auf simulierten daten
+Wir haben unser Angriff auf simulierten Capturedaten getestet. Im ersten Schritt generiert der Algorithmuss aus Aufgabe 2.1. IV und Schlüsselstrom Paare. Anschließend werden die beiden Angriffe auf 30000, 40000, 50000, 60000, 70000 und 80000 generierten Paaren simuliert. Für uns sind 2 Parameter interessant: 
+\begin{itemize}
+	\item Dauer der Angriffe
+	\item Erfolgsquote der Angriffe
+\end{itemize}
 
-
+Aus Zeitgründen haben wir den Angriff auf allen Rechnern des Cip-Pools gleichzeitig mit jeweils 4 Instanzen Laufen lassen.
+Hier bei handelt es sich um Rechner mit folgender Hardware Konfiguration:
+\\
+\textit{Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz, 8 GB RAM}
+\\\\
+Es wurden für den Standart-Angriff von Klein gesamt 6949 Tests auf WEP40 ausgeführt. Für den verbesserten Angriff wurden 4074 Tupel für WEP104 erzeugt. 
+Die Auswertung der Tests erfolgt im kommenden Kapitel.
 \subsubsection{Ergebnis}
-% Diagramme aus R
+
+\textbf{Erfolgswahrscheinlichkeit}
+
+
+
+\begin{tabular}{|l|r|r|}
+	\hline
+	 & Tupelanzahl WEP40 & Tupelanzahl WEP104 \\
+	\hline
+	gesamt & 6949 & 4074 \\
+	\hline
+	erfolgreich & 5156 & 3103\\
+	\hline
+	Erfolgswahrscheinlichkeit in Prozent & $~74.1977$ & $~76.1659$\\
+	\hline
+\end{tabular}
+\\\\
+Wir sind zu dem Ergebnis gekommen, dass sich zwischen den beiden Angriffen keinen messbaren Unterschied ausmachen lässt.
+
+\textbf{Auswertung für Angriffe auf WEP40:}
+
+WEP40 Angriff nach Klein:\\
+
+Grafik im Anhang auf Seite \pageref{fig:wep40_suc}
+
+
+Dauer für WEP 40 mit Klein-Angriff alle Zeitangaben in Millisekunden:\\
+
+\begin{tabular}{|l|l|l|l|l|l|}
+	\hline
+	Tupelanzahl & min      	& max 		& mean 		&   median 	&      std \\
+	\hline
+	30000 		& 12565		& 127392 	& 30141.81  &	19825 	& 21948.71 \\
+	\hline
+	40000 		& 16736 	& 170615 	& 40563.53  & 	25880	& 29431.57 \\
+	\hline
+	50000		& 20814 	& 285553 	& 52353.96 	& 	33912 	& 38180.82\\ 
+	\hline
+	60000 		& 24880		& 364119 	& 66030.32 	& 	41173 	& 52388.63\\ 
+	\hline
+	70000 		& 29200		& 429811	& 77661.14	&  	48819 	& 61471.03\\ 
+	\hline
+	80000 		& 33347 	& 478594	& 88949.75	&	55654	& 72098.78\\
+	\hline
+	
+\end{tabular}
+\\\\
+\textbf{WEP104 Angriff nach Klein:}\\
+Grafik im Anhang auf Seite \pageref{fig:wep100_suc}
+
+Dauer für WEP 104 mit dem verbesserten Klein-Angriff alle Zeitangaben in Millisekunden:\\
+
+
+\begin{tabular}{|l|l|l|l|l|l|}
+	\hline
+	Tupelanzahl & min      	& max 		& mean 		&   median 	&      std \\
+	\hline
+	30000 		& 820.220	& 8941.250 	& 2312.003  &	1664.270& 2045.727\\
+	\hline
+	40000 		& 1089.100 	& 11155.740 & 2716.104  & 	2206.850& 1808.624\\
+	\hline
+	50000		& 1368.000 	& 9564.290 	& 3371.985 	& 	2775.850& 2107.964\\ 
+	\hline
+	60000 		& 1630.390	& 11303.030 & 3923.691 	& 	3304.180& 2450.339\\ 
+	\hline
+	70000 		& 1871.970	& 21720.230	& 5809.924	&  	3695.595& 5458.055\\ 
+	\hline
+	80000 		& 2065.500 	& 33532.990	& 6577.360	&	4201.600& 6597.854\\
+	\hline
+	
+\end{tabular}
+\\\\
+
 
 \section{Fazit}
-% Verbesserungen ?
+
+Durchschnittlicher Geschwindigkeitsvorteil\\
+\begin{tabular}{|l|l|l|l|}
+	\hline
+	Tupelanzahl & Klein verbessert   	& Klein  & Geschwingdigkeitsvorteil	 \\
+			\hline
+		30000& 2312.003& 30141.81 & $1303\%$\\
+			\hline
+		40000& 2716.104& 40563.53 & $1493\%$\\
+			\hline
+		50000& 3371.985& 52353.96 & $1552\%$\\
+			\hline
+		60000& 3923.691& 66030.32 & $1683\%$\\
+			\hline
+		70000& 5809.924& 77661.14 & $1337\%$\\
+			\hline
+		80000& 6577.360& 88949.75 & $1352\%$\\
+	\hline
+	
+\end{tabular}
+
+
+
+\section{Anhang}
+
+\includegraphics[width=\textwidth]{img/wep40_erfolg.png}
+\label{fig:wep40_suc}
 \newpage
+
+\includegraphics[width=\textwidth]{img/WEP_104_erfolgreich.png}
+\label{fig:wep100_suc}
+\newpage
+
+\includegraphics[width=\textwidth]{img/vergleich.png}
+\label{fig:vergleich}
+\\
+Angriff von Klein in blau, Verbesserter Angriff in rot
+
+\newpage
+
 \nocite{*}
 \printbibliography
 \end{document}
