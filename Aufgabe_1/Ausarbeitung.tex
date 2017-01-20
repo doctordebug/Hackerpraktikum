@@ -9,6 +9,7 @@
 
 \author{Lukas Jung, Marc Narres-Schulz, Oliver Sänger, Tobias Zeimetz}
 \title{Teil I: \\Rechtliche Rahmenbedingungen}
+
 \begin{document}
 \maketitle
 \newpage
@@ -127,7 +128,54 @@ Dort heißt es, dass die Gesetze des Landes und Bundes die Rahmenbedingungen fü
 Die besonderen Bedingungen gehen aus der Teilgrundordnung der Universität Trier, Der Benutzerordnung der CIP- und Poolrechner der Abteilung Informatik, sowie der Dienstanweisung über den Datenschutz und die Datensicherung an der Universität Trier hervor.
 
 \section*{Aufgabe 2}
-\subsection*{Rechtlicher Schutz von Funknetzwerken gegenüber der Nutzung Dritter}
-\subsection*{Abhören von verschlüsselten Funkdaten}
+Funknetzwerke, so genannte WLANs, sind nicht nur bei Unternehmen beliebt, auch immer mehr Haushalte nutzen diese und sparen sich u.a. die Verlegung von notwendigen Kabeln. Mittlerweile gibt es viele Haushaltsgeräte eine solche Funkverbindung verwenden um Daten auszutauschen. Auch Smartphones oder Tabletts verwenden diese Technik. Der folgende Abschnitt beschäftigt sich mit dem rechtlichen Schutz des Funknetzes und was für Konsequenzen eine nicht gesicherte Verbindung haben kann.
 
+\subsection*{Rechtlicher Schutz von Funknetzwerken gegenüber der Nutzung Dritter}
+WLAN unterliegen gesetzlichen Regelungen. WLAN-Angebote müssen zahlreiche Vorgaben erfüllen. Hierbei regelt das Telekommunikationsgesetz (TKG) welche Voraussetzungen gegeben sein müssen, um WLAN-Netze überhaupt anbieten zu dürfen. Auch für den Beitrieb selbst gelten Anforderungen an den Datenschutz und die Datensicherheit.
+ 
+Die Nutzung von WLAN fällt unter §3 Nr. 16 TKG, d.h., der Telekommunikation. Bei gewerblichen Angeboten liegt sogar eine Telekommunikaktionsdienstleistung gemäß §3 Nr. 18 TKG vor. Für WLAN-Angebote sind die Frequenzbereiche von 2,4 GHz und 5 GHz freigegeben. WLAN-Netze sind hierbei nicht die einzigen Anwendungen, die diese Frequenzbereiche nutzen. Etwaige Einschränkungen wie bspw. durch Amateurfunk oder andere Funkanwendungen muss der jeweilige Betreiber hinnehmen.
+
+Als mögliche Straftatbestände kommen das Ausspähen von Daten gem. §202a StGB, der Computerbetrug gem. § 263a StGB sowie das Erschleichen von Leistungen gem. §265a StGB aber auch das Abhören von Nachrichten gem. §§89, 148 Abs. 1 Nr. 1 TKG in Betracht. 
+
+Es muss rechtlich unterschieden werden, ob es sich um ein gesichertes (verschlüsseltes) oder ein ungesichertes (unverschlüsseltes) Netzwerk handelt. Zuerst wird das Eindringen in ein gesichertes Netzwerk betrachtet. In diesem Fall kommt eine Strafbarkeit nach §202a StGB in Betracht. Danach macht sich strafbar, wer unbefugt Daten, die nicht für ihn bestimmt und die gegen unberechtigten Zugang besonders gesichert sind, sich oder einem anderen verschafft. Unter Daten sind dabei alle Informationen zu verstehen, die elektronisch, magnetisch oder sonst nicht unmittelbar wahrnehmbar gespeichert sind, sich also in EDV-spezifischer Form darstellen lassen. Dazu zählt zum einen das bei WEP verwendete Passwort, zum anderen aber auch die im Rahmen des Verbindungsaufbaus vom Router zugeteilte IP-Adresse. Für das Tatbestandsmerkmal \glqq Verschaffen\grqq \ reicht schon aus, wenn der Täter Kenntnis von den gesicherten Daten erlangt. Auf die tatsächliche Nutzung des WLAN-Netzwerks, beispielsweise als Internetzugang kommt es dabei nicht an. Das heißt, der Tatbestand des §202a StGB ist bereits dann erfüllt, wenn der Täter vorsätzlich ein verschlüsseltes WLAN-Netzwerk knackt und hierdurch von den geschützten Daten Kenntnis nimmt.
+
+Bei ungesicherten WLAN-Netzwerken liegt die Sache etwas anders. Eine Strafbarkeit nach §202a StGB scheidet in diesem Fall aus, da es an einer besonderen Datensicherung fehlt. 
+
+Eine Strafbarkeit wegen Computerbetrugs nach §263a StGB kommt ebenfalls nicht in Betracht. Insoweit muss man danach differenzieren, ob der Netzwerkinhaber mit seinem Provider einen Flatrate-Tarif oder eine Bezahlung nach der jeweils heruntergeladenen Datenmenge vereinbart hat. Denn für den Fall, dass der Netzwerkinhaber einen Flatrate-Tarif vereinbart hat, erleidet er durch das unbefugte Mitsurfen eines Dritten keinen Vermögensschaden. Für den Fall, dass eine Bezahlung nach Datenmenge vereinbart wurde, tritt beim Netzwerkinhaber ein Vermögensschaden in Höhe der über seine eigene Nutzung hinausgehenden und von ihm zu bezahlenden Datenmenge ein. Dem Vorteil des Nutzers steht in diesem Fall jedoch kein Schaden des Betreibers, dem möglichen Schaden des Betreibers kein vom Nutzer angestrebter Vorteil gegenüber. Es fehlt somit an der für §263a StGB erforderlichen Stoffgleichheit.
+
+Eine Strafbarkeit wegen Erschleichens von Leistungen nach §265a StGB kommt schon deshalb nicht in Betracht, weil dessen Schutzbereich sich nur auf öffentlichen Zwecken dienende Telekommunikationsnetze erstreckt. WLAN-Netzwerke, die nur geschlossenen Benutzergruppen zur Verfügung stehen, dienen jedoch nicht öffentlichen Zwecken.
+
+Bleibt eine mögliche Strafbarkeit wegen Abhörens von Nachrichten gem. §§89, 148 Abs. 1 Nr. 1 TKG. Diese scheitert jedoch daran, dass es sich beim Datenverkehr im Rahmen der IP-Zuweisung nicht um Nachrichten im Sinne des §89 TKG handelt.
+
+\subsection*{Abhören von verschlüsselten Funkdaten}
+Bereits mit frei verkäuflichen technischen Mitteln ist es möglich, Daten bei der Kommunikation über drahtlose Netze auszuspähen. Es liegt nahe, dass derartige Angriffe (sog. „drive-by-hacking“ oder “war-driving”) rechtlich nicht gestattet sein können. Insbesondere in §89 TKG sowie in §202a StGB finden sich entsprechende Regelungen.
+
+
+\subsubsection*{Abhörverbot nach §89 TKG}
+Die Vorschrift verbietet das Abhören von Nachrichten mit einer Funkanlage, wenn diese für die Funkanlage nicht bestimmt sind. Hierunter fällt zweifelsohne das \glqq Hacking\grqq \ von drahtlosen Funkverbindungen.
+
+Unter einer \glqq Nachricht\grqq \ ist nicht nur die an einen menschlichen Empfänger gerichtete Kommunikation zu verstehen. Auch auf den Informationsinhalt kommt es nicht an. Als Nachricht im Sinne dieser Vorschrift ist vielmehr jede Übermittlung von Signalen auch zwischen Computern ohne direkte menschliche Mitwirkung anzusehen.
+
+Funkanlage ist nach der Definition in §2 Nr. 3 des Gesetzes über Funkanlagen und Telekommunikationsendeinrichtungen (FTEG) \glqq ein Erzeugnis oder ein wesentliches Bauteil davon, das in dem für terrestrische/satellitengestützte Funkkommunikation zugewiesenen Spektrum durch Ausstrahlung und/oder Empfang von Funkwellen kommunizieren kann\grqq. Diese Voraussetzungen sind beim Hacking von drahtlosen Verbindungen gegeben.
+
+Verboten ist nach §89 TKG nur das vorsätzliche Abhören von Funkverbindungen. Das unbeabsichtigte Abhören ungesicherter drahtloser Verbindungen ist hingegen nicht von §89 Satz 1 TKG umfasst.
+
+Nicht verhindert werden soll durch die Vorschrift zudem das Aufdecken von Sicherheitsmängeln etwa durch die zuständigen Datenschutzaufsichtsbehörden. Diese sind befugt, auch verdeckt unsichere WLAN-Netze im Rahmen datenschutzrechtlicher Prüfungen aufzuspüren. Die Aufzeichnung von Inhalten sollte im Rahmen derartiger Prüfungen allerdings unterbleiben; sie ist zur Feststellung von Sicherheitsmängeln in der Regel auch nicht erforderlich.
+
+Sowohl der Inhalt der Nachrichten als auch die bloße Tatsache ihres Empfangs dürfen – auch bei unbeabsichtigtem Empfang – gemäß §89 Satz 2 TKG anderen nicht mitgeteilt werden. Dies gilt wiederum nicht für die Unterrichtung zuständiger Datenschutzaufsichtsbehörden. Diesen kann das Fernmeldegeheimnis nicht entgegengehalten werden. Sie sind nach §115 Abs. 5 TKG befugt, Nachrichteninhalte zur Kenntnis zu nehmen.
+
+Sowohl das vorsätzliche Abhören nach §89 Satz 1 TKG als auch die vorsätzliche unbefugte Weitergabe nach §89 Satz 2 TKG sind nach §148 Abs. 1 Nr. 1 TKG mit Strafe bedroht. Im Gegensatz zur ersten Aufgabe, ist hier noch nicht der Versucht strafbar, sondern lediglich die vollendete Tat.
+
+\subsubsection*{Ausspähen von Daten nach §202a StGB}
+Nach dieser Vorschrift ist es strafbar, sich oder einem anderen unbefugt Daten zu verschaffen, die gegen unberechtigten Zugang besonders gesichert und nicht für den Täter bestimmt sind.
+
+Die Vorschrift schützt allein die Verfügungsbefugnis über die Daten, d.h. das Bestimmungsrecht darüber, wem die Daten zugänglich sein sollen. Auf den Inhalt oder die Bedeutung der Daten kommt es nicht an.
+
+Der Täter verschafft sich die Daten beim vorsätzlichen Hacking drahtloser Kommunikation dann, wenn er Daten auf seinem Computer gespeichert hat, die nicht für ihn bestimmt sind. Dieses Merkmal dürfte bei Hacking von drahtlosen Verbindungen in der Regel gegeben sein. Der Versuch ist hingegen wieder nicht strafbar.
+
+Entscheidend für eine Strafbarkeit ist jedoch, ob die Daten bei der Übertragung gegen unberechtigten Zugang gesichert sind. Eine solche Zugangssicherung besteht bei der Übertragung in drahtlosen Netzen insbesondere dann, wenn die Daten bei der Übertragung wirksam verschlüsselt werden. Die vom Gesetz gemeinte Zugangssicherung soll in erster Linie den Zugang zu den Originaldaten, d.h. den Inhalten, verhindern. Das bloße Abgreifen verschlüsselter Daten wäre deshalb wegen der fehlenden Möglichkeit, auf die Inhalte zugreifen zu können, nicht nach §202a StGB strafbar, eine Entschlüsselung dieser Daten würde die Strafbarkeit jedoch begründen.
+
+Nicht gegen unberechtigten Zugang gesichert ist die Datenübertragung insbesondere dann, wenn die Sperren ohne größeren Aufwand überwunden werden können. Werden keine besonderen Sicherungssysteme, d. h. vor allem Verschlüsselungsverfahren, verwendet oder sind diese zum Zeitpunkt ihrer Einrichtung bekanntermaßen und objektiv völlig ungeeignet, ist keine besondere Sicherung gegen unberechtigten Zugang gegeben. Eine Strafbarkeit nach §202a StGB wäre in diesen Fällen zumindest fraglich.
+
+Eine Strafverfolgung ist gemäß §205 StGB nur auf Antrag des Verletzten möglich. Unabhängig von der Frage der Strafbarkeit werden die Anbieter selbstverständlich nicht ihrer Pflichten enthoben, die erforderlichen technischen und organisatorischen Maßnahmen zum Datenschutz zu treffen und so erfolgreiche unbefugte Zugriffe auf die übertragenen Daten zu verhindern.
 \end{document}
