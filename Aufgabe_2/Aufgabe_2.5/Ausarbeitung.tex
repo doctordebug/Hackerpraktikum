@@ -35,14 +35,15 @@
 \section{Einführung}
 Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Die erste Aufgabe bestand darin, sich in WEP und damit auch in RC4 einzuarbeiten. Hauptbestandteil für das Verständnis von WEP und RC4 waren die Artikel \glqq Attacks on the RC4 stream cipher\grqq \cite{Kle08}, \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \cite{TWP07}\ und \glqq Intercepting Mobile Communications: The Insecurity of 802.11\grqq \cite{BGW01}.
 
-Anschließend sollte eine Test-Umgebung und der Angriff nach Klein implementiert werden. Diese Testumgebung war eine programmierte Simulation der RC4-Stromchiffre. Die Testumgebung wurde in Python programmiert und lieferte als Ergebnis paare aus Initialisierungsvektoren (IV) und Stromchiffren. Dass Ziel bei dem Angriff nach Klein war es, den Hauptschlüssel zu berechnen und somit die Verschlüsselung zu brechen. 
+Anschließend sollte eine Test-Umgebung und der Angriff nach Klein implementiert werden. Diese Testumgebung war eine programmierte Simulation der RC4-Stromchiffre. Die Testumgebung wurde in Python programmiert und lieferte als Ergebnis paare aus Initialisierungsvektoren (IV) und Stromchiffren. Dass Ziel des Angriffs nach Klein war es, auf dieser Grundlage den Hauptschlüssel zu berechnen und somit die Verschlüsselung zu brechen. 
 
 Die letzte Aufgabe dieses Abschnitts im Praktikum bestand darin, den Hauptschlüssel eines auf WEP konfigurierten Routers zu berechnen. Wie in der ersten Aufgabe bereits implementiert, eigenen sich Paare von IV und Schlüsselstrom sehr gut. Um das Auftreten von ARP-Paketen zu erhöhen sollte eine Technik namens \glqq re-injection\grqq \ verwendet werden.  Dazu sollten die Tools \glqq aireplay-ng\grqq \ und \glqq airodump-ng\grqq \ verwendet werden.
 
 Wie bereits erwähnt bestand die letzte Aufgabe darin, aus den ARP-Paketen Paare von IV und und Schlüsselstrom zu berechnen und dadurch den Angriff von Klein auszuführen. Der Angriff lieferte als Ergebnis den Hauptschlüssel und somit wurde die Verschlüsselung von WEP gebrochen.
 
-Das Protokoll besteht aus drei Abschnitten. Der erste Abschnitt dreht sich um die Verschlüsselung und wie diese Funktion. Dort wird genauer erläutert wie die RC4-Stromchiffre funktioniert, wie das WEP-Protokoll arbeitet und was unter den einzelnen Begrifflichkeiten zu verstehen ist. Anschließend wird im Detail auf den ausgeführten Angriff eingegangen. Dieser Abschnitt unterteilt sich zum einen in den Angriff nach Klein und anschließend folgt eine Verbesserung des Angriffs. \textbf{Der letzte Abschnitt.... muss noch ausformuliert werden...}
-%TODO
+Das Protokoll besteht aus drei Abschnitten. Der erste Abschnitt dreht sich um die Verschlüsselung und wie diese Funktion. Dort wird genauer erläutert wie die RC4-Stromchiffre funktioniert, wie das WEP-Protokoll arbeitet und was unter den einzelnen Begrifflichkeiten zu verstehen ist. Anschließend wird im Detail auf den ausgeführten Angriff eingegangen. Dieser Abschnitt unterteilt sich zum einen in den Angriff nach Klein und anschließend folgt eine Verbesserung des Angriffs. 
+
+Im Anschluss haben wir diesen Performance-Vorteil untersucht und gemessen.
 
 \section{Grundlagen der Verschlüsselung}
 Zuerst folgt eine Einführung in die Verschlüsselung die verwendet wird. Dazu unterteilt sich dieses Kapitel in zwei Abschnitte; wie ist die Funktionsweise der RC4-Stromchiffre und des WEP-Protokolls. Die hier verwendete Literatur waren die Artikel \glqq Attacks on the RC4 stream cipher\grqq \cite{Kle08}, \glqq Breaking 104 bit WEP in less than 60 seconds\grqq \cite{TWP07}\ und \glqq Intercepting Mobile Communications: The Insecurity of 802.11\grqq \cite{BGW01}. Zuerst folgt eine Erklärung zum Verfahren der RC4-Stromchiffre und im Anschluss folgt eine Erklärung zum WEP-Protokoll.
@@ -52,7 +53,7 @@ Der Algorithmus zu RC4 wurde 1987 von Ron Rivest entwickelt und besteht aus zwei
 \begin{quote}
 	session key = IV || main key
 \end{quote}
-Das Symbol || stellt den Operator für die Konkatenation dar. Die länge von $k$ und die Größe des IVs sind Abhängig vom gewählten Modus. Bei einer 64-Bit-Verschlüsselung hat der IV eine Größe von 24 Bit und der main key ist 40 Bit groß. Wählt man die 128-Bit-Verschlüsselung so ergibt für den main key eine Größe von 104 Bit. Die Größe des IVs bleib unverändert bei 24 Bit. Somit ergibt sich die Größe $l_K$ des session keys wie folgt:
+Das Symbol || stellt den Operator für die Konkatenation dar. Die Länge von $k$ und die Größe des IVs sind Abhängig vom gewählten Modus. Bei einer 64-Bit-Verschlüsselung hat der IV eine Größe von 24 Bit und der main key ist 40 Bit groß. Wählt man die 128-Bit-Verschlüsselung so ergibt für den main key eine Größe von 104 Bit. Die Größe des IVs bleib unverändert bei 24 Bit. Somit ergibt sich die Größe $l_K$ des session keys wie folgt:
 \begin{quote}
 	| K | = | IV | + | k |
 \end{quote}
@@ -95,9 +96,9 @@ def keyScheduling(sessionKey=bytearray(), n=256):
 \end{minipage}
 \end{center}
 
-Bei der key scheduling phase wird eine Substitutionsbox (S-Box) verwendet. Diese wird zu beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die S-Box wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der For-Schleife werden zwei Einträge der S-Box vertauscht um eine zufällige Permutation zu erzeugen. 
+Bei der key-scheduling-Phase wird eine Substitutionsbox (S-Box) verwendet. Diese wird zu Beginn mit Werten aus 0 bis $n-1$ aufsteigend gefüllt. Die S-Box wird aus dem geheimen Schlüssel berechnet und später zur Berechnung der Stromchiffre verwendet. In jedem Schritt der \textit{for}-Schleife werden zwei Einträge der S-Box vertauscht um eine zufällige Permutation zu erzeugen. 
 
-Nachdem die key scheduling phase eine zufällige S-Box generiert hat, beginnt die zweite Phase des RC4-Algorithmus. In dieser Phase wird eine Zufallsfolge, auch Stromchiffre genannt, erstellt. Der Algorithmus dazu gestalltet sich wie folgt:
+Nachdem die key-scheduling-Phase eine zufällige S-Box generiert hat, beginnt die zweite Phase des RC4-Algorithmus. In dieser Phase wird eine Zufallsfolge (im Folgenden auch Stromchiffre genannt) erstellt. Der Algorithmus dazu gestalltet sich wie folgt:
 \begin{center}
 \hspace{5pt}
 \begin{minipage}[t]{.35\textwidth}
@@ -132,7 +133,7 @@ def pseudoRandomGenerator(sBox=bytearray(),n=256):
 \end{lstlisting}
 \end{minipage}
 \end{center}
-Hierbei handelt es sich um den Hauptteil des RC4-Algorithmus.  Der pseudo random generator startet mit dem permutierten Array $sBox$, dass in der key scheduling phase generiert wurde. Anschließend wird ein Index $j$ mit Hilfe der zufällig permutierten S-Box gewählt und zwei Einträge ($sBox[i]$ und $sBox[j]$) werden wie bereits in der key scheduling phase vertauscht. Der nächste Schritt besteht darin einen Index $k$ zu ermitteln, welcher aus den addierten Werten aus der S-Box bestehen. Durch den anschließenden Modulo-Operator wird sichergestellt, dass es sich um Werte aus dem Zahlenraum $\mathbb{Z}_n$ handelt. Der pseudo random generator erstellt somit in jedem Schritt ein Byte, mit einem Wert zwischen $0$ bis $n-1$ als Ausgabe.
+Hierbei handelt es sich um den Hauptteil des RC4-Algorithmus.  Der pseudo-random-Generator startet mit dem permutierten Array $sBox$, dass in der key-scheduling-Phase generiert wurde. Anschließend wird ein Index $j$ mit Hilfe der zufällig permutierten S-Box gewählt und zwei Einträge ($sBox[i]$ und $sBox[j]$) werden wie bereits in der key-scheduling-Phase vertauscht. Der nächste Schritt besteht darin einen Index $k$ zu ermitteln, welcher aus den addierten Werten aus der S-Box bestehen. Durch den anschließenden Modulo-Operator wird sichergestellt, dass es sich um Werte aus dem Zahlenraum $\mathbb{Z}_n$ handelt. Der pseudo-random-Generator erstellt somit in jedem Schritt ein Byte, mit einem Wert zwischen $0$ bis $n-1$ als Ausgabe.
 
 \subsection{WEP}
 Wired Equivalent Privacy (WEP) ist das ehemalige Standard-Verschlüsselungsprotokoll für WLAN. Das Protokoll wurde dazu verwendet um die Vertraulichkeit und Integrität einer Nachricht sicherzustellen. Die Verschlüsselung unter WEP gestaltet sich wie folgt:
@@ -145,7 +146,7 @@ Der letzte Schritt besteht darin die zufällige Bytefolge $RC4(v,k)$ und den Ter
 
 Über das Netzwerk werden durch den Router Nachrichten verschickt, welche die Form $v || C$ besitzen. Der Initialisierungsvektor wird dabei vorne and die Vernamchiffre konkateniert. Da die Länge des Initialisierungsvektors $v$ bekannt ist, kann der Empfänger der Nachrichten diesen \glqq abschneiden\grqq\ und durch Kenntnis des main keys $k$ die Stromchiffre $RC4(v,k)$ erzeugen. Anschließend kann durch $RC4(v,k) \oplus C$ die Chiffre $C$ entschlüsselt werden.
 
-Durch die Prüfsumme $c(M)$ ist der Empfänger außerdem in der Lage, die Integrität der eigentlichen Nachricht $M$ zu gewährleisten. 
+Durch die Prüfsumme $c(M)$ ist der Empfänger in der Lage, die Integrität der eigentlichen Nachricht $M$ zu gewährleisten. 
 
 \section{Der Angriff}
 %TODO Anpassen
@@ -153,8 +154,8 @@ In diesem Abschnitt werden die verschiedenen Angriffe die wir in den Aufgaben 2 
 
 \subsection{Schwächen in RC4}
 %TODO Auf Korrelation in RC4 PRNG eingehen(Klein paper, sowie andere paper kurz zusammenfassen), auf Besonderheiten unserer situation eingehen (iv vorne,...) 
-Die von RC4 erzeugte Pseudosufallssequenz (=PZS) unterscheidet sich in einigen Punkten von einer echten Zufallsfolge. Die Summe der letzten Bits in Schritt t und t+2 korreliert gegen 1.
-J.Dj. Golic kam zu dem Schluss, dass $2^40$ Bytes von der RC4-PZS unterscheidbar sind zu einer echten Zufallssequenz.
+Die von RC4 erzeugte Pseudozufallssequenz (=PZS) unterscheidet sich in einigen Punkten von einer echten Zufallsfolge. Die Summe der letzten Bits in Schritt t und t+2 korreliert gegen 1.
+J.Dj. Golic kam zu dem Schluss, dass ${2}^{40}$ Bytes von der RC4-PZS unterscheidbar sind zu einer echten Zufallssequenz.\\
 Weitere Untersuchungen von S.R. Fluhrer und D.A. McGrew haben beweisen, das die gemeinsame WK von zwei aufeinander folgenden Bytes sich signifikant von einer Zufallsfolge unterscheiden. Im Idealfall besteht ein Schlüssel aus n unabhägig, identischen und gleichverteilten Elementen aus Z/nZ und gerneriert $n^n$ gleichwahrscheinliche Schlüssel. Jedoch ist $n!$ kein Teiler von $n^n$. Daher muss sich die Verteilung der initialen Permutation von einer Gleichverteilung unterscheiden. (Siehe Studie von I.Mironov)
 Für das weitere Vorgehen ist jedoch folgende Schwachstelle wichtig:\\
 Das erste Byte der PZS ist nicht wirklich zufällig. Der Angriff von S. Fluhrer, I. Martin und A. Shamir nimmt an, dass der Initialisierungsvektor vor dem Hauptschlüssel steht und die ersten zwei Bytes die Form $(b,n-1)$ haben, wobei $b$ das Byte des Hauptschlüssel ist, welches rekonstruiert werden soll. Wenn ein Angreifer keine Chance hat den Initialisierungsverktor zu beeinflussen, muss er warten, bis der initialiserungsverktor die gewünschte Form annimmt. Die ist in druchschnittlich eine aus $n^2$ Situngen der Fall. Die Authoren zeigen, dass dieser Angriff auf WEP angewendet warden kann.
@@ -173,13 +174,13 @@ $\Rightarrow S[1] \textit{ wird vertauscht mit } S[ K[0] + 1 + K[1] ] $ ( $K[0] 
 \end{center}
 Wir wissen nun, dass für ein festes $K[0]$ der Wert $t$ und $S[1]$ sich aus $K[1]$ berechnen lassen.
 In den weiteren Schritten der Key-Sheduling-Phase wird $S[1]$ nicht mehr geändert, sofern $j$ nie den Wert 1 annimmt.
-Die Wahrscheinlickkeit, dass dies in einem Schritt dennoch passiert liegt bei $1 - (1/n)$ falls der SessionKey die Länge n hat.
-Sind alle Keybytes von einander unabhängig, folgt $S[1]$ wird mit der Wahrscheinlichkeit $(1-(1/n))^{n-2} \approx 1/e$ nicht verändert.\\
+Die Wahrscheinlickkeit, dass dies in einem Schritt dennoch passiert liegt bei $1 - \frac{1}{n}$ falls der SessionKey die Länge n hat.
+Sind alle Keybytes von einander unabhängig, folgt $S[1]$ wird mit der Wahrscheinlichkeit $(1-\frac{1}{n})^{n-2} \approx \frac{1}{e}$ nicht verändert.\\
 Nun wissen wir Folgendes:\\
 Der Wert von $S[1]$ ist zu Beginn des RC4-PZG $t$. Wobei $t$ mit Wahrscheinlichkeit $(1/e)$ nur von $K[0]$ und $K[1]$ abhängt. Somit kann das in der Arbeit von Klein hergeleitete Theorem 1 \cite{Kle08} benutzt werden um $t$ aus der beobachteten RC4-PZS zu erhalten.\\
 Dazu schauen wir uns die Generierung des ersten Pseudozufall-Bytes (PZB) an:\\
 Zuerst wird $i$ auf $1$ gesetzt. Daher werden $S[1]$ und $S[j]$ getauscht. Nun enthält $S[j]$ den interessanten Wert t.\\
-Nach Theorem 1 folgt: $S[j] = 1 - S[k] mod n$ mit Wahrscheinlichkeit $2/n$.\\
+Nach Theorem 1 folgt: $S[j] = 1 - S[k]\ mod\ n$ mit Wahrscheinlichkeit $\frac{2}{n}$.\\
 Nutzt man diese Aussagen, kommt man zu folgender Aproximation für t:
 \begin{center}
 $Prob( t = 1 - S[k] mod n) \approx \dfrac{1}{e} * \dfrac{2}{n} + ( 1- \dfrac{1}{e}) * \dfrac{n-2}{n(n-1)} \approx 1.36/n$
@@ -196,64 +197,10 @@ $\mathcal{F}_i(K[0], .\ .\ .\ ,K[i-1],X[i-1]) = S^{-1}_{i-1}[i-X[i-1]] - (j_{i-1
  
 
 \subsubsection{Anwendung auf WEP}
-In WEP-Protokoll haben die Pakete die folgende Form: $Initialisierungsvektor || Chiffreschlüsselstrom $. Wir haben den Angriff von Klein erfolgreich auf WEP40 und WEP104 angewand. Bei beiden Protokollen haben die Initialisierungsvektor eine Länge von 24 Bit (= 3 Byte). Aus diesem Grunde ist es nicht nötig die ersten 3 Bytes des Hauptschlüssels mit der Methode von Klein zu berechnen. Es kann direkt mit der iterativen Berechnung der Schlüsselbytes begonnen werden. Mithilfe von ARP reinjektion haben wir circa 35.000 IV und Chiffreschlüsselstrom generiert. Die ersten 16 Bytes eines ARP-Paketes sind immer gleich. Da der erzeugte Schlüsselstrom mit dem Klartext lediglich über eine XOR-Operation zur Stromchiffre verknüpft wird, erhalten wir durch die erneute Anwendung der XOR-Opertion den erzeugten Schlüsselstrom. Hat man nun genug Paare gesammelt, lässt sich mithilfe des zuvor beschriebenen Angriffes der Hauptschlüssel berechnen. Bereits nach 35.000 untersuchten ARP-Paketen konnten wir zuverlässig den Hauptschlüssel für WEP40 errechnen. Für WEP104 benötigten wir für eine zuverlässige Aussage ca. 45.000 Pakete. Die Laufzeit betrug hierbei im Mittel 5 Sekunden für WEP40 und 60Sekunden für WEP104. Beide Werte berücksichtigen nicht das Sammeln von ARP-Paketen. Im Abschnitt \ref{ssec:vergleich} werden wir noch genauer auf die Lauzeit eingehen.
+Wir haben den Angriff von Klein erfolgreich auf WEP40 und WEP104 angewand.
+In WEP-Protokoll haben die Pakete die folgende Form: $Initialisierungsvektor || Chiffreschlüsselstrom $. Bei beiden Protokollen haben die Initialisierungsvektor eine Länge von 24 Bit (= 3 Byte). Aus diesem Grunde ist es nicht nötig die ersten 3 Bytes des Hauptschlüssels mit der Methode von Klein zu berechnen. Es kann direkt mit der iterativen Berechnung der Schlüsselbytes begonnen werden. Mithilfe von ARP reinjektion haben wir circa 500.000 IV und Chiffreschlüsselstrom generiert. Die ersten 16 Bytes eines ARP-Paketes sind immer gleich. Da der erzeugte Schlüsselstrom mit dem Klartext lediglich über eine XOR-Operation zur Stromchiffre verknüpft wird, erhalten wir durch die erneute Anwendung der XOR-Opertion den erzeugten Schlüsselstrom. Hat man nun genug Paare gesammelt, lässt sich mithilfe des zuvor beschriebenen Angriffes der Hauptschlüssel berechnen. Bereits nach 35.000 untersuchten ARP-Paketen konnten wir zuverlässig den Hauptschlüssel für WEP40 errechnen. Für WEP104 benötigten wir für eine zuverlässige Aussage ca. 45.000 Pakete. Die Laufzeit betrug hierbei im Mittel 5 Sekunden für WEP40 und 60Sekunden für WEP104. Beide Werte berücksichtigen nicht das Sammeln von ARP-Paketen. Dies dauert in der Regel 3 bis 5 Minuten. Im Abschnitt \ref{ssec:vergleich} werden wir noch genauer auf die Laufzeit eingehen.
 
 \paragraph{Permutieren der S-Box}\ 
-%Approximate the permutation by simulating the first i steps of the key scheduling of RC4
-\begin{lstlisting}
-def simulate_permutation(part_of_key, n):
-    # Initialize s-box
-    s = []
-    for i in range(n):
-        s.append(i)
-    i, j = 0, 0
-    # Calculate permutation for first i bytes
-    for i in range(len(part_of_key)):
-        j = (j + s[i] + part_of_key[i]) % n
-        s[i], s[j] = s[j], s[i]
-    return s, i, j
-\end{lstlisting}
-\paragraph{Berechnung von Bytes im Schlüssel} Bla Bla
-%Approximate the key byte at position i
-\begin{lstlisting}
-def calculate_key_byte(stream_cipher, s_box, i, j, n):
-    s_invert = []
-    for init in range(n):
-        s_invert.append(init)
-
-    # Invert s-box
-    for r in range(len(s_box)):
-        s_invert[s_box[r]] = r
-
-    # Calculate nex key byte
-    key_byte = (s_invert[(i - stream_cipher[i - 1]) % n] - (j + s_invert[i]) % n) % n
-    return key_byte
-\end{lstlisting}
-\paragraph{Iterierte Anwendung} Bla Bla
-%Method to approximate the main key of wep. The stream cipher is the RC4 stream cipher generated by running RC with arguments iv and main\_key.
-\begin{lstlisting}
-def crack_wep(iv_stream_pair, key_length_bytes, n, tuple_amount):
-    possible_key = bytearray()
-    key_length = key_length_bytes - len(possible_key) % key_length_bytes
-
-    for b in range(key_length):
-        candidates = []
-        for index, tuple in enumerate(iv_stream_pair):
-            if index > tuple_amount:
-                break
-            compound_key = bytearray()
-            compound_key.extend(tuple[0])
-            if possible_key:
-                compound_key.extend(possible_key)
-            # Internal permutation S_(i-1) and index j at (i-1)th step
-            s_box, i, j = simulate_permutation(compound_key)
-            # Calculate possible key byte K[i]
-            candidates.append(calculate_key_byte(tuple[1], s_box, i + 1, j, n))
-        candidate_byte = Counter(candidates).most_common(1)[0][0]
-        possible_key.append(candidate_byte)
-    return possible_key
-\end{lstlisting}
-
 
 \subsubsection{Angriff in der simulierten Umgebung}
 %TODO das mit dem IV sollte noch festgehalten werden
@@ -290,6 +237,44 @@ def iv_and_stream_cipher_generator(n, rounds, iv_length, key_length, tuple_amoun
 
 \paragraph{ARP-Pakete generieren}
 % \cite[Kapitel 5]{TWP07} vielleicht nützlich ?
+
+Das Internet Protocol (IP) ist das am weitesten verbreitete Netzwerkprotokoll. Für
+unseren Angriff gehen wir davon aus, dass IPv4 im anzugreifenden WLAN verwendet wird.
+Wenn Host A ein Paket an Host B senden möchte, benötigt A die physikalische
+Adresse des Hosts B oder des Gateways, durch das B erreicht werden kann.
+Zum Auflösen der IP-Adressen wird das Address Resolution Protokoll (ARP) verwendet.
+Dies funktioniert wie folgt: Host A sendet eine ARP-Anfrage an die Broadcast-Adresse. 
+Diese Anforderung gibt an, dass A nach der physikalische Adresse von Host B sucht.  
+Host B antwortet mit einer ARP-Antwort mit seiner eigenen physikalische Adresse an Host A. 
+ARP ist ein Link-Layer-Protokoll, daher ist es in der Regel nicht durch Paket-Filter oder Senderate beschränkt.
+ARP-Anfragen und ARP-Antworten sind von fester Größe. Da die Größe eines Pakets 
+nicht durch WEP maskiert wird, können sie in der Regel leicht von anderen unterschieden werden.
+Die ersten 16 Bytes eines Klartextes eines ARP-Pakets bestehen aus einem 8 Byte langen
+802.11 Logical Link Control (LLC)-Header gefolgt von den ersten 8 Bytes der
+ARP-Paket selbst. 
+Der LLC-Header ist für jedes ARP-Paket festgelegt:\\
+\begin{center}
+	AA AA 03 00 00 00 08 06\\
+\end{center}
+Die ersten 8 Bytes einer ARP-Anfrage sind ebenfalls fixiert. Ihr Wert
+ist:\\
+\begin{center}
+	00 01 08 00 06 04 00 01\\
+\end{center}
+Bei einer ARP-Antwort ändert sich das letzte Byte zu 02. Eine ARP-Anfrage wird immer an die Broadcast-Adresse gesendet, während eine ARP-Antwort an einen Unicast gesendet wird.
+Da die physikalischen Adressen nicht durch WEP verschlüsselt werden, ist es einfach
+zwischen einer verschlüsselten ARP-Anfrage und Antwort zu unterscheiden.
+Durch das XORing eines erfassten ARP-Pakets mit diesen festen Mustern können wir die ersten 16 Byte des Schlüsselstroms extrahieren. 
+Der entsprechende IV wird im Klartext übertragen.
+Um die Wiederherstellung von Schlüsselstrom zu beschleunigen, ist es möglich, einen erfassten ARP erneut zu injizieren, was
+im Netzwerk, die eine weitere Antwort mit neuem IV auslöst. 
+Wenn der Initiator und das Ziel der ursprünglichen Anfrage 
+beide WLAN-Stationen sind, werden drei neue Pakete generieren,
+da die Übertragung vom Access Point weitergeleitet wird. 
+Das Sammeln von genügend Paketen dauert nur wenige Minuten.
+
+
+
 
 \subsection{Verbesserungen des Angriffs}
 \paragraph{Überblick}
@@ -370,16 +355,15 @@ def calculate_key_byte_vote(i, key_stream, s_box_3, s_box_3_invert, j_3, n):
 \end{lstlisting}
 
 \subsection{Vergleich der Angriffe}
-<<<<<<< HEAD
+
 \label{subsec:vergleich}
 Wir wollen nun den Geschwindigkeitsvorteil des verbesserten Klein-Angriffes messen. Dazu haben wir mehrere Angriffe durch geführt. Der verbesserte Angriff ist so effektiv, dass sich zwischen dem Angriff auf WEP40 und WEP104 keinen erwähnenswerten Performancevorteil messen lässt. Daher haben wir uns dazu entschieden den Standartangriff von klein auf WEP40 und den verbesserten Angriff auf WEP104 zu vergeleichen.
 
-=======
 \label{ssec:vergleich}
 %TODO Benchmark mit starkem key byte
 % Siehe 60 sekunden paper
 %Die Wahrscheinlichkeit, dass der richtige Schlüssel aus den am häufigsten vorkommenden \glqq votes\grqq\ besteht korreliert stark mit der Menge an zur Verfügung stehenden Paaren aus IV's und Stromchiffren. 
->>>>>>> 34a0eba1257d9c17dd6fe129347043889aa74bb9
+
 
 \subsubsection{Versuchsanordnung}
 % Skript für cip pool, auf simulierten daten
@@ -400,7 +384,7 @@ Die Auswertung der Tests erfolgt im kommenden Kapitel.
 
 \textbf{Erfolgswahrscheinlichkeit}
 
-
+Aus den Versuchen haben sich folgende Werte für die Erfolgswahrscheinlichkeit ergeben:
 
 \begin{tabular}{|l|r|r|}
 	\hline
@@ -414,20 +398,20 @@ Die Auswertung der Tests erfolgt im kommenden Kapitel.
 	\hline
 \end{tabular}
 \\\\
-Wir sind zu dem Ergebnis gekommen, dass sich zwischen den beiden Angriffen keinen messbaren Unterschied ausmachen lässt.
+Wir sind zu dem Ergebnis gekommen, dass sich zwischen den beiden Angriffen keinen messbaren Unterschied ausmachen lässt.\\
 
 \textbf{Auswertung für Angriffe auf WEP40:}
 
 WEP40 Angriff nach Klein:\\
 
-Grafik im Anhang auf Seite \pageref{fig:wep40_suc}
+Auswertung siehe Grafik im Anhang auf Seite \pageref{fig:wep40_suc}
 
 
 Dauer für WEP 40 mit Klein-Angriff alle Zeitangaben in Millisekunden:\\
 
 \begin{tabular}{|l|l|l|l|l|l|}
 	\hline
-	Tupelanzahl & min      	& max 		& mean 		&   median 	&      std \\
+	Tupelanzahl & Minimum  	& Maximum 		& Mittelwert&   Median 	& Standardabweichung \\
 	\hline
 	30000 		& 12565		& 127392 	& 30141.81  &	19825 	& 21948.71 \\
 	\hline
@@ -452,7 +436,7 @@ Dauer für WEP 104 mit dem verbesserten Klein-Angriff alle Zeitangaben in Millis
 
 \begin{tabular}{|l|l|l|l|l|l|}
 	\hline
-	Tupelanzahl & min      	& max 		& mean 		&   median 	&      std \\
+	Tupelanzahl & Minimum      	& Maximum 		& Mittelwert 		&   Median 	&      Standardabweichung \\
 	\hline
 	30000 		& 820.220	& 8941.250 	& 2312.003  &	1664.270& 2045.727\\
 	\hline
@@ -469,9 +453,8 @@ Dauer für WEP 104 mit dem verbesserten Klein-Angriff alle Zeitangaben in Millis
 	
 \end{tabular}
 \\\\
+Aus den Versuchen lässt sich ablesen, dass der verbesserte Angriff 
 
-
-\section{Fazit}
 
 Durchschnittlicher Geschwindigkeitsvorteil\\
 \begin{tabular}{|l|l|l|l|}
@@ -493,7 +476,12 @@ Durchschnittlicher Geschwindigkeitsvorteil\\
 	
 \end{tabular}
 
+Aufgrund der vorgenommenen Verbesserungen konnte der Angriff von Klein in einem Bruchteil der Zeit erfolgreich durchgeführt werden. Zwischen WEP40 und WEP104 gibt es keinen Unterschied mehr. 
 
+\section{Fazit}
+
+Die Schwächen des RC4 Verfahren machen auch WEP unsicher. 
+Daher wird WEP seit Jahren nicht mehr genutzt. Ein Grund hierfür ist die in dieser Ausarbeitung aufgezeigten Unsicherheit. Ob das Brechen des Hauptschlüssels 90 Sekunden oder optimiert auch nur 3 Sekunden dauert ist für diesen Fakt vernachlässigbar. Wir haben jedoch gesehen, dass die Theorie und Wahrscheinlichkeitstheorie hinter einem Protokoll eine große Rolle spielt. Nur mit arithmetischen Mitteln ist es gelungen die Laufzeit des Angriffes auf einen Bruchteil zu verringern.
 
 \section{Anhang}
 
@@ -508,7 +496,12 @@ Durchschnittlicher Geschwindigkeitsvorteil\\
 \includegraphics[width=\textwidth]{img/vergleich.png}
 \label{fig:vergleich}
 \\
-Angriff von Klein in blau, Verbesserter Angriff in rot
+\textbf{Legende}
+\begin{itemize}
+	\item[] Angriff von Klein in blau
+	\item[] Verbesserter Angriff in rot
+\end{itemize}
+
 
 \newpage
 
