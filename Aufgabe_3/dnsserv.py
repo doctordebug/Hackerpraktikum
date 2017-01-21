@@ -1,5 +1,6 @@
 # Use scapy2.3.1+ from pip (secdev original) or for Python3 use the
 # https://github.com/phaethon/scapy Scapy3K version.
+# Using pip3: pip3 install scapy-python3
 #
 # Example DNS server that resolves NAME.IPV4.example.com A record
 # requests to an A:IPV4 response.
@@ -19,22 +20,42 @@ while True:
 
     try:
         dns = DNS(request)
-        assert dns.opcode == 0, dns.opcode  # QUERY
-        assert dnsqtypes[dns[DNSQR].qtype] == 'A', dns[DNSQR].qtype
         query = dns[DNSQR].qname.decode('ascii') 
-        head, domain, tld, tail = query.rsplit('.', 3)
-        assert head == 'www' and domain == 'bank' and tld == 'com' and tail == ''
 
-        rdata="12.34.56.78"
+        if dnsqtypes[dns[DNSQR].qtype] == 'A':
+            rdata="12.34.56.78"
 
-        response = DNS(
-            id=dns.id, ancount=1, qr=1,
-            an=DNSRR(rrname=str(query), type='A', rdata=rdata, ttl=1234))
-        print(repr(response))
+            response = DNS(
+                id=dns.id, ancount=1, qr=1, aa=0, ra=0, rd=0,
+                qdcount=1,
+                qd=dns.qd,
+                an=DNSRR(rrname=str(query), type='A', rdata=rdata, ttl=1234))
+        elif dnsqtypes[dns[DNSQR].qtype] == 'AAAA':
+            response = DNS(
+                id=dns.id, ancount=0, qr=1, aa=1, ra=0, rd=0,
+                qdcount=dns.qdcount,
+                qd=dns.qd)
+            #        elif dnsqtypes[dns[DNSQR].qtype] == 'MX':
+            #            response = DNS(
+            #                id=dns.id, arcount=1, qr=1, aa=0, ra=0, rd=0,
+            #                nscount=dns.nscount,
+            #                ns=dns.ns,
+            #                qdcount=dns.qdcount,
+            #                qd=dns.qd,
+            #                ar=DNSRR(rrname=str(query), type='OPT', rdata='.', ttl=1234))
+        else:
+            response = DNS(id=dns.id, ancount=0, rcode=3, aa=1, ra=0, rd=0,
+                nscount=dns.nscount,
+                ns=dns.ns,
+                arcount=dns.arcount,
+                ar=dns.ar,
+                qdcount=dns.qdcount,
+                qd=dns.qd)
+            print(dnsqtypes[dns[DNSQR].qtype])
+
         sock.sendto(bytes(response), addr)
 
     except Exception as e:
         print('')
         print_exc()
         print('garbage from {!r}? data {!r}'.format(addr, request))
-        sock.sendto(DNS(id=dns.id, ancount=1, qr=1, an=DNSRR(type='NXDOMAIN')), addr)
