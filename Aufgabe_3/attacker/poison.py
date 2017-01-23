@@ -94,6 +94,9 @@ while True:
         if dns_response[DNS].an.rdata == expected_ip:
             print("Successfully poisoned the zone of {}".format(target_domain_base))
             break
+        else:
+            print("Poisoning failed")
     except:
         print("Poisoning failed")
+
 
