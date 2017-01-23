@@ -45,14 +45,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         attacker.vm.network :public_network, ip: ATK_IP, bridge: INTERFACE
 
         attacker.vm.provider :virtualbox do |v|
-            v.customize ["modifyvm", :id, "--memory", 4096]
+            v.customize ["modifyvm", :id, "--memory", 2048]
             v.customize ["modifyvm", :id, "--cpus", 2]
             v.customize ["modifyvm", :id, "--name", "attacker"]
         end
 
         attacker.vm.synced_folder "attacker", "/vagrant"
         attacker.vm.provision "shell", path: "attacker/setup.sh", args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT, ATK_FORGED_IP]
-        attacker.vm.provision "shell", path: "attacker/run.sh", run: 'always'
+        attacker.vm.provision "shell", path: "attacker/run.sh", env: {"ATK_FORGED_IP" => ATK_FORGED_IP}, run: 'always'
     end
 
 end
