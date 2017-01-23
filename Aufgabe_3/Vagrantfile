@@ -30,8 +30,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             v.customize ["modifyvm", :id, "--memory", 512]
             v.customize ["modifyvm", :id, "--name", "vulnerable"]
             v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
-            # v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
-            # v.auto_nat_dns_proxy = false
         end
 
         vulnerable.vm.synced_folder "vulnerable", "/vagrant"
