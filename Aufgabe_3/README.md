@@ -35,8 +35,11 @@ Tshark is installed to monitor network traffic:
 ### Attacker
 VM containing the cache poisoning script and the malicious DNS server (default: 192.168.0.26).
 
+To access the scripts, log in to the VM and navigate to the "/vagrant" folder.
 Start the malicious dns server (should be already running):
 
     nohup python3 dns.py &
 
-To access the scripts, log in to the VM and navigate to the "/vagrant" folder.
+Start the poison script:
+
+    python3 poison.py
