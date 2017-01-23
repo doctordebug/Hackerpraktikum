@@ -16,6 +16,7 @@ VLN_DNS_PORT_OUT = "54"
 
 # Attacker server
 ATK_IP = "192.168.0.26"
+ATK_FORGED_IP = "123.123.123.123"
 
 # Create and configure the Docker container(s)
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -50,7 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
 
         attacker.vm.synced_folder "attacker", "/vagrant"
-        attacker.vm.provision "shell", path: "attacker/setup.sh", args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT]
+        attacker.vm.provision "shell", path: "attacker/setup.sh", args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT, ATK_FORGED_IP]
         attacker.vm.provision "shell", path: "attacker/run.sh", run: 'always'
     end
 

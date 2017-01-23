@@ -6,7 +6,7 @@ from scapy.all import DNS, DNSQR, DNSRR, dnsqtypes
 sock = socket(AF_INET, SOCK_DGRAM)
 sock.bind((os.environ['ATK_SERVER_IP'], 53))
 
-fixed_ip = "216.58.212.99"
+fixed_ip = os.environ['ATK_FORGED_IP']
 
 while True:
     # DNS server that resolves every A record to a fixed A:IPV4 response.
