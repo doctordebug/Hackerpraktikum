@@ -50,9 +50,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
 
         attacker.vm.synced_folder "attacker", "/vagrant"
-        attacker.vm.provision "shell", path: "attacker/setup.sh"
-        attacker.vm.provision "shell", path: "attacker/run.sh",
-         args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT], run: 'always'
+        attacker.vm.provision "shell", path: "attacker/setup.sh", args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT]
+        attacker.vm.provision "shell", path: "attacker/run.sh", run: 'always'
     end
 
 end

