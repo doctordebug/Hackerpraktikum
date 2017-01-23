@@ -1,0 +1,23 @@
+options {
+    directory "/etc/namedb";
+    pid-file "/var/run/named.pid";
+    statistics-file "/var/run/named.stats";
+
+    query-source address <ip> port <port_out>;
+
+    dnssec-enable no;
+
+    allow-recursion { any; };
+    allow-query { any; };
+
+    auth-nxdomain no;    # conform to RFC1035
+
+    listen-on-v6 { none; };
+
+    listen-on port <port_in> {
+        127.0.0.1;
+        <ip>;
+    };
+
+};
+

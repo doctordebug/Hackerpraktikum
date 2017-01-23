@@ -1,0 +1,60 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Specify Vagrant version and Vagrant API version
+Vagrant.require_version ">= 1.6.0"
+VAGRANTFILE_API_VERSION = "2"
+
+# Host specific settings
+INTERFACE = "Realtek PCIe GBE Family Controller"
+HOST_NETWORK_GATEWAY="192.168.0.1"
+
+# Vulnerable DNS server
+VLN_IP = "192.168.0.25"
+VLN_DNS_PORT_IN = "53"
+VLN_DNS_PORT_OUT = "54"
+
+# Attacker server
+ATK_IP = "192.168.0.26"
+
+# Create and configure the Docker container(s)
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+    config.vm.define "vulnerable" do |vulnerable|
+        vulnerable.vm.hostname = "vulnerable"
+        vulnerable.vm.box = "ubuntu/trusty32"
+
+        vulnerable.vm.network :public_network, ip: VLN_IP, bridge: INTERFACE
+
+        vulnerable.vm.provider :virtualbox do |v|
+            v.customize ["modifyvm", :id, "--memory", 512]
+            v.customize ["modifyvm", :id, "--name", "vulnerable"]
+            v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+            # v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+            # v.auto_nat_dns_proxy = false
+        end
+
+        vulnerable.vm.synced_folder "vulnerable", "/vagrant"
+        vulnerable.vm.provision "shell", path: "vulnerable/setup.sh", args: [VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT]
+        vulnerable.vm.provision "shell", path: "vulnerable/run.sh", args: HOST_NETWORK_GATEWAY, run: 'always'
+    end
+
+    config.vm.define "attacker" do |attacker|
+        attacker.vm.box = "ubuntu/trusty32"
+        attacker.vm.hostname = 'attacker'
+
+        attacker.vm.network :public_network, ip: ATK_IP, bridge: INTERFACE
+
+        attacker.vm.provider :virtualbox do |v|
+            v.customize ["modifyvm", :id, "--memory", 4096]
+            v.customize ["modifyvm", :id, "--cpus", 2]
+            v.customize ["modifyvm", :id, "--name", "attacker"]
+        end
+
+        attacker.vm.synced_folder "attacker", "/vagrant"
+        attacker.vm.provision "shell", path: "attacker/setup.sh"
+        attacker.vm.provision "shell", path: "attacker/run.sh",
+         args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT], run: 'always'
+    end
+
+end
