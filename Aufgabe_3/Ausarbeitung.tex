@@ -1,0 +1,29 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.5cm}
+
+\author{Lukas Jung, Marc Narres-Schulz, Oliver Sänger, Tobias Zeimetz}
+\title{Teil III: \\DNS Cache Poisoning}
+
+\begin{document}
+\maketitle
+\newpage
+
+\section{Einleitung}
+Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Die erste Aufgabe bestand in der Programmierung eines eigenen DNS-Servers. Der Server wurde in der Programmiersprache Python geschrieben und als Hilfe wurde das Modul Scapy verwendet. Der Python-Server sollte in der Lage sein, auf eine DNS-Anfrage eine entsprechend korrekt geformte Antwort zu senden. Die IP, mit welcher der Python-Server antwortet, sollte selbst einstellbar sein.
+
+Anschließend sollte ein DNS-Server aufgesetzt und konfiguriert werden. Dieser Server sollte später das Ziel des DNS-Cache-Poisoning-Angriffs sein. Die grundlegende Idee bestand darin, erst alle Sicherheitseigenschaften des Servers gegen diesen einen Angriff zu deaktivieren. Anschließend bestand das Ziel darin den Cache des DNS-Servers (Victim-DNS) zu \glqq vergiften\grqq \ und eine fehlerhaften DNS-Auflösung zu injecten. Ferner war das Ziel, den Cache des Victim-DNS so zu manipulieren, dass alle Anfragen an den in Python selbstgeschriebenen DNS-Server (Python-Server oder auch Attacker-DNS) weitergeleitet werden. Dadurch ist es dem Angreifer immer möglich eine andere IP-Adresse für die Auflösung zu wählen. Eine genauer Erläuterung folgt in den nächsten Kapiteln.
+
+Die folgenden Kapitel beschäftigen sich mit den Grundlagen des Angriffs, das heißt wie sollte in der Theorie vorgegangen werden, wie müssen die Abläufe aussehen und was sind die Vorrausetzungen für den Angriff. Außerdem wird der Angriff im Detaill genauer Erklärt. Der nächste Abschnitt besteht aus der Konfiguration der Server, welche Komponenten verwenden wurden und welche Sicherheitsmaßnahmen deaktiviert wurden. Im letzten Kapitel folgt anschließend eine detaillierte Beschreibung unseres Vorgehens, wie unsere Implementierung des Angriffs funktioniert und welche Tests durchgeführt wurden.
+
+\section{Grundlagen des Angriffs}
+\section{Konfigurationen der Server und Schnittstellen}
+\subsection{Scapy}
+\section{Der Angriff}
+
+\end{document}
