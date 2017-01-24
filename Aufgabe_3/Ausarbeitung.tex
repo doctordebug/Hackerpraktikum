@@ -51,8 +51,7 @@ Die DNS-Antwort zu fälschen ist in sofern Problematisch, dass sie eine 16 Bit l
 
 Ist man beim ersten Versuch nicht erfolgreich so wird der Ziel-DNS-Server die Korrekte Antwort zwischenspeichern, so dass erst nach Ablauf der Time-To-Live, also der Gültigkeitsdauer der validen DNS Antwort, ein neuer Versuch unternommen werden kann.
 
-%Geburtstagsparadoxon verbessern
-Bei BIND handelt es sich um den standard DNS-Server auf einem Linux System. Ältere Versionen hatten verschiedene Probleme und Schwachstellen. Beispielsweise unter BIND 8 wurde die Transaktionsnummer bei jeder Anfrage iteriert. Dadurch war es für einen Angreifer leicht, die nächsten Transaktionsnummern vorherzusagen. Sendet der angegriffene Resolver eine identische DNS-Anfrage mehrfach mit verschiedenen Transaktionsnummern, erhöht sich die Erfolgswahrscheinlichkeit aufgrund des Geburtstagsparadoxons erheblich.
+Bei BIND handelt es sich um den standard DNS-Server auf einem Linux System. Ältere Versionen hatten verschiedene Probleme und Schwachstellen. Beispielsweise unter BIND 8 wurde die Transaktionsnummer bei jeder Anfrage iteriert. Dadurch war es für einen Angreifer leicht, die nächsten Transaktionsnummern vorherzusagen. Sendet der angegriffene Resolver eine identische DNS-Anfrage mehrfach mit verschiedenen Transaktionsnummern, erhöht sich die Erfolgswahrscheinlichkeit aufgrund des Geburtstagsparadoxons erheblich. Dieser Punkt wird jedoch noch genauer im nächsten Kapitel behandelt.
 
 War der Angriff nicht erfolgreich, befindet sich der korrekte Resource Record im Cache, sodass der Angreifer erst nach Ablauf der Time to Live (TTL) einen erneuten Versuch unternehmen kann.
 
@@ -63,7 +62,7 @@ Wie bereits erwähnt, muss der Angreifer zuerst einen eigenen DNS-Server (Attack
 
 {
 \centering
-\includegraphics[scale=0.4]{DNS-Cache-Poisoning.png}
+\includegraphics[scale=0.45]{DNS-Cache-Poisoning.png}
 \newpage
 }
 
@@ -74,18 +73,14 @@ Wichtig ist, dass die Seite noch nicht (kurz vorher) angefragt wurde, da der Vic
 Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten zu generieren bzw. an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss einen NS-Record enthalten, damit der Victim-DNS nochmal den Attacker-DNS nach der IP für \emph{victimg.com} anfragt.\\
 
 %% TODO 
-\textbf{[WIEVIELE PAKETE AUSREICHEN UND WIE DAS GANZE LAUFEN SOLL]}\\
+\textbf{[TODO: WIEVIELE PAKETE AUSREICHEN UND WIE DAS GANZE LAUFEN SOLL]}\\
 %%
 
-Wenn jetzt das \glqq richtige\grqq\ Antwortpaket vom Approriate-DNS an den den Victim-DNS gesendet wird, ist das vom Angreifer erstellte und versendete Paket jedoch längst angekommen und auch angenommen. Dadurch wird die Antworten des richtigen Appropriate-DNS vom Victim-DNS ignoriert und verworfen. Da dem Victim-DNS durch das gefälschte Paket mitgeteilt wurde, dass der Attacker-DNS für die IP-Auflösung zuständig ist, sendet der Victim-DNS erneut eine DNS-Anfrage. Jetzt kann der Attacker-DNS mit einer vom Angreifer selbst gewählten IP antworten. In einem letzten Schritt wird die aufgelöste IP jetzt noch vom Victim-DNS zurück an den Anreifer gesendet. Der Angreifer überprüft jetzt ob die Antwort der DNS-Anfrage von \emph{victim.com} die von ihm selbst gewählte IP beinhaltet. Sollte dem nicht der Fall sein, so versucht er den gesamten Vorgang erneut.\\
+Wenn jetzt das \glqq richtige\grqq\ Antwortpaket vom Approriate-DNS an den den Victim-DNS gesendet wird, ist das vom Angreifer erstellte und versendete Paket jedoch längst angekommen und auch angenommen. Dadurch wird die Antworten des richtigen Appropriate-DNS vom Victim-DNS ignoriert und verworfen. Da dem Victim-DNS durch das gefälschte Paket mitgeteilt wurde, dass der Attacker-DNS für die IP-Auflösung zuständig ist, sendet der Victim-DNS erneut eine DNS-Anfrage. Jetzt kann der Attacker-DNS mit einer vom Angreifer selbst gewählten IP antworten. In einem letzten Schritt wird die aufgelöste IP jetzt noch vom Victim-DNS zurück an den Anreifer gesendet. Der Angreifer überprüft jetzt ob die Antwort der DNS-Anfrage von \emph{victim.com} die von ihm selbst gewählte IP beinhaltet. Sollte dem nicht der Fall sein, so versucht er den gesamten Vorgang erneut.
 
-%% TODO 
-\textbf{[ABÄNDERUNG DER SUBDOMAINS BESCHREIBEN]}\\
-%% 
+Um einen Overload beim DNS-Server zu verhinden, werden alle Angefragten IP-Auflösungen kurzfristig im Cache gespeichert. Daher kann der Angreifer nicht einfach erneut die gleiche Domain anfragen. Um das Caching zu verhinern und dem Angriff somit ein größeres Zeitfenster zu schaffen, stellt der Angreifer die Anfrage immer an ein anderes Subdomains als die Male zuvor. Beispielsweise könnte beim ersten Mal die Domain \emph{www1.victim.com} angefragt werden und beim zweiten Mal die Domain \emph{www12.victim.com}. Dadurch wird der Victim-DNS dazu \glqq gezwungen\grqq\ die Anfragen erneut an den NS-Server dieser Domain zu stellen.
 
-%% TODO 
-\textbf{[WAS PASSIERT JETZT FÜR EINEN NORMALEN BENUTZER]}\\
-%%
+Angenommen der Angriff hat nach einigen Versuchen funktioniert und der Cache wurde erfolgreich \glqq injected\grqq\ ergibt sich für einen normalen Benutzer folgendes Szenario: Der Benutzer stellt eine DNS-Anfrage an den Victim-DNS für die Domain \emph{user.victim.com}. Der Victim-DNS hat noch aufgrund des \glqq Poisonings\grqq\ einen Eintrag im Cache, dass der Attacker-DNS authorotative für die Domain sei. Aufgrundessen fragt der Victim-DNS beim Attacker-DNS nach der IP für die angefragte Domain nach. Der Attacker-DNS antwortet darauf mit einer zuvor festgelegten IP die auf eine vom Angreifer kontrollierte Webseite leitet. Der Victim-DNS leitet die IP-Adresse als letzten Schritt an den Benutzer weiter, welcher sich anschließend mit der \glqq falschen\grqq\ Webseite verbindet.
 
 \section{Konfigurationen der Server und Schnittstellen}
 Dieses Kapitel beschäftig sich mit unserer Netzwerkstruktur, den verwenden System und ihren Konfigurationen. Zu erst wird auf den aus Ausgabe 2 in Python implementierten DNS-Server eingegangen. Anschließend werden die Konfigurationen des in Ubuntu aufgesetzten DNS-Servers dargelegt und genauer Erläutert. Im letzten Abschnitt dieses Kapitels wird die Architektur unseren Netwerks dargestellt. Genauer heißt das, wie kommunizieren die einzelnen Parteien miteinander und wie sind sie verbunden.
@@ -154,11 +149,6 @@ Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die I
     qr=1 & Die Flag qr steht für Query/Response. Eine eins im Paket bedeutet, dass es sich um eine Antwort handelt\\ \hline
     opcode=0 & Durch diese Option wird angegeben, dass es sich um eine Standard-Query handelt\\ \hline
     aa=1 & Wie bereits in Kapitel X erkläutert wurde, ist es wichtig, dass es sich bei der Antwort um eine \glqq Authoritative\grqq \ Antwort handelt. Das setzen der Flag auf den Wert Eins wird die Antwort Authoritative.\\ \hline
-    \end{tabular}
-\end{center}    
-\begin{center}
-    \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
-    \hline
     tc=0 & Sollten die zu übermittelnden Daten größer als 512 Bytes sein, sind UDP-Pakete zu kleine für eine solche Antwort. In diesem Fall müsste das Bit auf Eins gestellt werden um dem Empfänger des Paketes anzugeben, das es sich um ein TCP-Package handelt.\\ \hline
     rd=0, ra=0 & Die beiden Flags sind zum Angeben das eine Rekursion benötigt (desired) oder verfügbar (available) ist. In unserem Fall beantworten wir jedoch die Anfragen alle mit einer IP, daher kann diese Option auf Null gesetzt werden.\\ \hline
     z=0 & Hierbei handelt es sich um ein reserviertes Bit, welches immer auf Null gesetzt sein muss.\\ \hline
@@ -330,15 +320,13 @@ while True:
 \subsection{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
 
-\subsection*{Transaktionsnummer}
-Die Transaktionsnummer ist eine 16 Bit lange Zahl die vom Ziel-Server beim erstellen der Anfrage generiert wurde. Sie muss bei der Antwort gleich lauten wie bei der Anfrage und Existierte bereits vor bekannt werden das Angriffs. Manche Implementierungen waren allerdings leicht angreifbar, da die ID nicht zufällig gewählt wurde, sondern einfach bei jeder Anfrage Inkrementiert wurde. War also die Transaktionsnummer einer vorherigen Anfrage bekannt schränkte dies die möglichen Transaktionsnummern erheblich ein. Dies wurde durch einen Pool von zufällig gewürfelten Transaktionsnummern behoben, von denen für die Anfrage zufällig eine ausgewählt wird.
+\subsection*{Gleichverteilte Transaktionsnummern}
+Die Transaktionsnummer ist eine 16 Bit lange Zahl die vom Ziel-Server beim erstellen der Anfrage generiert wurde. Sie muss bei der Antwort gleich lauten wie bei der Anfrage und Existierte bereits vor bekannt werden das Angriffs. Manche Implementierungen waren allerdings leicht angreifbar, da die ID nicht zufällig gewählt wurde, sondern einfach bei jeder Anfrage Inkrementiert wurde. War also die Transaktionsnummer einer vorherigen Anfrage bekannt schränkte dies die möglichen Transaktionsnummern erheblich ein. Dies wurde durch einen Pool von zufällig gewürfelten Transaktionsnummern behoben, von denen für die Anfrage zufällig eine ausgewählt wird. Sollten alle möglichen Transaktionsnummern gleichverteilt gewählt werden, ergibt sich eine Wahrscheinlichkeit von $1/2^{16}$ pro Transaktionsnummer. Das alleine reicht jedoch wie im Angriff von Kaminky gezeigt wurde nicht aus um eine verfälschung zu verhindern. 
 
-\subsection*{Zufällige Quell Port}
-Früher wurden DNS anfragen standardmäßig über Port 53 gestellt. Dies machte es einfach gefälschte Antworten zu senden. In neueren Implementierungen wurde daher die sogenannte Source-Port-Randomization eingeführt. Hierbei wird der Ausgangsport für die Anfrage zufällig gewählt, was, je nach Implementierung weitere 11–16 Bit Zufall liefert.
+\subsection*{Port-Randomization}
+Früher wurden DNS anfragen standardmäßig über Port 53 gestellt. Dies machte es einfach gefälschte Antworten zu senden. In neueren Implementierungen wurde daher die sogenannte Source-Port-Randomization eingeführt. Hierbei wird der Ausgangsport für die Anfrage zufällig gewählt. Da es erforderlich ist, über den gleichen Port zu antworten, ergeben sich mindestens $2^{11}$ mögliche Ports. Sollten alle möglichen Ports verwendet werden, können bis zu $2^{16}$ Ports erschlossen werden. In Verbindung mit der Gleichverteilung der Transaktionsnummern ergeben sich dann $2^{16} \cdot 2^{11}$ Möglichkeiten.
 
-\subsection*{Random URL Capitalizing}
-Eine weitere Methode ist das Random URL Capitalizing oder auch 0x20-Bit Encoding. Hierbei wird die angefragte Domain zufällig in Klein- und Großbuchstaben geschrieben. Die Groß- und Kleinschreibeung ist bei DNS anfragen äquivalent, nach RFC 1034 sollte die Schreibweise bei der Antwort alledings gleich sein wie bei der Anfrage. Die Größe des Zufalls ist hierbei von der Länge der angefragten Domain abhängig.
-
-\section{Fazit}
+\subsection*{Random-URL-Capitalizing}
+Um die Möglichen Paare für den Angreifer noch weiter zu erhöhen und somit den Angriff noch Unrealistischer zu gestalten, ist eine weitere Methode das Random-URL-Capitalizing oder auch 0x20-Bit Encoding. Hierbei wird die angefragte Domain zufällig in Klein- und Großbuchstaben geschrieben. Die Groß- und Kleinschreibeung ist bei DNS anfragen äquivalent, nach RFC 1034 sollte die Schreibweise bei der Antwort alledings gleich sein wie bei der Anfrage. Die Größe des Zufalls ist hierbei von der Länge der angefragten Domain abhängig. Sei nun $|\mathit{URL}|$ die anzahl der Buchstaben in einer URL so ergeben sich $2^{|URL|}$ Moglichkeiten der Groß- und Kleinschreibung. Sollten also alle 3 Verteidigungsmechanismen verwendet werden, ergeben sich insgesamt $2^{16} \cdot 2^{11} \cdot 2^{|URL|}$ mögliche Kombinationspaare aus Transaktionsnummer, Port, und Groß- und Kleinschreibung die der Angreifer korrekt raten muss.
 
 \end{document}

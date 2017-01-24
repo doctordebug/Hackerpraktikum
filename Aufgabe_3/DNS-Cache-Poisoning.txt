@@ -8,31 +8,26 @@ participant Appropriate-DNS
 participant Attacker-DNS
 
 loop until: FakeIP == Attackers Choosen IP
-    Attacker->Victim-DNS: DNS-Request: [URL1, ID]
+    Attacker->Victim-DNS: DNS-Request: [victim.com]
     note right of Victim-DNS: No entry in cache
-    Victim-DNS->Root-Server: DNS-Request: [URL1, ID]
-    Root-Server->Victim-DNS: DNS-Response: [URL1, nsIP,ID]
-    Victim-DNS->Appropriate-DNS: DNS-Request: [URL1, ID #m]
-    Attacker->Victim-DNS: DNS-Response: [URL1, validIP, AR=PoisonNS, ID #1]
-    Attacker->Victim-DNS: DNS-Response: [URL1, validIP, AR=PoisonNS, ID #2]
+    Victim-DNS->Root-Server: DNS-Request: [victim.com]
+    Root-Server->Victim-DNS: DNS-Response: [victim.com, NS=nsIP]
+    Victim-DNS->Appropriate-DNS: DNS-Request: [victim.com, ID #m]
+    Attacker->Victim-DNS: DNS-Response: [victim.com, validIP, AR=PoisonNS, ID #1]
+    Attacker->Victim-DNS: DNS-Response: [victim.com, validIP, AR=PoisonNS, ID #2]
     Attacker->Victim-DNS: ...
-    Attacker->Victim-DNS: DNS-Response: [URL1, validIP, AR=PoisonNS, ID #m]
+    Attacker->Victim-DNS: DNS-Response: [victim.com, validIP, AR=PoisonNS, ID #m]
     Attacker->Victim-DNS: ...
-    Attacker->Victim-DNS: DNS-Response: [URL1, validIP, AR=PoisonNS, ID #n]
-    Appropriate-DNS->Victim-DNS: DNS-Response: [URL1, validIP, ID #m]
+    Attacker->Victim-DNS: DNS-Response: [victim.com, validIP, AR=PoisonNS, ID #n]
+    Appropriate-DNS->Victim-DNS: DNS-Response: [victim.com, validIP, ID #m]
     note right of Victim-DNS: Response was to slow
-    Victim-DNS->Attacker-DNS: DNS-Request: [URL1, ID]
-    Attacker-DNS->Victim-DNS: DNS-Response: [URL1, IP, ID]
-    Victim-DNS->Attacker: DNS-Response: [URL1, validIP, ID]
-    
-    Attacker->Victim-DNS: DNS-Request: [URL2, ID]
-    note right of  Victim-DNS: Found poisoned ns entry
-    Victim-DNS->Attacker-DNS: DNS-Request: [URL2, ID]
-    Attacker-DNS->Victim-DNS: DNS-Response: [URL2, FakeIP, ID]
-    Victim-DNS->Attacker: DNS-Response: [URL2, FakeIP, ID]
+    Victim-DNS->Attacker-DNS: DNS-Request: [victim.com]
+    Attacker-DNS->Victim-DNS: DNS-Response: [victim.com, fakeIP]
+    Victim-DNS->Attacker: DNS-Response: [victim.com, fakeIP]
+
 end
-User->Victim-DNS: DNS-Request: [URL2, ID]
+User->Victim-DNS: DNS-Request: [user.victim.com, ID]
 note right of  Victim-DNS: Found poisoned ns entry
-Victim-DNS->Attacker-DNS: DNS-Request: [URL2, ID]
-Attacker-DNS->Victim-DNS: DNS-Response: [URL2, FakeIP, ID]
-Victim-DNS->User: DNS-Response: [URL2, FakeIP, ID]
+Victim-DNS->Attacker-DNS: DNS-Request: [user.victim.com, ID]
+Attacker-DNS->Victim-DNS: DNS-Response: [user.victim.com, FakeIP, ID]
+Victim-DNS->User: DNS-Response: [user.victim.com, FakeIP, ID]
