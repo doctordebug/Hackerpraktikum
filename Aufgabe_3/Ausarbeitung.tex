@@ -35,30 +35,57 @@ Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufg
 Anschließend sollte ein DNS-Server aufgesetzt und konfiguriert werden. Dieser Server sollte später das Ziel des DNS-Cache-Poisoning-Angriffs sein. Die grundlegende Idee bestand darin, erst alle Sicherheitseigenschaften des Servers gegen diesen einen Angriff zu deaktivieren. Anschließend bestand das Ziel darin den Cache des DNS-Servers (Victim-DNS) zu \glqq vergiften\grqq \ und eine fehlerhaften DNS-Auflösung zu injecten. Ferner war das Ziel, den Cache des Victim-DNS so zu manipulieren, dass alle Anfragen an den in Python selbstgeschriebenen DNS-Server (Python-Server oder auch Attacker-DNS) weitergeleitet werden. Dadurch ist es dem Angreifer immer möglich eine andere IP-Adresse für die Auflösung zu wählen. Eine genauer Erläuterung folgt in den nächsten Kapiteln.
 
 Die folgenden Kapitel beschäftigen sich mit den Grundlagen des Angriffs, das heißt wie sollte in der Theorie vorgegangen werden, wie müssen die Abläufe aussehen und was sind die Vorrausetzungen für den Angriff. Außerdem wird der Angriff im Detaill genauer Erklärt. Der nächste Abschnitt besteht aus der Konfiguration der Server, welche Komponenten verwenden wurden und welche Sicherheitsmaßnahmen deaktiviert wurden. Im letzten Kapitel folgt anschließend eine detaillierte Beschreibung unseres Vorgehens, wie unsere Implementierung des Angriffs funktioniert und welche Tests durchgeführt wurden.
-%%%%Marc%%%%
+
 \section{Grundlagen des Angriffs}
-In diesem Kapitel wird zunächst der Ursprüngliche DNS Cache Poisoning Angriff so wie seine Lösung beschrieben, danach wird genauer auf die Aktuelle Variante eingegangen
+In diesem Kapitel wird zunächst der Ursprüngliche DNS Cache Poisoning Angriff so wie seine Lösung beschrieben, danach wird genauer auf die aktuelle Variante eingegangen
 
 \subsection{Historisches DNS Cache Poisoning}
-Der Ursprüngliche DNS-Cache-Poisoning Angriff basiert darauf dem Ziel DNS Server einen Gefälschten DNS Eintrag in Form eines sogenannten Additional Record unter zu schieben.
+Der Ursprüngliche DNS-Cache-Poisoning Angriff basiert darauf dem Ziel-DNS-Server (Victim-DNS) einen Gefälschten DNS Eintrag in Form eines sogenannten Additional Record unter zu schieben. Bei einem Additional Record handelt es sich um einen zusätzlichen Eintrag in einer DNS-Antwort. Dieser wird häufig dazu verwendet um zusätzliche Informationen wie die IP anderer NS-Server zu übertragen.
 
-Dazu wird wie Folgt vorgegangen: Man bringt zunächst einen validen Nameserver, nennen wir ihn \emph{ns1.attacker.com} unter seine Kontrolle, Beispielsweise den Nameserver der für die Domain \emph{attacker.com} zuständig ist. Stellt man nun eine Anfrage für die Domain \emph{attacker.com} an den Ziel-DNS-Server, so wird dieser bei \emph{ns1.attacker.com} anfragen, wie diese Adresse auf zu lösen ist. \emph{ns1.attacker.com} wird nun so konfiguriert, dass er zusätzlich zu der korrekten Antwort auf diese Frage einen gefälschten Record, beispielsweise für \emph{de.wikipedia.org} ausliefert. Der Ziel-DNS-Server wird sich diese Antwort merken und von nun an die gefälschte Adresse für Anfragen nach \emph{de.wikipedia.org} ausliefern.
+Dazu wird wie Folgt vorgegangen: Der erste Schritt besteht darin, dass der Angreifer einen validen DNS-Server (Attacker-DNS) besitzt. Dieser Attacker-DNS ist für die Domain \emph{attacker.com} zuständig. Wird eine DNS-Anfrage für die Domain \emph{attacker.com} an den Attacker-DNS gestellt, so wird der Attacker-DNS mit der korrekten IP für die Webseite antworten. Zusätzlich sendet er jedoch einen Additional Record, welcher eine falsche IP auflösung besitzt. Dadurch wird der Cache eines anderen DNS-Servers (Victim-DNS) mit dem Zusätzlichen Eintrag \glqq injected\grqq\ und wird von nun an eine falsche IP auflösen.
 
+\subsection{DNS-Spoofing}
+Beim sogenannten DNS-Spoofing versucht der Angreifer eine gefälschte DNS-Antwort zu senden, die vorgeblich von zuständigen DNS-Server Stammt. Damit der Angriff erfolgreich ist, muss die gefälschte Antwort entweder vor der legitimen Antwort beim angegriffenen DNS-Server eintreffen, oder der zuständige Nameserver wird durch einen Denial-of-Service-Angriff daran gehindert eine Antwort zu senden.
 
-\subsection{DNS Spoofing}
-Beim sogenannten DNS Spoofing versucht der Angreifer eine gefälschte DNS-Antwort zu senden, die vorgeblich von zuständigen DNS-Server Stammt.  Hierzu muss die Antwort vor der Antwort des echten DNS-Servers eintreffen. 
-
-Die DNS-Antwort zu fälschen ist in sofern Problematisch, dass sie eine 16 Bit lange Transaktionsnummer enthält die vom Ziel-Server beim erstellen der Anfrage generiert wurde. Für einen erfolgreichen Angriff muss die Transaktionsnummer erraten werden, hierfür sind im Schnitt $\dfrac{2^{16}}{2}=32768$ versuche Nötig.
-Um die Erfolgschance zu Steigern können mehrere Pakete auf einmal gesendet werden.
+Die DNS-Antwort zu fälschen ist in sofern Problematisch, dass sie eine 16 Bit lange Transaktionsnummer enthält die vom Ziel-Server beim erstellen der Anfrage generiert wurde. Für einen erfolgreichen Angriff muss die Transaktionsnummer erraten werden, hierfür sind im Schnitt $\displaystyle \textstyle {\frac {2^{16}}{2}}=32.768$ versuche Nötig. Der Angreifer kann mehrere gefälschte Antworten gleichzeitig senden, um die Erfolgswahrscheinlichkeit bei einem Angriffsversuch zu erhöhen.
 
 Ist man beim ersten Versuch nicht erfolgreich so wird der Ziel-DNS-Server die Korrekte Antwort zwischenspeichern, so dass erst nach Ablauf der Time-To-Live, also der Gültigkeitsdauer der validen DNS Antwort, ein neuer Versuch unternommen werden kann.
 
+%Geburtstagsparadoxon verbessern
+Bei BIND handelt es sich um den standard DNS-Server auf einem Linux System. Ältere Versionen hatten verschiedene Probleme und Schwachstellen. Beispielsweise unter BIND 8 wurde die Transaktionsnummer bei jeder Anfrage iteriert. Dadurch war es für einen Angreifer leicht, die nächsten Transaktionsnummern vorherzusagen. Sendet der angegriffene Resolver eine identische DNS-Anfrage mehrfach mit verschiedenen Transaktionsnummern, erhöht sich die Erfolgswahrscheinlichkeit aufgrund des Geburtstagsparadoxons erheblich.
+
+War der Angriff nicht erfolgreich, befindet sich der korrekte Resource Record im Cache, sodass der Angreifer erst nach Ablauf der Time to Live (TTL) einen erneuten Versuch unternehmen kann.
+
 \subsection{Kaminsky Angriff}
-Der Kaminsky Angriff erweitert den DNS Spoofing Angriff um das  zwischenspeichern der Korrekte Antwort zu umgehen. Da dadurch die Wartezeit bis zum Ablauf des Pakets umgangen wird, reduziert sich die Gesamtdauer des Angriffs erheblich! Dies wird dadurch erreicht, dass gezielt nicht existierende Domainnamen angefragt werden, welche vom Ziel-Server nicht gespeichert werden.
+In diesem Abschnitt wird der Angriff von Dan Kaminksy genauer dargelegt. Er fand mehrere Möglichkeiten, wie der Cache eines DNS-Servers \glqq injected\grqq\ werden kann. In diesem Prakikum wurde sich jeodch ausschließlich mit der effektivsten Methode beschäftigt um den Angriff zu realisieren. An Stelle einer falschen IP in den Cache des DNS-Servers zu \glqq injecten\grqq\ wird versucht einen vollständigen NS-Eintrag zu injection.  
 
-Außerdem wird nicht wie beim DNS Spoofing ein einzelner Domain Name verseucht, sondern stattdessen die Hoheit über die gesamte Domain übernommen. Hierzu enthält die gefälschte Antwort eine Delegation bestehend aus einem NS Resource Record und einem Glue Record. Ersterer beinhaltet einen Verweis auf den (angeblich) für die Domain zuständigen Nameserver (z.B. \emph{ns1.wikipedia.de}). Wollte der Ziel DNS Server nun allerdings \emph{ns1.wikipedia.de} auflösen, so müsste er dafür bei \emph{ns1.wikipedia.de} selber nachfragen, was jedoch nicht möglich ist, da er hierfür ja bereits den Namen aufgelöst haben müsste. Hierfür ist der Glue Record zuständig. Es handelt sich dabei um einen Normalen A Record, welcher den Namen \emph{ns1.wikipedia.de} zu der IP eines DNS Servers unter der Kontrolle des Angreifers umleitet.
+Wie bereits erwähnt, muss der Angreifer zuerst einen eigenen DNS-Server (Attacker-DNS) konfigurieren, sodass dieser als authoritative für die Domain $victim.com$ und $attacker.com$ gilt. Den Attacker-DNS als authoritative einzustellen ist kein Problem und wird auch nicht verhindert, da kein Root-Server diesen als authoritative angeben wird.
 
-%%%%Marc Ende%%%%
+{
+\centering
+\includegraphics[scale=0.4]{DNS-Cache-Poisoning.png}
+\newpage
+}
+
+Im ersten Schritt stellt der Attacker eine DNS-Anfrage für die Domain \emph{victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind zu diesen Zeitpunkt noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
+
+Wichtig ist, dass die Seite noch nicht (kurz vorher) angefragt wurde, da der Victim-DNS sonst die IP zu der Seite im Cache gespeichert hat. Dadurch könnte keine falsche IP \glqq injected\grqq\ werden und der Angriff wäre zwecklos. Ist die Seite nicht im Cache des Victim-DNS eingetragen, wird eine Anfrage an den Root-Server gestellt, um herauszufinden was der zuständige Nameserver (Appropriate-DNS) für die Angefragt Domain ist.
+
+Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten zu generieren bzw. an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss einen NS-Record enthalten, damit der Victim-DNS nochmal den Attacker-DNS nach der IP für \emph{victimg.com} anfragt.\\
+
+%% TODO 
+\textbf{[WIEVIELE PAKETE AUSREICHEN UND WIE DAS GANZE LAUFEN SOLL]}\\
+%%
+
+Wenn jetzt das \glqq richtige\grqq\ Antwortpaket vom Approriate-DNS an den den Victim-DNS gesendet wird, ist das vom Angreifer erstellte und versendete Paket jedoch längst angekommen und auch angenommen. Dadurch wird die Antworten des richtigen Appropriate-DNS vom Victim-DNS ignoriert und verworfen. Da dem Victim-DNS durch das gefälschte Paket mitgeteilt wurde, dass der Attacker-DNS für die IP-Auflösung zuständig ist, sendet der Victim-DNS erneut eine DNS-Anfrage. Jetzt kann der Attacker-DNS mit einer vom Angreifer selbst gewählten IP antworten. In einem letzten Schritt wird die aufgelöste IP jetzt noch vom Victim-DNS zurück an den Anreifer gesendet. Der Angreifer überprüft jetzt ob die Antwort der DNS-Anfrage von \emph{victim.com} die von ihm selbst gewählte IP beinhaltet. Sollte dem nicht der Fall sein, so versucht er den gesamten Vorgang erneut.\\
+
+%% TODO 
+\textbf{[ABÄNDERUNG DER SUBDOMAINS BESCHREIBEN]}\\
+%% 
+
+%% TODO 
+\textbf{[WAS PASSIERT JETZT FÜR EINEN NORMALEN BENUTZER]}\\
+%%
 
 \section{Konfigurationen der Server und Schnittstellen}
 Dieses Kapitel beschäftig sich mit unserer Netzwerkstruktur, den verwenden System und ihren Konfigurationen. Zu erst wird auf den aus Ausgabe 2 in Python implementierten DNS-Server eingegangen. Anschließend werden die Konfigurationen des in Ubuntu aufgesetzten DNS-Servers dargelegt und genauer Erläutert. Im letzten Abschnitt dieses Kapitels wird die Architektur unseren Netwerks dargestellt. Genauer heißt das, wie kommunizieren die einzelnen Parteien miteinander und wie sind sie verbunden.
@@ -176,8 +203,6 @@ options {
 };
 \end{lstlisting}
 \end{center}
-
-\subsection{Protokollfluss}
 
 \section{Der Angriff}
 In folgendem Abschnitt wird die praktische Umsetzung des Angriffs genauer dargelegt. Im ersten Unterpunkt wird auf die konkrete Implementierung in Python mithilfe von Scapy eingegangen. Dabei wird dargelegt, was die einzelnen Optionen bedeuten und wie sie zu interpretieren sind. Als nächstes folgt eine Beschreibung unserer Vorgehensweise und welche Versuche und Versuchsreihen durchgeführt wurden. Zum Schluss werden Gegenmaßnahmen aufgezählt, die einen solchen Angriff verhindern sollen.
@@ -302,7 +327,6 @@ while True:
 
 \subsection{Versuchsreihen und Vorgehensweise}
 
-%%%%Marc%%%%
 \subsection{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
 
@@ -314,7 +338,7 @@ Früher wurden DNS anfragen standardmäßig über Port 53 gestellt. Dies machte 
 
 \subsection*{Random URL Capitalizing}
 Eine weitere Methode ist das Random URL Capitalizing oder auch 0x20-Bit Encoding. Hierbei wird die angefragte Domain zufällig in Klein- und Großbuchstaben geschrieben. Die Groß- und Kleinschreibeung ist bei DNS anfragen äquivalent, nach RFC 1034 sollte die Schreibweise bei der Antwort alledings gleich sein wie bei der Anfrage. Die Größe des Zufalls ist hierbei von der Länge der angefragten Domain abhängig.
-%%%%Marc%%%%
+
 \section{Fazit}
 
 \end{document}
