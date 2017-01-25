@@ -1,0 +1,28 @@
+title  Classic DNS-Cache-Poisoning
+
+participant User
+participant Attacker
+participant Victim-DNS
+participant Root-Server
+participant Appropriate-DNS
+
+loop until: FakeIP == Attackers Choosen IP
+    Attacker->Victim-DNS: DNS-Request: [www.victim.com]
+    note right of Victim-DNS: No entry in cache
+    Victim-DNS->Root-Server: DNS-Request: [www.victim.com]
+    Root-Server->Victim-DNS: DNS-Response: [www.victim.com, NS=nsIP]
+    Victim-DNS->Appropriate-DNS: DNS-Request: [victim.com, ID #m]
+    Attacker->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, AR=PoisonNS, ID #1]
+    Attacker->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, AR=PoisonNS, ID #2]
+    Attacker->Victim-DNS: ...
+    Attacker->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, AR=PoisonNS, ID #m]
+    Attacker->Victim-DNS: ...
+    Attacker->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, AR=PoisonNS, ID #n]
+    Appropriate-DNS->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, ID #m]
+    note right of Victim-DNS: Response was to slow
+    Victim-DNS->Attacker: DNS-Response: [www.victim.com, fakeIP]
+
+end
+User->Victim-DNS: DNS-Request: [www.victim.com, ID]
+note right of  Victim-DNS: Found poisoned A-Record
+Victim-DNS->User: DNS-Response: [www.victim.com, FakeIP, ID]
