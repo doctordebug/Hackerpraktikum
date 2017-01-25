@@ -6,8 +6,8 @@ Vagrant.require_version ">= 1.6.0"
 VAGRANTFILE_API_VERSION = "2"
 
 # Host specific settings
-INTERFACE = "Realtek PCIe GBE Family Controller"
-HOST_NETWORK_GATEWAY="192.168.0.1"
+INTERFACE = "Qualcomm Atheros AR5B97 Wireless Network Adapter"
+HOST_NETWORK_GATEWAY = "192.168.0.1"
 
 # Vulnerable DNS server
 VLN_IP = "192.168.0.25"

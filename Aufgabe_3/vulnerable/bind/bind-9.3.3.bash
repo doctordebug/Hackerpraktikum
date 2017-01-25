@@ -59,4 +59,8 @@ sed -i "s@<port_out>@${PORT_OUT}@g" /srv/named/etc/named.conf.options.vulnerable
 cp $BASE_DIR/127.0.0 /srv/named/etc/namedb/pz/127.0.0
 cp $BASE_DIR/root.hints /srv/named/etc/namedb/root.hints
 
-chown -R named.named /srv/named
+mkdir /var/log/named
+cd /var/log/named
+touch default.log database.log security.log config.log resolver.log xfer-in.log xfer-out.log notify.log client.log unmatched.log queries.log network.log update.log dispatch.log dnssec.log lame-servers.log
+
+chown -R named.named /srv/named /var/log/named

