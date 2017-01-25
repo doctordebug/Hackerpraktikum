@@ -72,7 +72,7 @@ Wichtig ist, dass die Seite noch nicht (kurz vorher) angefragt wurde, da der Vic
 
 Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten zu generieren bzw. an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss einen NS-Record enthalten, damit der Victim-DNS nochmal den Attacker-DNS nach der IP für \emph{victimg.com} anfragt.\\
 
-%% TODO 
+%TODO 
 \textbf{[TODO: WIEVIELE PAKETE AUSREICHEN UND WIE DAS GANZE LAUFEN SOLL]}\\
 %%
 
@@ -138,6 +138,8 @@ Als Nächstes wird mit $\mathit{assert}$ sichergestellt, dass zum Einen der OP-C
 \end{center}
 Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die IP beinhaltet bzw. in unserem Fall eine vom Angreifer selbst gewählte IP. Um ein gültiges Antwort-Paket zu bilden, müssen mehrere Optionen (sogennante Flags) korrekt gesetzt sein. Die Optionen werden im Folgenden aus Gründen der Einfachheit in tabellarischer Form erläutert:
 \begin{center}
+	%TODO Lukas:  Warum ist es wichtig, dass es sich um eine Authoritative antwort handelt?
+	%			  Bitte den Absatz mit aa nochmal Formulieren und den Rest eintragen.
 	\setlength\arrayrulewidth{0.6pt}    
     \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
     \rowcolor[gray]{0.9} 
@@ -167,32 +169,44 @@ Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die I
 In einem letzten Schritt wird das gebildete Paket als Antwort auf die DNS-Anfrage zurück gesendet.
 
 \subsection{Victim DNS-Server}
+%TODO Bindversion angeben, Ubuntu-Version angeben
+Aufgrund der Nachvollziehbarkeit und der Reproduzierbarkeit werde im folgenden Abschnitt die Konfigurationen auf dem Victim-DNS genauer erläuert. Als Grundlage für den Victim-DNS wurde ein Ubuntu-Server (Version X) gewählt. Auf diesem Serversystem wurde der standard DNS-Server names BIND eingerichtet. Bei der von uns verwendeten BIND-Version handelt es sich um X. Jegliche konfigurationen des DNS-Servers wurde in \emph{/etc/bind/named.conf.options} vorgenommen. Im Folgenden werden die einzelnen Konfigurationen genauer erläutert:
 \begin{center}
 \begin{lstlisting}
 options {
-    directory "/etc/namedb";
-    pid-file "/var/run/named.pid";
-    statistics-file "/var/run/named.stats";
+    ...
 
-    query-source address <ip> port <port_out>;
+    query-source address <ip_eth1> port 54;
 
     dnssec-enable no;
 
     allow-recursion { any; };
     allow-query { any; };
 
-    auth-nxdomain no;    # conform to RFC1035
+    auth-nxdomain no;
 
-    listen-on-v6 { none; };
-
-    listen-on port <port_in> {
+    listen-on port 53 {
         127.0.0.1;
-        <ip>;
+        <ip_eth1>;
     };
 
 };
 \end{lstlisting}
 \end{center}
+
+Die erste Zeile gibt den DNS-Server an, dass alle Anfragen nach außen über Port 54 laufen und über die IP \emph{<ip\_eth1>} versendet werden. Die IP musste zusätzlich angegeben werden, da unser DNS-Server zwei Interfaces (eth0 und eth1) verwendet. Das erste Interface (eth0) dient dazu, dass Vagrant unsere virtuelle Machinen verwalten kann. Bei Vagrant handelt es sich um eine Anwendung zum Erstellen und Verwalten von virtuellen Maschinen. Es ermöglicht ein einfaches Deployment und eine Reproduzierbare und leicht zu übertragende (Beispielsweise Git) Umgebung. Eine Vagrant-Datei mit den Konfigurationen muss nur gestartet werden, und alle virtuellen Maschinen werden den Konfigurationen entsprechend auf dem Computer installiert und konfiguriert. Daurch ist gewährleistet, dass alle Mitglieder in der Gruppe die gleichen und aktuellsten virtuellen Maschinen besitzen. Beim zweiten Interface (eth1) handelt es sich um eine Netzwerkbrücke über die alle DNS-Anfragen angenommen und versendet werden.
+
+Beim zweiten Eintrag handelt es sich um die DNS Security Extensions (DNSSEC). Diese Extensions werden verwendet um die Integrität von DNS-Antworten zu gewährleisten. DNSSEC signiert alle DNS-Records (A,MX etc.) einer Zone mit Hilfe von Public Key Infrastructure (PKI). Damit der Angriff funktionieren kann, wurde diese Option deaktiviert. Dadurch ist sichergestellt, dass keine weiteren Überprüfungen von Signaturen etc. vorgenommen werden.\\
+
+%TODO Marc
+\textbf{TODO: ALLOW SEKTION NOCH AUSFORMULIEREN}\\
+%%
+
+%TODO Marc
+\textbf{TODO: AUTH-NXDOMAIN}\\
+%%
+
+Der letzte Eintrag über welches Interface und welchen Port die die DNS-Anfragen empfangen werden. Hier wurde der DNS-Server so konfiguriert, dass er alle Anfragen über Port 53 annimmt. Außerdem werden alle Anfragen über die IP \emph{<ip\_eth1>} und den Localhost angenommen.
 
 \section{Der Angriff}
 In folgendem Abschnitt wird die praktische Umsetzung des Angriffs genauer dargelegt. Im ersten Unterpunkt wird auf die konkrete Implementierung in Python mithilfe von Scapy eingegangen. Dabei wird dargelegt, was die einzelnen Optionen bedeuten und wie sie zu interpretieren sind. Als nächstes folgt eine Beschreibung unserer Vorgehensweise und welche Versuche und Versuchsreihen durchgeführt wurden. Zum Schluss werden Gegenmaßnahmen aufgezählt, die einen solchen Angriff verhindern sollen.
