@@ -198,15 +198,17 @@ Die erste Zeile gibt den DNS-Server an, dass alle Anfragen nach außen über Por
 
 Beim zweiten Eintrag handelt es sich um die DNS Security Extensions (DNSSEC). Diese Extensions werden verwendet um die Integrität von DNS-Antworten zu gewährleisten. DNSSEC signiert alle DNS-Records (A,MX etc.) einer Zone mit Hilfe von Public Key Infrastructure (PKI). Damit der Angriff funktionieren kann, wurde diese Option deaktiviert. Dadurch ist sichergestellt, dass keine weiteren Überprüfungen von Signaturen etc. vorgenommen werden.\\
 
-%TODO Marc
-\textbf{TODO: ALLOW SEKTION NOCH AUSFORMULIEREN}\\
+%Marc
+Der nachfolgende allow-recursion Eintrag sorgt dafür, dass der DNS Server nicht nur anfragen für Zonen beantwortet für die er selbst autoritativ ist, sondern auch rekursiv über andere Nameservern Adressen auflöst. Der parameter any sorgt dafür, dass der Server anfragen von jeder beliebigen IP annimmt.
+
+Die allow-query Anweisung legt fest von welchen Clients der Server überhaupt anfragen an nimmt.\\
 %%
 
-%TODO Marc
-\textbf{TODO: AUTH-NXDOMAIN}\\
+%Marc
+Mit der auth-nxdomain no anweisung wird festgelegt, dass der Nameserver NXDOMAIN Records (also Antworten für nicht existente Domains) nicht als autoritativ kennzeichnen soll. Anderenfalls würde der Server alle NX records als autoritativ  markieren, auch wenn er eigentlich nicht die Autorität über die betreffende Domain inne hat.
 %%
 
-Der letzte Eintrag über welches Interface und welchen Port die die DNS-Anfragen empfangen werden. Hier wurde der DNS-Server so konfiguriert, dass er alle Anfragen über Port 53 annimmt. Außerdem werden alle Anfragen über die IP \emph{<ip\_eth1>} und den Localhost angenommen.
+Der letzte Eintrag legt fest über welches Interface und welchen Port die die DNS-Anfragen empfangen werden. Hier wurde der DNS-Server so konfiguriert, dass er alle Anfragen über den Standart DNS Port 53 annimmt. Außerdem werden alle Anfragen über die IP \emph{<ip\_eth1>} und die Loopback angenommen.
 
 \section{Der Angriff}
 In folgendem Abschnitt wird die praktische Umsetzung des Angriffs genauer dargelegt. Im ersten Unterpunkt wird auf die konkrete Implementierung in Python mithilfe von Scapy eingegangen. Dabei wird dargelegt, was die einzelnen Optionen bedeuten und wie sie zu interpretieren sind. Als nächstes folgt eine Beschreibung unserer Vorgehensweise und welche Versuche und Versuchsreihen durchgeführt wurden. Zum Schluss werden Gegenmaßnahmen aufgezählt, die einen solchen Angriff verhindern sollen.
@@ -258,6 +260,7 @@ def initial_request(domain, ip, port):
     )
 \end{lstlisting}
 \end{center}
+Die Funktion initial\_request generiert eine Reguläre DNS-Anfrage, um den Ziel-Server auf zu fordern die Ziel-Domain auf zu lösen.
 \begin{center}
 \begin{lstlisting}
 def forged_ns_response(id, target_domain, target_ip, attacker_dns_ip, known_ns_domain, 
@@ -293,6 +296,9 @@ def forged_ns_response(id, target_domain, target_ip, attacker_dns_ip, known_ns_d
     return response
 \end{lstlisting}
 \end{center}
+Mit der Funktion forged\_ns\_response werden generische Antwortpakete generiert.
+Die Funktion erhält mehrere Parameter, insbesondere die Transaktions-ID welche die Nachricht erhalten soll. Mit ihrer Hilfe werden zunächst alle möglichen Antworten generiert, die dann gebündelt zum Server gesandt werden können.
+
 \begin{center}
 \begin{lstlisting}
 counter = 0
@@ -330,6 +336,11 @@ while True:
 \end{center}
 
 \subsection{Versuchsreihen und Vorgehensweise}
+
+%Versuch 1: DNS Python DNS Server Schreiben, dessen Antworten von Bind Akzeptiert werden; Wichtig war: Bind Akzeptierte die Antworten nur, wenn der Request in der Antwort enhalten war.
+%Versuch 2: Generische A-Record, wo nur die ID eingesetzt werden muss
+%Versuch 3: DNS Pakete Schnell genug senden: On the fly ist zu langsam. sr1 ist zu langsam => sendpfast und pakete vorbereiten
+%Versuch 4: Paketreihenfolge mit wireshark beobachen
 
 \section{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
