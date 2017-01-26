@@ -9,6 +9,7 @@
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{nameref}
 \usepackage{hyperref}
 \usepackage{colortbl}
 \usepackage{hhline}
@@ -30,7 +31,7 @@
 \newpage
 
 \section{Einleitung}
-Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Als Quelle für diese Ausarbeitung wurde ausschließlich die Literatur aus der Aufgabenstellung verwendet. Die erste Aufgabe bestand in der Programmierung eines eigenen DNS-Servers. Der Server wurde in der Programmiersprache Python geschrieben und als Hilfe wurde das Modul Scapy verwendet. Der Python-Server sollte in der Lage sein, auf eine DNS-Anfrage eine entsprechend korrekt geformte Antwort zu senden. Die IP, mit welcher der Python-Server antwortet, sollte selbst einstellbar sein.
+Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Als Quelle für diese Ausarbeitung wurde ausschließlich die Literatur~\cite{Blog} aus der Aufgabenstellung verwendet. Die erste Aufgabe bestand in der Programmierung eines eigenen DNS-Servers. Der Server wurde in der Programmiersprache Python geschrieben und als Hilfe wurde das Modul Scapy verwendet. Der Python-Server sollte in der Lage sein, auf eine DNS-Anfrage eine entsprechend korrekt geformte Antwort zu senden. Die IP, mit welcher der Python-Server antwortet, sollte selbst einstellbar sein.
 
 Anschließend sollte ein DNS-Server aufgesetzt und konfiguriert werden. Dieser Server sollte später das Ziel des DNS-Cache-Poisoning-Angriffs sein. Die grundlegende Idee bestand darin, erst alle Sicherheitseigenschaften des Servers gegen diesen einen Angriff zu deaktivieren. Anschließend bestand das Ziel darin den Cache des DNS-Servers (Victim-DNS) zu \glqq vergiften\grqq \ und eine fehlerhaften DNS-Auflösung zu injecten. Ferner war das Ziel, den Cache des Victim-DNS so zu manipulieren, dass alle Anfragen an den in Python selbst geschriebenen DNS-Server (Python-Server oder auch Attacker-DNS) weitergeleitet werden. Dadurch ist es dem Angreifer immer möglich eine andere IP-Adresse für die Auflösung zu wählen. Eine genauer Erläuterung folgt in den nächsten Kapiteln.
 
@@ -42,15 +43,15 @@ In diesem Kapitel wird zunächst der klassische DNS Cache Poisoning Angriff so w
 \subsection{Klassisches DNS-Cache-Poisoning}
 Die klassische Form des DNS-Cache-Poisonings basierte darauf, einem DNS-Server (Victim-DNS) einen gefälschten DNS-Eintrag, in Form eines sogenannten A-Records, zu übermitteln. Ein A-Record ordnet einer Domain eine  IPv4-Adresse zu. Diese Form der Records sind die häufigsten Records im DNS. 
 
-%TODO why caching
 Da ein DNS-Server alle DNS-Anfragen für kurze Zeit in seinem Cache speichert, speichert er sich auch die von einem Angreifer gefälschte Adresse. Stellt ein Benutzer nach dem Poisoning eine DNS-Anfrage an die gleiche Domain, die der Attacker zuvor \glqq injected\grqq\ hat, wird der DNS-Server in seinem Cache die falsche IP finden und diese an den Benutzer übermitteln. Dadurch kann der Angreifer den Benutzer beispielsweise auf eine von ihm kontrollierte Webseite leiten. 
 
-Im folgenden wird anhand eines Sequenzdiagramms genauer dargestellt, wie die klassische Form dieses Angriffs aussieht. Im späteren Verlauf der Arbeit wird eine deutlich effizientere Methode vorgestellt. Dabei werden ebenfalls die Unterschiede und auch Vorteile zur klassischen Methoden herausgestellt. Das Sequenzdiagramm im klassischen Szenario gestaltet sich daher wie folgt:
-
-{
-\centering
-\includegraphics[scale=0.45]{Classic_DNS-Cache-Poisoning.png}
-}
+Im folgenden wird anhand eines Sequenzdiagramms genauer dargestellt, wie die klassische Form dieses Angriffs aussieht. Im späteren Verlauf der Arbeit wird eine deutlich effizientere Methode vorgestellt. Dabei werden ebenfalls die Unterschiede und auch Vorteile zur klassischen Methoden herausgestellt. Das Sequenzdiagramm im klassischen Szenario gestaltet sich daher wie in Abbildung~\ref{pic:CDNSCP} zu sehen ist.
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.45]{Classic_DNS-Cache-Poisoning.png}
+	\caption{Klassischer DNS-Cache-Poisoning}
+	\label{pic:CDNSCP}
+\end{figure}
 
 Im ersten Schritt stellt der Attacker eine DNS-Anfrage für die Domain \emph{www.victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind zu diesem Zeitpunkt noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
 
@@ -81,12 +82,13 @@ Während beim klassischen Angriff nur eine Domain, beispielsweise \emph{www.vict
 
 Der Angriff von Dan Kaminsky basiert darauf, an Stelle eines gefälschten A-Records einen gefälschten NS-Record an den Victim-DNS zu übermitteln. Bei einem NS-Record handelt es sich um eine DNS-Response die angibt, welcher NS-Server für diese Domain zuständig ist. Das Ziel ist es also, dem Victim-DNS die falsche IP-Adresse für einen zuständigen NS-Server zu übermitteln. Da sich der Victim-DNS die NS-Einträge ebenfalls cached, wird er in Zukunft für jede Anfrage, unabhängig der Subdomain, den vom Attacker angegeben DNS-Server anfragen. Als Vorraussetzung für diesen Angriff ergibt sich also, dass der Angreifer einen DNS-Server (Attacker-DNS) unter seine Kontrolle haben muss. 
 
-Das heißt, der Angreifer muss den Attacker-DNS so konfigurieren, dass dieser als authoritative für die Domain $victim.com$ und $attacker.com$ gilt. Den Attacker-DNS als authoritative einzustellen ist kein Problem und wird auch nicht verhindert, da kein Root-Server diesen als authoritative angeben wird. Das Angriffsszenario legt sich somit folgt dar:
-
-{
-\centering
-\includegraphics[scale=0.35]{DNS-Cache-Poisoning.png}
-}
+Das heißt, der Angreifer muss den Attacker-DNS so konfigurieren, dass dieser als authoritative für die Domain $victim.com$ und $attacker.com$ gilt. Den Attacker-DNS als authoritative einzustellen ist kein Problem und wird auch nicht verhindert, da kein Root-Server diesen als authoritative angeben wird. Das Angriffsszenario legt sich somit wie in Abbildung~\ref{pic:DNSCP} dar.
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.4]{DNS-Cache-Poisoning.png}
+	\caption{DNS-Cache-Poisoning}
+	\label{pic:DNSCP}
+\end{figure} 
 
 Wie auch beim klassischen Angriff, stellt der Attacker eine DNS-Anfrage für die Domain \emph{victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind auch in diesem Szenario noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
 
@@ -358,4 +360,6 @@ Früher wurden DNS anfragen standardmäßig über Port 53 gestellt. Dies machte 
 \subsection*{Random-URL-Capitalizing}
 Um die Möglichen Paare für den Angreifer noch weiter zu erhöhen und somit den Angriff noch Unrealistischer zu gestalten, ist eine weitere Methode das Random-URL-Capitalizing oder auch 0x20-Bit Encoding. Hierbei wird die angefragte Domain zufällig in Klein- und Großbuchstaben geschrieben. Die Groß- und Kleinschreibeung ist bei DNS anfragen äquivalent, nach RFC 1034 sollte die Schreibweise bei der Antwort alledings gleich sein wie bei der Anfrage. Die Größe des Zufalls ist hierbei von der Länge der angefragten Domain abhängig. Sei nun $|\mathit{URL}|$ die anzahl der Buchstaben in einer URL so ergeben sich $2^{|URL|}$ Moglichkeiten der Groß- und Kleinschreibung. Sollten also alle 3 Verteidigungsmechanismen verwendet werden, ergeben sich insgesamt $2^{16} \cdot 2^{11} \cdot 2^{|URL|}$ mögliche Kombinationspaare aus Transaktionsnummer, Port, und Groß- und Kleinschreibung die der Angreifer korrekt raten muss.
 
+\bibliographystyle{abbrv}
+\bibliography{database}
 \end{document}
