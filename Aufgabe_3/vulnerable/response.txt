@@ -1,0 +1,106 @@
+Frame 2: 131 bytes on wire (1048 bits), 131 bytes captured (1048 bits) on interface 0
+    Interface id: 0
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Jan 26, 2017 09:18:52.697463000 UTC
+    [Time shift for this packet: 0.000000000 seconds]
+    Epoch Time: 1485422332.697463000 seconds
+    [Time delta from previous captured frame: 0.031243000 seconds]
+    [Time delta from previous displayed frame: 0.031243000 seconds]
+    [Time since reference or first frame: 0.031243000 seconds]
+    Frame Number: 2
+    Frame Length: 131 bytes (1048 bits)
+    Capture Length: 131 bytes (1048 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ip:udp:dns]
+Ethernet II, Src: HitronTe_bf:e0:22 (bc:14:01:bf:e0:22), Dst: CadmusCo_fc:6c:eb (08:00:27:fc:6c:eb)
+    Destination: CadmusCo_fc:6c:eb (08:00:27:fc:6c:eb)
+        Address: CadmusCo_fc:6c:eb (08:00:27:fc:6c:eb)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HitronTe_bf:e0:22 (bc:14:01:bf:e0:22)
+        Address: HitronTe_bf:e0:22 (bc:14:01:bf:e0:22)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IP (0x0800)
+Internet Protocol Version 4, Src: 216.69.185.38 (216.69.185.38), Dst: 192.168.0.25 (192.168.0.25)
+    Version: 4
+    Header length: 20 bytes
+    Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
+        0000 00.. = Differentiated Services Codepoint: Default (0x00)
+        .... ..00 = Explicit Congestion Notification: Not-ECT (Not ECN-Capable Transport) (0x00)
+    Total Length: 117
+    Identification: 0x0000 (0)
+    Flags: 0x02 (Don't Fragment)
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    Fragment offset: 0
+    Time to live: 51
+    Protocol: UDP (17)
+    Header checksum: 0xf54a [validation disabled]
+        [Good: False]
+        [Bad: False]
+    Source: 216.69.185.38 (216.69.185.38)
+    Destination: 192.168.0.25 (192.168.0.25)
+    [Source GeoIP: Unknown]
+    [Destination GeoIP: Unknown]
+User Datagram Protocol, Src Port: domain (53), Dst Port: xns-ch (54)
+    Source port: domain (53)
+    Destination port: xns-ch (54)
+    Length: 97
+    Checksum: 0x48a6 [validation disabled]
+        [Good Checksum: False]
+        [Bad Checksum: False]
+Domain Name System (response)
+    [Request In: 1]
+    [Time: 0.031243000 seconds]
+    Transaction ID: 0xae58
+    Flags: 0x8400 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .1.. .... .... = Authoritative: Server is an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...0 .... .... = Recursion desired: Don't do query recursively
+        .... .... 0... .... = Recursion available: Server can't do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 1
+    Authority RRs: 1
+    Additional RRs: 1
+    Queries
+        www0.bank.com: type A, class IN
+            Name: www0.bank.com
+            Type: A (Host address)
+            Class: IN (0x0001)
+    Answers
+        www0.bank.com: type A, class IN, addr 184.168.221.96
+            Name: www0.bank.com
+            Type: A (Host address)
+            Class: IN (0x0001)
+            Time to live: 10 minutes
+            Data length: 4
+            Addr: 184.168.221.96 (184.168.221.96)
+    Authoritative nameservers
+        www0.bank.com: type NS, class IN, ns ns01.cashparking.com
+            Name: www0.bank.com
+            Type: NS (Authoritative name server)
+            Class: IN (0x0001)
+            Time to live: 1 hour
+            Data length: 19
+            Name Server: ns01.cashparking.com
+    Additional records
+        <Root>: type OPT
+            Name: <Root>
+            Type: OPT (EDNS0 option)
+            UDP payload size: 4096
+            Higher bits in extended RCODE: 0x0
+            EDNS0 version: 0
+            Z: 0x8000
+                Bit 0 (DO bit): 1 (Accepts DNSSEC security RRs)
+                Bits 1-15: 0x0 (reserved)
+            Data length: 0
+
