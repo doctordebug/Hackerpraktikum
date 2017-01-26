@@ -18,7 +18,7 @@ loop until: IP == Attackers Choosen IP
     Attacker->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, ID #m]
     Attacker->Victim-DNS: ...
     Attacker->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, ID #n]
-    Appropriate-DNS->Victim-DNS: DNS-Response: [www.victim.com, fakeIP, ID #m]
+    Appropriate-DNS->Victim-DNS: DNS-Response: [www.victim.com, validIP, ID #m]
     note right of Victim-DNS: Response was to slow
     Victim-DNS->Attacker: DNS-Response: [www.victim.com, IP]
 
