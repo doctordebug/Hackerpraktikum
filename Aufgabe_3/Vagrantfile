@@ -6,7 +6,9 @@ Vagrant.require_version ">= 1.6.0"
 VAGRANTFILE_API_VERSION = "2"
 
 # Host specific settings
-INTERFACE = "Realtek PCIe GBE Family Controller"
+
+INTERFACE = "Intel(R) Centrino(R) Ultimate-N 6300 AGN"
+
 HOST_NETWORK_GATEWAY = "192.168.0.1"
 
 # Vulnerable DNS server

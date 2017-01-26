@@ -3,7 +3,7 @@ options {
     pid-file "/var/run/named.pid";
     statistics-file "/var/run/named.stats";
 
-    query-source address <ip> port <port_out>;
+    #query-source address <ip> port <port_out>;
 
     dnssec-enable no;
 
@@ -14,9 +14,9 @@ options {
 
     listen-on-v6 { none; };
 
-    listen-on port <port_in> {
+    listen-on port 53 {
         127.0.0.1;
-        <ip>;
+		0.0.0.0;
     };
 
 };
