@@ -100,8 +100,7 @@ sock.bind((os.environ['ATK_SERVER_IP'], 53))
 fixed_ip = os.environ['ATK_FORGED_IP']
 \end{lstlisting}
 \end{center}
-%TODO das mit der fixed ip
-Da DNS-Server primär Anfragen (Requests) über das User Datagram Protocol (UDP) und Port 53 erhalten, liegt der erste Schritt im erstellen und binden eines Datagram Sockets (SOCK\_DGRAM). Dieser Socket ist wie es bei DNS oft üblich ist an den Port 53 gebunden. Die Variable $fixed\_ip$ erhählt einen vom Benutzer selbst gewählte IP-Adresse als Eingabe. Die Adresse wird beim Start des Python-Servers abgefragt.
+Da DNS-Server primär Anfragen (Requests) über das User Datagram Protocol (UDP) und Port 53 erhalten, liegt der erste Schritt im erstellen und binden eines Datagram Sockets (SOCK\_DGRAM). Dieser Socket ist wie es bei DNS oft üblich ist an den Port 53 gebunden. Die Variable $fixed\_ip$ enthält eine vom Angreifer gewählte IP-Adresse, die bei jeder Anfrage als Ziel-IP gesendet wird.
 \begin{center}
 \begin{lstlisting}
 while True:
