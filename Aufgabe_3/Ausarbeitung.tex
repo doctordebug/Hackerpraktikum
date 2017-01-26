@@ -243,7 +243,7 @@ victim_host_base = ".bank.com."
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
 \end{lstlisting}
 \end{center}
-Es werden einige Parameter geladen. Die Variablen welche mit dem Präfix victim\_dns\_ beginnen, legen den zu vergiftenden Nameserver fest. In victim\_host\_base steht die URL, welche später vom Victim-DNS in den Cache übernommen werden soll. Zuletzt kommt attacker\_dns\_ip welche die IP des vom Attacker kontrollierten DNS-Servers (Attacker-DNS) beinhaltet.
+Es werden einige Parameter geladen. Die Variablen welche mit dem Präfix \emph{victim\_dns\_} beginnen, legen den zu vergiftenden Nameserver fest. In \emph{victim\_host\_base} steht die URL, welche später vom Victim-DNS in den Cache übernommen werden soll. Zuletzt kommt \emph{attacker\_dns\_ip} welche die IP des vom Attacker kontrollierten DNS-Servers (Attacker-DNS) beinhaltet.
 
 Es git eine Funktion mit dem namen \emph{a\_request}, welche die initialen DNS-Anfragen an den Victim-DNS generiert und verwaltet. Dadurch wird der Victim-DNS dazu aufgefordert, nach dem entsprechenden A-Record beim zuständigen NS-Server nachzufragen.
 \begin{center}
@@ -349,9 +349,19 @@ if __name__ == '__main__':
         t2.running = False
 \end{lstlisting}
 \end{center}
-Da die meisten Domains mehr als einen Nameserver besitzen, und die DNS-Antworten vom gleichen NS-Server stammen müssen, die der Victim-DNS angefragt hat, werden zwei Threads gestartet. Jeder dieser Threads generiert Antwortpakete mit verschiedenen Transaktionsnummern, und versucht dem Victim-DNS ein gültiges Antwortpaket zu senden. Beide Threads laufen so lange, bis der Angriff erfolgreich war.
+Da die meisten Domains mehr als einen Nameserver besitzen, und die DNS-Antworten vom gleichen NS-Server stammen müssen, die der Victim-DNS angefragt hat, werden zwei Threads gestartet. Jeder dieser Threads generiert Antwortpakete mit verschiedenen Transaktionsnummern, und versucht dem Victim-DNS ein gültiges Antwortpaket zu senden. Beide Threads laufen so lange, bis der Angriff erfolgreich war. 
 
-\subsection{Versuchsreihen und Vorgehensweise}
+\section{Versuchsreihen und Vorgehensweise}
+Es wurden mehrere Versuchsreihen auf dem Weg zum bereits beschriebenen Code unternommen,
+die im Folgenden beschrieben werden.
+\subsection{Versuch 1: Victm-DNS fragt direkt beim Attacker-DNS an}
+Im ersten Versuch wurde der Victm-DNS als forwarding DNS Server konfiguriert, der anfragen direkt an den Attacker-DNS stellt. Ziel des Versuchs war es das richtige Antwort Format zu finden, damit der Victm-DNS die Antwort akzeptiert. Die Pakete wurden mit Wireshark analysiert und mit korrekten Paketen verglichen um Fehler zu finden.
+
+\subsection{Versuch 2: Victm-DNS fragt beim Google-DNS Server an}
+Beim zweiten Versuch wurde der Victm-DNS als forwarding DNS Server konfiguriert, der anfragen direkt an den Google-DNS Server stellt. Ziel war es herauszufinden ob man alle Pakete vor Eintreffen des echten Antwort Pakets senden kann. Zu diesen Zweck wurden die Pakete mit Hilfe von Wireshark auf dem Host und tshark auf dem Victm-DNS überwacht.
+
+\subsection{Versuch 3: Victm-DNS als Caching-Nameserver}
+Der dritte Versuch war Grundsätzlich gleich wie in Versuch 2 nur fragte der Victm-DNS nun bei den Rootnameservern an. Das Ziel war weiterhin herauszufinden ob man alle Pakete vor Eintreffen des echten Antwort Pakets senden kann.
 
 \section{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
