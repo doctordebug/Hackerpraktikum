@@ -42,30 +42,32 @@ In diesem Kapitel wird zunächst der klassische DNS Cache Poisoning Angriff so w
 \subsection{Klassisches DNS-Cache-Poisoning}
 Die klassische Form des DNS-Cache-Poisonings basierte darauf, einem DNS-Server (Victim-DNS) einen gefälschten DNS-Eintrag, in Form eines sogenannten A-Records, zu übermitteln. Ein A-Record ordnet einer Domain eine  IPv4-Adresse zu. Diese Form der Records sind die häufigsten Records im DNS. Da ein DNS-Server alle DNS-Anfragen für kurze Zeit in seinem Cache speichert, speichert er sich auch die von einem Angreifer gefälschte Adresse. Stellt ein Benutzer nach dem Poisoning eine DNS-Anfrage an die gleiche Domain, die der Attacker zuvor \glqq injected\grqq\ hat, wird der DNS-Server in seinem Cache die falsche IP finden und diese an den Benutzer übermitteln. Dadurch kann der Angreifer den Benutzer beispielsweise auf eine von ihm kontrollierte Webseite leiten. 
 
-Im folgenden wird anhand eines Sequenzdiagramms genauer dargestellt wie die klassische Form dieses Angriffs aussieht. Im späteren Verlauf der Arbeit wird jedoch eine deutlich effizientere Methode vorgestellt und die unterschieden zur klassischen Methoden werden ebenfalls herausgestellt. Das Sequenzdiagramm gestaltet sich wie folgt:
+Im folgenden wird anhand eines Sequenzdiagramms genauer dargestellt wie die klassische Form dieses Angriffs aussieht. Im späteren Verlauf der Arbeit wird jedoch eine deutlich effizientere Methode vorgestellt. Dabei werden ebenfalls die Unterschiede zur klassischen Methoden herausgestellt. Das Sequenzdiagramm im klassischen Szenario gestaltet sich daher wie folgt:
 
 {
 \centering
 \includegraphics[scale=0.45]{Classic_DNS-Cache-Poisoning.png}
 }
 
-Im ersten Schritt stellt der Attacker eine DNS-Anfrage für die Domain \emph{www.victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind zu diesen Zeitpunkt noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
+Im ersten Schritt stellt der Attacker eine DNS-Anfrage für die Domain \emph{www.victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind zu diesem Zeitpunkt noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
 
 Wichtig ist, dass die Seite (kurz vorher) noch nicht angefragt wurde, da der Victim-DNS sonst die IP zu der Seite im Cache gespeichert hat. Dadurch wäre es nicht möglich eine falsche IP  zu \glqq injecten\grqq\ und der Angriff wäre erfolglos. Ist die Seite nicht im Cache des Victim-DNS eingetragen, wird eine Anfrage an den Root-Server für die Top-Level-Domain (TLD) gestellt, um herauszufinden, wer der zuständige Nameserver (Appropriate-DNS), für die Angefragt Domain ist.
 
 Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten zu generieren oder viel mehr, an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss ein A-Record enthalten sein. Der A-Record enthält die vom Angreifer zuvor selbst gewählte IP-Adresse und und suggeriert dem Victim-DNS somit, dass es sich bei dieser IP um die Adresse der Domain handelt.
 
-%TODO 
-\textbf{[TODO: WIEVIELE PAKETE AUSREICHEN UND WIE DAS GANZE LAUFEN SOLL]}\\
-%%
-
 Wenn später das \glqq richtige\grqq\ Antwortpaket vom Approriate-DNS an den den Victim-DNS gesendet wird, ist das vom Angreifer erstellte Paket längst beim Victim-DNS angekommen und auch angenommen. Dadurch wird die Antworten des \glqq richtige\grqq\ Appropriate-DNS vom Victim-DNS ignoriert. 
 
-Da der Victim-DNS ein gefälschtes A-Record-Paket vom Angreifer erhalten hat, in welchem alle wichtigen Informationen korrekt gefälscht wurden, geht er davon aus, dass es sich beim A-Record um die zur Domain gehörigen IP-Adresse handelt. 
+Da der Victim-DNS ein gefälschtes A-Record-Paket vom Angreifer erhalten hat, in welchem alle wichtigen Informationen korrekt gefälscht wurden, geht er davon aus, dass es sich beim A-Record um die zur Domain gehörigen IP-Adresse handelt.
 
 Diese Adresse wird in einem letzten Schritt an den Angreifer zurück gesendet und von diesem überprüft. Sollte die zurückgelieferte IP nicht die vom Angreifer gewählte IP sein, so muss der Angriff vom ersten Schritt an wiederholt werde. Da die Domain \emph{www.victim.com} jedoch im Cache gespeichert ist, kann der Angreifer nicht einfach die gleiche Domain anfragen. Er muss also eine andere Subdomain wählen, beispielsweise \emph{cloud.victim.com} oder aber warten, bis der Eintrag aus dem Cache des Victim-DNS entfernt wurde.
 
-Sollte die Adresse, die vom Victim-DNS zurückgeliefert wurde, jedoch gleich der vom Angreifer gewählten Adresse sein, war der Angriff erfolgreich. Der nächste Benutzer, der die Domain \emph{www.victim.com} beim Victim-DNS anfragt, wird anschließend auf auf eine vom Angreifer kontrollierte IP-Adresse geführt.
+Die Hauptaufgabe des Angreifers besteht darin, die korrekte Transaktionsnummer zu raten. Bei alten DNS-Servern (Bind 8) wurde die Transaktionsnummer inkrementiert wenn eine DNS-Anfrage gestellt wurde. Das hat es einem Angreifer leicht macht, die Transaktionsnummer vorherzusagen.
+
+Damit der Angreifer eine der letzten Transaktionsnummern herausfinden kann, muss er einen eigenen DNS-Server (Attacker-DNS) besitzen. Dieser Attacker-DNS muss als \glqq authoritative\grqq\ für die Domain \emph{attacker.com} eingerichtet sein. Dadurch kann der Angreifer DNS-Anfragen an den Victim-DNS stellen, um die IP-Adresse für die Domain des Angreifers herauszufinden. Da der Attacker-DNS für diese Domain \glqq authoritative\grqq\ ist wird der Victim-DNS irgendwann bei diesem Server einen A-Record erfragen. Der Attacker muss somit nur auf seinem DNS-Server alle DNS-Anfragen aufzeichnen und die Transaktionsnummer herausfiltern. Dadurch kann er ein gutes Intervall schätzen, in welchem sich die Transaktionsnummer bei der nächsten Anfrage befindet.
+
+Bei aktuelleren BIND-Versionen wurde diese Lücke jedoch geschlossen durch das Anlegen eines Random-Number-Pools. Dadurch wurde eine Gleichverteilung der Transaktionsnummern gewährleistet. Diese Schutzmaßnahme ist jedoch kein Schutz gegen diesen Angriff, sondern macht es einem Anreifer lediglich schwerer die Transaktionsnummer vorherzusagen. 
+
+In diesem Fall geht der Angreifer einfach wie folgt vor: Man konnte feststellen das ca. 50 gefälschte Pakete vom Angreifer an den Victim-DNS gesendet werden können, bevor die original Antwort vom Appropriate-DNS ankommt. Der Angreifer muss somit nur automatisiert Anfragen stellen, immer an unterschiedliche Subdomains, und versucht so viele gefälschte Pakete wie möglich an den Victim-DNS zu senden. Das macht er so lange, bis das Cache-Poisonin erfolgreich war. Laut Dan Kaminsky konnte man festellen, dass unter diesen Bedingungen in ca. 10 Sekunden das Poisoning erreicht werden kann.
 
 \subsection{Kaminsky Angriff}
 In diesem Abschnitt wird der Angriff von Dan Kaminksy genauer dargelegt. Er fand mehrere Möglichkeiten, wie der Cache eines DNS-Servers \glqq injected\grqq\ werden kann. In diesem Prakikum lag der Schwerpunkt jedoch auf der effektivsten Methode um den Angriff zu realisieren. 
@@ -78,16 +80,14 @@ Das heißt, der Angreifer muss den Attacker-DNS so konfigurieren, dass dieser al
 
 {
 \centering
-\includegraphics[scale=0.45]{DNS-Cache-Poisoning.png}
-\newpage
+\includegraphics[scale=0.35]{DNS-Cache-Poisoning.png}
 }
-
 
 Wie auch beim klassischen Angriff stellt der Attacker eine DNS-Anfrage für die Domain \emph{victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind auch in diesem Szenario noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
 
 Wie auch beim klassischen Szenario ist es wichtig, dass die Seite (kurz vorher) noch nicht angefragt wurde. Ist die Seite nicht im Cache des Victim-DNS eingetragen, wird eine Anfrage an den Root- oder auch Top-Level-Domain-Server (TLD) gestellt, um herauszufinden was der zuständige Nameserver (Appropriate-DNS) für die Angefragt Domain ist.
 
-Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten (NS-Records) zu generieren bzw. an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss einen NS-Record enthalten, damit der Victim-DNS nochmal den Attacker-DNS nach der IP für \emph{victimg.com} anfragt.\\
+Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten (NS-Records) zu generieren bzw. an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss einen NS-Record enthalten, damit der Victim-DNS nochmal den Attacker-DNS nach der IP für \emph{victimg.com} anfragt.
 
 Die Anzahl der Pakete die der Angreifer im Durchschnitt senden muss, bis der Angriff erfolgreicht war, unterscheidet sich nicht vom klassischen Angriff. Die Berechnung der Wahrscheinlichkeit bleibt also in beiden Fällen gleich, da der selbe Schwachpunkt ausgenutzt wird.
 
@@ -150,7 +150,6 @@ Als Nächstes wird mit $\mathit{assert}$ sichergestellt, dass zum Einen der OP-C
 \end{center}
 Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die IP beinhaltet bzw. in unserem Fall eine vom Angreifer selbst gewählte IP. Um ein gültiges Antwort-Paket zu bilden, müssen mehrere Optionen (sogennante Flags) korrekt gesetzt sein. Die Optionen werden im Folgenden aus Gründen der Einfachheit in tabellarischer Form erläutert:
 \begin{center}
-	%TODO Lukas: Bitte den Absatz mit aa nochmal Formulieren und den Rest eintragen.
 	\setlength\arrayrulewidth{0.6pt}    
     \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
     \rowcolor[gray]{0.9} 
@@ -166,17 +165,17 @@ Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die I
     rd=0, ra=0 & Die beiden Flags sind zum Angeben das eine Rekursion benötigt (desired) oder verfügbar (available) ist. In unserem Fall beantworten wir jedoch die Anfragen alle mit einer IP, daher kann diese Option auf Null gesetzt werden.\\ \hline
     z=0 & Hierbei handelt es sich um ein reserviertes Bit, welches immer auf Null gesetzt sein muss.\\ \hline
     rcode=0 & Der rcode ist der Antwort Code (Response Code) vom Server. Hier gibt es die Möglichkeit mehr als nur zwei Optionen zu wählen. Hier steht 0 für \glqq ok\grqq, 1 für \glqq format-error\grqq, 2 für \glqq server-failure\grqq, 3 für \glqq name-error\grqq, 4 für \glqq not-implemented\grqq, 5 für \glqq refused\grqq.\\ \hline
-    qdcount=1 & Steht für Question Record Count und gibt an nach was gesucht wird. Beinhaltet sind dabei die URL, der Typ der Anfrage und andere Informationen. Da ein DNS-Server immer die Frage im Antwortpaket wiederholt, muss dieser Wert auf Eins gesetzt sein.\\ \hline
-    ancount=1 & Gibt an wieviele Records in der Antwort mitgeliefert werden. Da wir nur eine falsche IP übertragen wollen steht dieser Wert auf Eins.\\ \hline
-    nscount=dns\_request.nscount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf Null stehen.\\ \hline
-    arcount=dns\_request.arcount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Auch hier gilt, da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf 0 stehen.\\ \hline
-    qd=DNSQR(qname= dns\_request[DNSQR].qname, qtype='A', qclass='IN') & Die Abkürzung qd steht für Query Data. Hier wird lediglich die DNS-Anfrage eingetragen und dass es sich um enen A-Record handelt.\\ \hline
     \end{tabular}
 \end{center}    
 \begin{center}
     \setlength\arrayrulewidth{0.6pt}    
     \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
     \hline
+    qdcount=1 & Steht für Question Record Count und gibt an nach was gesucht wird. Beinhaltet sind dabei die URL, der Typ der Anfrage und andere Informationen. Da ein DNS-Server immer die Frage im Antwortpaket wiederholt, muss dieser Wert auf Eins gesetzt sein.\\ \hline
+    ancount=1 & Gibt an wieviele Records in der Antwort mitgeliefert werden. Da wir nur eine falsche IP übertragen wollen steht dieser Wert auf Eins.\\ \hline
+    nscount=dns\_request.nscount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf Null stehen.\\ \hline
+    arcount=dns\_request.arcount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Auch hier gilt, da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf 0 stehen.\\ \hline
+    qd=DNSQR(qname= dns\_request[DNSQR].qname, qtype='A', qclass='IN') & Die Abkürzung qd steht für Query Data. Hier wird lediglich die DNS-Anfrage eingetragen und dass es sich um enen A-Record handelt.\\ \hline
     an & Enthält als Antwort die A-Record-Response mit der gefälschten IP-Adresse die vom Angreifer kontrolliert wird. Eine hohe Time-To-Live (TTL) sorgt dafür, dass der Eintrag möglichst lange im Cache des Victim-DNS bleibt.\\ \hline
     ns, ar & Die letzten beiden Parameter dienen dazu die entsprechenden NS-Records und Additional Records anzugeben.\\
     \hline
@@ -212,15 +211,11 @@ options {
 
 Die erste Zeile gibt den DNS-Server an, dass alle Anfragen nach außen über Port 54 laufen und über die IP \emph{<ip\_eth1>} versendet werden. Die IP musste zusätzlich angegeben werden, da unser DNS-Server zwei Interfaces (eth0 und eth1) verwendet. Das erste Interface (eth0) dient dazu, dass Vagrant unsere virtuelle Machinen verwalten kann. Bei Vagrant handelt es sich um eine Anwendung zum Erstellen und Verwalten von virtuellen Maschinen. Es ermöglicht ein einfaches Deployment und eine Reproduzierbare und leicht zu übertragende (Beispielsweise Git) Umgebung. Eine Vagrant-Datei mit den Konfigurationen muss nur gestartet werden, und alle virtuellen Maschinen werden den Konfigurationen entsprechend auf dem Computer installiert und konfiguriert. Daurch ist gewährleistet, dass alle Mitglieder in der Gruppe die gleichen und aktuellsten virtuellen Maschinen besitzen. Beim zweiten Interface (eth1) handelt es sich um eine Netzwerkbrücke über die alle DNS-Anfragen angenommen und versendet werden.
 
-Beim zweiten Eintrag handelt es sich um die DNS Security Extensions (DNSSEC). Diese Extensions werden verwendet um die Integrität von DNS-Antworten zu gewährleisten. DNSSEC signiert alle DNS-Records (A,MX etc.) einer Zone mit Hilfe von Public Key Infrastructure (PKI). Damit der Angriff funktionieren kann, wurde diese Option deaktiviert. Dadurch ist sichergestellt, dass keine weiteren Überprüfungen von Signaturen etc. vorgenommen werden.\\
+Beim zweiten Eintrag handelt es sich um die DNS Security Extensions (DNSSEC). Diese Extensions werden verwendet um die Integrität von DNS-Antworten zu gewährleisten. DNSSEC signiert alle DNS-Records (A,MX etc.) einer Zone mit Hilfe von Public Key Infrastructure (PKI). Damit der Angriff funktionieren kann, wurde diese Option deaktiviert. Dadurch ist sichergestellt, dass keine weiteren Überprüfungen von Signaturen etc. vorgenommen werden.
 
-%TODO Marc
-\textbf{TODO: ALLOW SEKTION NOCH AUSFORMULIEREN}\\
-%%
+Der nachfolgende \emph{allow-recursion} Eintrag sorgt dafür, dass der DNS Server nicht nur anfragen für Zonen beantwortet für die er selbst autoritativ ist, sondern auch rekursiv über andere Nameservern Adressen auflöst. Der parameter \emph{any} sorgt dafür, dass der Server anfragen von jeder beliebigen IP annimmt. Die allow-query Anweisung legt fest, von welchen Clients der Server anfragen annimmt.
 
-%TODO Marc
-\textbf{TODO: AUTH-NXDOMAIN}\\
-%%
+Mit der \emph{auth-nxdomain no} anweisung wird festgelegt, dass der Nameserver NXDOMAIN Records (also Antworten für nicht existente Domains) nicht als autoritativ kennzeichnen soll. Anderenfalls würde der Server alle NX records als autoritativ  markieren, auch wenn er eigentlich nicht die Autorität über die betreffende Domain inne hat.
 
 Der letzte Eintrag über welches Interface und welchen Port die die DNS-Anfragen empfangen werden. Hier wurde der DNS-Server so konfiguriert, dass er alle Anfragen über Port 53 annimmt. Außerdem werden alle Anfragen über die IP \emph{<ip\_eth1>} und den Localhost angenommen.
 
