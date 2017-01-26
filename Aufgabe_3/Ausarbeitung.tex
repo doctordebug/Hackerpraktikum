@@ -137,6 +137,7 @@ while True:
 Die While-Schleife sorgt dafür, dass der Socket niemals geschlossen wird und alle DNS-Anfragen (Querries) mit der zuvor selbst gewählten $\mathit{fixed\_ip}$ beantwortet. In der Variable $\mathit{request}$ sind alle Informationen der DNS-Anfrage enthalten. Die Informationen der Anfragen werden später beim Erstellen der Antwort verwendet, um eine erwartungsgemäße und korrekte Antwort zurück zu liefern. 
 
 Als Nächstes wird mit $\mathit{assert}$ sichergestellt, dass zum Einen der OP-Code Null ist und zum Anderen es sich um eine A-Record-Anfrage handelt. Dadurch dass der OP-Code Null ist, weiß unser Python-Server, dass es sich um eine DNS-Anfrage (Query) handelt. Da das Ziel darin besteht, einem Benutzer (eines Browsers) eine falsche IP zurück zu liefern, muss dieser auch eine IP-Auflösung anfragen. Da es sich bei einer IP-Auflösung um einen sogenannten A-Record handelt, prüft unser DNS-Server ebenfalls den Typ der Anfrage.
+\newpage
 \begin{center}
 \begin{lstlisting}
     response = DNS(
@@ -171,13 +172,13 @@ Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die I
     rd=0, ra=0 & Die beiden Flags sind zum Angeben das eine Rekursion benötigt (desired) oder verfügbar (available) ist. In unserem Fall beantworten wir jedoch die Anfragen alle mit einer IP, daher kann diese Option auf Null gesetzt werden.\\ \hline
     z=0 & Hierbei handelt es sich um ein reserviertes Bit, welches immer auf Null gesetzt sein muss.\\ \hline
     rcode=0 & Der rcode ist der Antwort Code (Response Code) vom Server. Hier gibt es die Möglichkeit mehr als nur zwei Optionen zu wählen. Hier steht 0 für \glqq ok\grqq, 1 für \glqq format-error\grqq, 2 für \glqq server-failure\grqq, 3 für \glqq name-error\grqq, 4 für \glqq not-implemented\grqq, 5 für \glqq refused\grqq.\\ \hline
+    qdcount=1 & Steht für Question Record Count und gibt an nach was gesucht wird. Beinhaltet sind dabei die URL, der Typ der Anfrage und andere Informationen. Da ein DNS-Server immer die Frage im Antwortpaket wiederholt, muss dieser Wert auf Eins gesetzt sein.\\ \hline
     \end{tabular}
 \end{center}    
 \begin{center}
     \setlength\arrayrulewidth{0.6pt}    
     \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
     \hline
-    qdcount=1 & Steht für Question Record Count und gibt an nach was gesucht wird. Beinhaltet sind dabei die URL, der Typ der Anfrage und andere Informationen. Da ein DNS-Server immer die Frage im Antwortpaket wiederholt, muss dieser Wert auf Eins gesetzt sein.\\ \hline
     ancount=1 & Gibt an wieviele Records in der Antwort mitgeliefert werden. Da wir nur eine falsche IP übertragen wollen steht dieser Wert auf Eins.\\ \hline
     nscount=dns\_request.nscount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf Null stehen.\\ \hline
     arcount=dns\_request.arcount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Auch hier gilt, da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf 0 stehen.\\ \hline
@@ -214,7 +215,6 @@ options {
 };
 \end{lstlisting}
 \end{center}
-
 Die erste Zeile gibt den DNS-Server an, dass alle Anfragen nach außen über Port 54 laufen und über die IP \emph{<ip\_eth1>} versendet werden. Die IP musste zusätzlich angegeben werden, da unser DNS-Server zwei Interfaces (eth0 und eth1) verwendet. Das erste Interface (eth0) dient dazu, dass Vagrant unsere virtuelle Machinen verwalten kann. Bei Vagrant handelt es sich um eine Anwendung zum Erstellen und Verwalten von virtuellen Maschinen. Es ermöglicht ein einfaches Deployment und eine Reproduzierbare und leicht zu übertragende (Beispielsweise Git) Umgebung. Eine Vagrant-Datei mit den Konfigurationen muss nur gestartet werden, und alle virtuellen Maschinen werden den Konfigurationen entsprechend auf dem Computer installiert und konfiguriert. Daurch ist gewährleistet, dass alle Mitglieder in der Gruppe die gleichen und aktuellsten virtuellen Maschinen besitzen. Beim zweiten Interface (eth1) handelt es sich um eine Netzwerkbrücke über die alle DNS-Anfragen angenommen und versendet werden.
 
 Beim zweiten Eintrag handelt es sich um die DNS Security Extensions (DNSSEC). Diese Extensions werden verwendet um die Integrität von DNS-Antworten zu gewährleisten. DNSSEC signiert alle DNS-Records (A,MX etc.) einer Zone mit Hilfe von Public Key Infrastructure (PKI). Damit der Angriff funktionieren kann, wurde diese Option deaktiviert. Dadurch ist sichergestellt, dass keine weiteren Überprüfungen von Signaturen etc. vorgenommen werden.
@@ -243,29 +243,9 @@ victim_host_base = ".bank.com."
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
 \end{lstlisting}
 \end{center}
-Es werden einige Parameter geladen. Die Variablen welche mit dem Präfix victim\_dns\_ beginnen, legen den zu vergiftenden Nameserver fest. In victim\_host\_base steht die URL welche übernommen werden soll. Zuletzt kommt attacker\_dns\_ip welche die IP des eigenen Interfaces beinhaltet.
+Es werden einige Parameter geladen. Die Variablen welche mit dem Präfix victim\_dns\_ beginnen, legen den zu vergiftenden Nameserver fest. In victim\_host\_base steht die URL, welche später vom Victim-DNS in den Cache übernommen werden soll. Zuletzt kommt attacker\_dns\_ip welche die IP des vom Attacker kontrollierten DNS-Servers (Attacker-DNS) beinhaltet.
 
-\begin{center}
-\begin{lstlisting}
-def a_request(domain):
-    return IP(dst=victim_dns_ip) / UDP(dport=victim_dns_port_in) / DNS(
-        id=42,
-        qr=0,
-        opcode=0,
-        rd=1,
-        ra=0,
-        qdcount=1,
-        ancount=0,
-        nscount=0,
-        arcount=0,
-        qd=DNSQR(qname=domain, qtype='A', qclass='IN'),
-        an=0,
-        ns=0,
-        ar=0
-    )
-\end{lstlisting}
-\end{center}
-Die Funktion initial\_request generiert eine Reguläre DNS-Anfrage, um den Ziel-Server auf zu fordern die Ziel-Domain auf zu lösen.
+Es git eine Funktion mit dem namen \emph{a\_request}, welche die initialen DNS-Anfragen an den Victim-DNS generiert und verwaltet. Dadurch wird der Victim-DNS dazu aufgefordert, nach dem entsprechenden A-Record beim zuständigen NS-Server nachzufragen.
 \begin{center}
 \begin{lstlisting}
 def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
@@ -347,13 +327,9 @@ class Poison(Thread):
                 print("Poisoning failed")
 \end{lstlisting}
 \end{center}
-Die Klasse Poison Führt den eigentlichen Angriff in einer Endlosschleife durch.
-Bei jedem Schleifendurchlauf wird eine zufällige Subdomain gewählt, um das Caching zu umgehen. Es werden response\_amount viele Pakete generiert werden, wobei die erste Transaction-ID wird zufällig gewählt wird. Die Transaction-ID wird bei jedem Paket Inkrementiert.
+Die Klasse \emph{Poison} ist zuständig für das Ausführen des Poisoning-Angriffs. Bei jedem Schleifendurchlauf wird eine zufällige Subdomain gewählt, um das Caching zu umgehen. Es werden so viele Pakete generiert, wie in der Variable \emph{response\_amount} angegeben werden. Die erste Transaktionsnummer wird zufällig gewählt und pro jedem weiteren Paket inkrementiert. Dadurch werden Pakete generiert, die ein bestimmtes Intervall aller möglichen Transaktionsnummern abdecken. Anschließend werden alle generierten Pakete in eine Liste eingefügt und letztendlich mit hilfe von der Funktion \emph{sendpfast} an den Victim-DNS gesendet.
 
-Wenn die Pakete fertig generiert sind werden sie mit hilfe von sendpfast versandt.
-
-Danach wird eine DNS-Anfrage an den Ziel-DNS gesandt, um zu überprüfen ob der Angriff erfolgreich war. Falls ja wird die Endlosschleife verlassen.
-
+Im Anschluss wird eine eine A-Record-Anfrage mit dem bekannten Namen des für die Domain \emph{victim.com} zuständigen NS-Servers beim Victim-DNS gestellt. Das Antwortpaket des Victim-DNS beinhaltet einen A-Record mit der IP-Adresse des NS-Servers, der für die Domain \emph{victim.com} zuständig ist. Diese IP-Adresse muss in einem letzten Schritt mit der IP-Adresse des Attacker-DNS verglichen werden. Sollten die IP-Adressen identisch sein, so war der Poisoning-Angriff erfolgreich und der Victimt-DNS hat den Attacker-DNS als zuständigen NS-Server für die Domain \emph{victim.com} in seinem Cache gespeichert.
 \begin{center}
 \begin{lstlisting}
 if __name__ == '__main__':
@@ -373,7 +349,7 @@ if __name__ == '__main__':
         t2.running = False
 \end{lstlisting}
 \end{center}
-Da die Ziel Domain zwei Nameserver hat, werden auch zwei Threads gestartet, jeder versucht einen der Nameserver zu "übernehmen".
+Da die meisten Domains mehr als einen Nameserver besitzen, und die DNS-Antworten vom gleichen NS-Server stammen müssen, die der Victim-DNS angefragt hat, werden zwei Threads gestartet. Jeder dieser Threads generiert Antwortpakete mit verschiedenen Transaktionsnummern, und versucht dem Victim-DNS ein gültiges Antwortpaket zu senden. Beide Threads laufen so lange, bis der Angriff erfolgreich war.
 
 \subsection{Versuchsreihen und Vorgehensweise}
 
