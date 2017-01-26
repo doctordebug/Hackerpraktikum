@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Set vulnerable dns
-echo "nameserver 127.0.0.1" > /etc/resolv.conf
+sed -i '1s;^;nameserver 127.0.0.1\n;' /etc/resolv.conf
 
 # Start bind
 /usr/sbin/named -u named -t /srv/named -c /etc/named.conf

@@ -6,7 +6,7 @@ Vagrant.require_version ">= 1.6.0"
 VAGRANTFILE_API_VERSION = "2"
 
 # Host specific settings
-INTERFACE = "Qualcomm Atheros AR5B97 Wireless Network Adapter"
+INTERFACE = "Realtek PCIe GBE Family Controller"
 HOST_NETWORK_GATEWAY = "192.168.0.1"
 
 # Vulnerable DNS server
@@ -52,7 +52,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         attacker.vm.synced_folder "attacker", "/vagrant"
         attacker.vm.provision "shell", path: "attacker/setup.sh", args: [ATK_IP, VLN_IP, VLN_DNS_PORT_IN, VLN_DNS_PORT_OUT, ATK_FORGED_IP]
-        attacker.vm.provision "shell", path: "attacker/run.sh", env: {"ATK_FORGED_IP" => ATK_FORGED_IP}, run: 'always'
+        attacker.vm.provision "shell", path: "attacker/run.sh", env: {"ATK_FORGED_IP" => ATK_FORGED_IP}, run: 'always', args: ATK_IP
     end
 
 end
