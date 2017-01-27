@@ -1,6 +1,9 @@
-from Aufgabe_2.Aufgabe_2_4.fast_attack import get_key_vote_dict, combine_key_votes, test_keys, read_cap_file
+import datetime
+
+from Aufgabe_2.Aufgabe_2_4.fast_attack import read_cap_file, get_key_vote_dict, combine_key_votes, test_keys
 
 if __name__ == '__main__':
+    start = datetime.datetime.now()
     key_length_bytes = 13
     tuple_amount = 300000
 
@@ -17,3 +20,7 @@ if __name__ == '__main__':
     key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
     test_keys(key_set_iterator, (iv_stream_pair[0][0], iv_stream_pair[0][1]))
+
+    ms_end = int((datetime.datetime.now() - start).total_seconds() * 1000)
+    s_end = int((datetime.datetime.now() - start).total_seconds())
+    print(s_end, ms_end)
