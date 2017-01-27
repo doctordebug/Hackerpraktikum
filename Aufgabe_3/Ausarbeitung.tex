@@ -367,6 +367,8 @@ Weitere Versuche gestalteten sich dann nach der Suche einer angreifbaren BIND-Ve
 
 Alle Versuche wurden durch eine Analyse von Hand mittels Wireshark durchgeführt. Es wurde pro Versuch ein \emph{tcpdump}-File angelegt und anschließend mit Wireshark darauf untersucht, wieviele Pakete vor der original Antwort von unserem Attacker-Skript an den Victim-DNS gesendet werden konnten. Wir konnten feststellen, dass ca. 600 Pakete zu versenden waren, bevor die legitime Antwort beim DNS-Server ankam.
 
+Neben der Analyse der Reihenfolge wurde Wireshark auch verwendet um alle Flags einer echten DNS-Antwort nach zu stellen, bis sich die Pakete, außer der Transaktionsnummer nicht mehr von den Originalen unterschieden.
+
 \section{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
 
