@@ -1,6 +1,5 @@
-import os
-
-from Aufgabe_2.Aufgabe_2_4.fast_attack import get_key_vote_dict, combine_key_votes, test_keys, read_cap_file
+from Aufgabe_2.Aufgabe_2_2.wep.klein_attack import crack_wep
+from Aufgabe_2.Aufgabe_2_4.fast_attack import read_cap_file, test_keys
 
 if __name__ == '__main__':
     key_length_bytes = 13
@@ -15,7 +14,5 @@ if __name__ == '__main__':
     iv_stream_pair.extend(read_cap_file("wep-128_2min.cap", tuple_amount=tuple_amount))
 
     print("Start Hacking")
-    key = get_key_vote_dict(key_length_bytes, tuple_amount, iv_stream_pair)
-    key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
-
-    test_keys(key_set_iterator, (iv_stream_pair[0][0], iv_stream_pair[0][1]))
+    possible_key = crack_wep(iv_stream_pair, key_length_bytes, 256, tuple_amount)
+    test_keys(iter([possible_key]), (iv_stream_pair[0][0], iv_stream_pair[0][1]))
