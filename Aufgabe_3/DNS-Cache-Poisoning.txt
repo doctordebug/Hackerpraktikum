@@ -4,7 +4,6 @@ participant User
 participant Attacker
 participant Victim-DNS
 participant Root-Server
-participant Appropriate-DNS
 participant Attacker-DNS
 
 loop until: IP == Attackers Choosen IP
