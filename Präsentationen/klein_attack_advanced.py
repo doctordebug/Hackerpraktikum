@@ -1,4 +1,3 @@
-from Aufgabe_2.Aufgabe_2_2.wep.klein_attack import crack_wep
 from Aufgabe_2.Aufgabe_2_4.fast_attack import get_key_vote_dict, combine_key_votes, test_keys, read_cap_file
 
 if __name__ == '__main__':
