@@ -1,13 +1,7 @@
 # Hackerpraktikum
 
 ## 1. Rechtliche Rahmenbedingungen
-### Aufgabe 1: 
-siehe Aufgabe_1.1.md
 
-todo: 
-  
-* beck-online erläuterungen  
-* 303a und 303b noch aufnehmen  
+## 2. Angriff auf WEP
 
-### Aufgabe 2:
-siehe Aufgabe_1.2.md
+## 3. DNS-Angriff nach Kaminsky
