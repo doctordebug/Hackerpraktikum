@@ -191,8 +191,7 @@ Anschließend wird eine Antwort gebildet, welche zu der Angefragen Website die I
 In einem letzten Schritt wird das gebildete Paket als Antwort auf die DNS-Anfrage zurück gesendet.
 
 \subsection{Victim DNS-Server}
-%TODO Bindversion angeben, Ubuntu-Version angeben
-Aufgrund der Nachvollziehbarkeit und der Reproduzierbarkeit werde im folgenden Abschnitt die Konfigurationen auf dem Victim-DNS genauer erläuert. Als Grundlage für den Victim-DNS wurde ein Ubuntu-Server (Version X) gewählt. Auf diesem Serversystem wurde der standard DNS-Server names BIND eingerichtet. Bei der von uns verwendeten BIND-Version handelt es sich um X. Jegliche konfigurationen des DNS-Servers wurde in \emph{/etc/bind/named.conf.options} vorgenommen. Im Folgenden werden die einzelnen Konfigurationen genauer erläutert:
+Aufgrund der Nachvollziehbarkeit und der Reproduzierbarkeit werde im folgenden Abschnitt die Konfigurationen auf dem Victim-DNS genauer erläuert. Als Grundlage für den Victim-DNS wurde ein Ubuntu-Server (Version 14.04) gewählt. Auf diesem Serversystem wurde der standard DNS-Server names BIND eingerichtet. Bei der von uns verwendeten BIND-Version handelt es sich um 9.3.3. Jegliche konfigurationen des DNS-Servers wurde in \emph{/etc/bind/named.conf.options} vorgenommen. Im Folgenden werden die einzelnen Konfigurationen genauer erläutert:
 \begin{center}
 \begin{lstlisting}
 options {
@@ -361,9 +360,14 @@ Im ersten Setup wurde der Victm-DNS als forwarding DNS Server konfiguriert, der 
 \subsubsection{Setup 2: Injecten von A-Records beim Victim-DNS}
 Beim zweiten Setup wurde der Victm-DNS als forwarding DNS Server konfiguriert, der Anfragen direkt an Googles DNS-Server (und später auch den TLD-Server) stellt. Ziel war es herauszufinden, ob man alle Pakete vor Eintreffen des echten Antwort Pakets senden kann. Zu diesem Zweck wurden die Pakete mit Hilfe von Wireshark auf dem Host und Tshark auf dem Victm-DNS überwacht. Außerdem wurde in diesem Setup versucht, testweise gefälschte A-Records in den Cache des Victim-DNS zu \glqq injecten\grqq.
 
-%TODO Lukas und Oli
 \subsubsection{Setup 3: Der Angriff von Kaminsky}
-In einem dritten Setup, sehr ähnlich dem Zweiten, wurde der eigentliche Angriff von Kaminsky nachgestellt.
+In einem dritten Setup, sehr ähnlich dem Zweiten, wurde der eigentliche Angriff von Kaminsky nachgestellt. Dabei wurde versucht einen validen NS-Record beim Victim-DNS zu \glqq injecten\grqq. Mehrere Versuche mit unterschiedlichen BIND-Versionen als auch Server-Betriebssystemen wurden getestet. Erst wurde ein Ubuntu 8 mit BIND 9.3.3 getestet. Da sich das vorhersagen der Transaktionsnummer jedoch deutlich schwieriger gestaltet hat als zuerst angenommen, wurden mehrere versuche unternommen die Transaktionsnummer vorhersehbar zu machen. Ein versuch bestand darin eine alte BIND 8 Version unter (centOS als auch Redhat) zu kompilieren. Wie wir jedoch feststellen konnten, war die Schwachstelle einer inkrementierten Transaktionsnummer nicht mehr in jeder Unterversion von Bind 8 enhalten.
+
+Weitere Versuche gestalteten sich dann nach der Suche einer angreifbaren BIND-Version, welche die Schwachstelle inkrementierender Transaktionsnummer besaß. Des Weiteren haben andere Mitglieder unseres Team versucht den BIND Source Code nach den Transaktionsnummer zu durchsuchen, um diese auf einen fixen Wert zu setzen. Leider blieben die Versuche einer älteren BIND-Version jedoch aufgrund zu alter Abhängigkeiten ohne Erfolg.
+
+Alle Versuche wurden durch eine Analyse von Hand mittels Wireshark durchgeführt. Es wurde pro Versuch ein \emph{tcpdump}-File angelegt und anschließend mit Wireshark darauf untersucht, wieviele Pakete vor der original Antwort von unserem Attacker-Skript an den Victim-DNS gesendet werden konnten. Wir konnten feststellen, dass ca. 600 Pakete zu versenden waren, bevor die legitime Antwort beim DNS-Server ankam.
+
+Neben der Analyse der Reihenfolge wurde Wireshark auch verwendet um alle Flags einer echten DNS-Antwort nach zu stellen, bis sich die Pakete, außer der Transaktionsnummer nicht mehr von den Originalen unterschieden.
 
 \section{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.

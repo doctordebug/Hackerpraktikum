@@ -131,7 +131,7 @@ def handle_strong_key_bytes(i, key, n=256):
 
 
 @log_timing()
-def get_key_vote_dict(key_length_bytes, tuple_amount):
+def get_key_vote_dict(key_length_bytes, tuple_amount, iv_stream_pair):
     # Initialize dict
     key = dict()
     for i in range(key_length_bytes):
@@ -146,13 +146,18 @@ def get_key_vote_dict(key_length_bytes, tuple_amount):
     key_p = dict()
     for k, v in key.items():
         key_p.update({k: list(map(lambda x: (x, x / tuple_amount), v))})
-    # test if err_strong is smaller than err_normal
-    for b in list(key_p.values()):
-        err_strong = get_err_strong_at_pos(b)
-        err_normal = get_err_normal_at_pos(1, b)
-        threshold = 3.109642788418655e-05
 
-        print(err_strong < err_normal, err_strong - err_normal, (err_strong - err_normal) < threshold)
+    # Strong key byte handling
+    # Calculate err_normal and err_strong according to paper.
+    # if this exceeds a certain threshold, take action and correct them.
+    # The Code for detection and correction is implemented but not
+    # incorporated due to time management constraints.
+
+    # test if err_strong is smaller than err_normal
+    #for b in list(key_p.values()):
+    #    err_strong = get_err_strong_at_pos(b)
+    #    err_normal = get_err_normal_at_pos(1, b)
+    #    threshold = 3.109642788418655e-05
 
     return key
 
@@ -242,7 +247,7 @@ def read_cap_file(file_path, tuple_amount=50000):
         if packet['len'] == 68:
             iv, k, ciphertext, icv = WEP(IEEE802_11(packet['data']).get_payload()).get()
             stream_key = bytearray([a ^ b for (a, b) in zip(ciphertext, known_headers)])
-            iv_stream_pair.append(dict(iv=iv, stream_key=stream_key))
+            iv_stream_pair.append((iv, stream_key))
         if (len(iv_stream_pair) > tuple_amount):
             print("Tupel-Limit reached:{} iv-stream-pairs found!".format(tuple_amount))
             return iv_stream_pair
@@ -250,7 +255,7 @@ def read_cap_file(file_path, tuple_amount=50000):
 
 
 if __name__ == '__main__':
-    key_length_bytes = 13
+    key_length_bytes = 5
     tuple_amount = 85000
     # Info
     print("Using key length of {} bytes".format(key_length_bytes))
@@ -260,7 +265,7 @@ if __name__ == '__main__':
     iv_stream_pair, main_key = iv_and_stream_cipher_generator(key_length=key_length_bytes, tuple_amount=tuple_amount)
     print("Start Hacking")
 
-    key = get_key_vote_dict(key_length_bytes, tuple_amount)
+    key = get_key_vote_dict(key_length_bytes, tuple_amount, iv_stream_pair)
     key_set_iterator = combine_key_votes(key, tuple_amount, candidate_amount=3)
 
     test_keys(key_set_iterator, (iv_stream_pair[0][0], iv_stream_pair[0][1]))
