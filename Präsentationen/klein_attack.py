@@ -1,7 +1,7 @@
 import datetime
 
 from Aufgabe_2.Aufgabe_2_2.wep.klein_attack import crack_wep
-from Aufgabe_2.Aufgabe_2_4.fast_attack import read_cap_file, test_keys
+from Aufgabe_2.Aufgabe_2_4.fast_attack import read_cap_file
 
 if __name__ == '__main__':
     start = datetime.datetime.now()
@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     print("Start Hacking")
     possible_key = crack_wep(iv_stream_pair, key_length_bytes, 256, tuple_amount)
-    test_keys(iter([possible_key]), (iv_stream_pair[0][0], iv_stream_pair[0][1]))
+    print("possible key found: {}".format(possible_key))
 
     ms_end = int((datetime.datetime.now() - start).total_seconds() * 1000)
     s_end = int((datetime.datetime.now() - start).total_seconds())
