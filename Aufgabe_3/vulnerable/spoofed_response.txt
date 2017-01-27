@@ -1,0 +1,93 @@
+Frame 1: 156 bytes on wire (1248 bits), 156 bytes captured (1248 bits) on interface 0
+    Interface id: 0
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Jan 26, 2017 09:27:23.892208000 UTC
+    [Time shift for this packet: 0.000000000 seconds]
+    Epoch Time: 1485422843.892208000 seconds
+    [Time delta from previous captured frame: 0.000000000 seconds]
+    [Time delta from previous displayed frame: 0.000000000 seconds]
+    [Time since reference or first frame: 0.000000000 seconds]
+    Frame Number: 1
+    Frame Length: 156 bytes (1248 bits)
+    Capture Length: 156 bytes (1248 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ip:udp:dns]
+Ethernet II, Src: CadmusCo_01:25:bb (08:00:27:01:25:bb), Dst: CadmusCo_fc:6c:eb (08:00:27:fc:6c:eb)
+    Destination: CadmusCo_fc:6c:eb (08:00:27:fc:6c:eb)
+        Address: CadmusCo_fc:6c:eb (08:00:27:fc:6c:eb)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: CadmusCo_01:25:bb (08:00:27:01:25:bb)
+        Address: CadmusCo_01:25:bb (08:00:27:01:25:bb)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IP (0x0800)
+Internet Protocol Version 4, Src: 216.69.185.38 (216.69.185.38), Dst: 192.168.0.25 (192.168.0.25)
+    Version: 4
+    Header length: 20 bytes
+    Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
+        0000 00.. = Differentiated Services Codepoint: Default (0x00)
+        .... ..00 = Explicit Congestion Notification: Not-ECT (Not ECN-Capable Transport) (0x00)
+    Total Length: 142
+    Identification: 0x0001 (1)
+    Flags: 0x02 (Don't Fragment)
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    Fragment offset: 0
+    Time to live: 64
+    Protocol: UDP (17)
+    Header checksum: 0xe830 [validation disabled]
+        [Good: False]
+        [Bad: False]
+    Source: 216.69.185.38 (216.69.185.38)
+    Destination: 192.168.0.25 (192.168.0.25)
+    [Source GeoIP: Unknown]
+    [Destination GeoIP: Unknown]
+User Datagram Protocol, Src Port: domain (53), Dst Port: xns-ch (54)
+    Source port: domain (53)
+    Destination port: xns-ch (54)
+    Length: 122
+    Checksum: 0xcd6b [validation disabled]
+        [Good Checksum: False]
+        [Bad Checksum: False]
+Domain Name System (response)
+    Transaction ID: 0x9d3a
+    Flags: 0x8400 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .1.. .... .... = Authoritative: Server is an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...0 .... .... = Recursion desired: Don't do query recursively
+        .... .... 0... .... = Recursion available: Server can't do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 1
+    Additional RRs: 1
+    Queries
+        www0.bank.com: type A, class IN
+            Name: www0.bank.com
+            Type: A (Host address)
+            Class: IN (0x0001)
+    Authoritative nameservers
+        www0.bank.com: type NS, class IN, ns ns01.cashparking.com
+            Name: www0.bank.com
+            Type: NS (Authoritative name server)
+            Class: IN (0x0001)
+            Time to live: 7 days
+            Data length: 22
+            Name Server: ns01.cashparking.com
+    Additional records
+        ns01.cashparking.com: type A, class IN, addr 192.168.0.26
+            Name: ns01.cashparking.com
+            Type: A (Host address)
+            Class: IN (0x0001)
+            Time to live: 7 days
+            Data length: 4
+            Addr: 192.168.0.26 (192.168.0.26)
+
