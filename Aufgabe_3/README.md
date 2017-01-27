@@ -1,12 +1,24 @@
-# Preparation
+# Aufgabe 1
+Umsetzung eines einfachen DNS-Servers
+
+# Aufgabe 2
+Exploit für das gegebene Netzwerk-Setup (Cache Poisoning nach Kaminsky)
+
+# Aufgabe 3
+Ausarbeitung
+
+---
+# Vagrant README
+
+## Preparation
 Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Vagrant](https://www.vagrantup.com/downloads.html).
 Set the INTERFACE variable in the Vagrantfile according to the interface of your host machine and the HOST_NETWORK_GATEWAY variable to the gateway ip address.
-# Setup
+## Setup
 Navigate into the folder that holds the Vagrantfile and execute the following from the console.
 
     vagrant up
 Press enter and grab a drink, this will take a few minutes.
-# Access to VMs
+## Access to VMs
 ### vagrant
     vagrant ssh <vulnerable/attacker>
 
@@ -14,7 +26,7 @@ Press enter and grab a drink, this will take a few minutes.
 username: vagrant
 password: vagrant
 
-# Further information
+## Further information
 The folders "vulnerable" and "attacker" are shared folders that are mapped to the "/vagrant" folder inside the guest. 
 ### Vulnerable
 Bind-9.3.3 is used as it should be vulnerable to the Kaminsky DNS cache poisoning attack [(source)](https://kb.isc.org/article/AA-00924/0/CVE-2008-1447%3A-DNS-Cache-Poisoning-Issue-Kaminsky-bug.html).

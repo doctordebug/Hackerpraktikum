@@ -1,11 +1,10 @@
+import datetime
+import sys
 from collections import Counter
 
-import sys
-
-import datetime
-
+from Aufgabe_2.Aufgabe_2_2.wep.iv_and_cipher_generator import iv_and_stream_cipher_generator
 from Aufgabe_2.utils import log
-from wep.iv_and_cipher_generator import iv_and_stream_cipher_generator
+
 
 def simulate_permutation(part_of_key, n=256):
     """
