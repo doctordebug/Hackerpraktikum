@@ -31,14 +31,14 @@ while True:
             z=0,  # This is reserved and must be zero
             rcode=0,  # Response code from the server: indicates success or failure
             # "ok", 1:"format-error", 2:"server-failure", 3:"name-error", 4:"not-implemented", 5:"refused"
-            qdcount=1,  # Question record count
+            qdcount=dns_request.qdcount,  # Question record count
             ancount=1,  # Answer count
             nscount=dns_request.nscount,  # authority count
             arcount=dns_request.arcount,  # additional record count
             ad=dns_request.ad,  # DNS Question/Answer data referenced by the count fields above
             cd=dns_request.cd,  # Checking Disabled (0/1)
             # DNS Question Record(s)
-            qd=DNSQR(qname=dns_request[DNSQR].qname, qtype='A', qclass='IN'),
+            qd=dns_request.qd,
             # DNS Resource Record(s)
             an=DNSRR(rrname=dns_request[DNSQR].qname, type='A', rclass='IN', rdata=fixed_ip, ttl=86400),
             ns=dns_request.ns,

