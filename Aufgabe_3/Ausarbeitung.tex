@@ -276,8 +276,8 @@ def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
 Mit der Funktion \emph{forged\_ns\_response} werden generische Antwortpakete generiert.
 Die Funktion erhält mehrere Parameter, insbesondere die Transaktions-ID welche die Nachricht erhalten soll. Mit ihrer Hilfe werden zunächst alle möglichen Antworten generiert, die dann gebündelt zum Server gesandt werden können.
 
-Der Parameter \emph{id} beinhaltet die Transaktionsnummer, der wert 1 für \emph{qr} legt fest, dass es sich um eine DNS Antwort und nicht eine Anfrage handelt. Der \emph{opcode} legt fest, dass es sich um einen Standard Query handelt. Mit \emph{aa} wird die Antwort als autoritativ markiert. Da die Antwort unter 512 Byte lang ist wird das Flag \emph{tc} auf 0 gesetzt. Das Flag \emph{ra} legt mit dem wert 0 fest, dass der Server keine Rekursiven anfragen erlaubt. \emph{z} ist ein reserviertes Flag, dass immer null sein muss. Mit \emph{rcode} wird die Antwort als OK markiert, es ist also kein Fehler aufgetreten. \emph{qdcount}, \emph{ancount}, \emph{nscount} und \emph{arcount} enthalten respektive die Anzahl von enthaltenen Frage, Antwort, Nameserver und Zusätlichen Einträgen in der Antwort.
-Die Flags ad und cd sind für DNSSEC verantwortlich, was wir weder verwenden, noch unterstützen, weshalb sie auf null gesetzt sind. Zum Schluss kommen die eigentlichen Frage, Antwort, Nameserver und Zusätlichen Einträgen in den Parametern qd, an, ns und ar.
+Der Parameter \emph{id} beinhaltet die Transaktionsnummer, der Wert Eins für \emph{qr} legt fest, dass es sich um eine DNS Antwort und nicht eine Anfrage handelt. Der \emph{opcode} legt fest, dass es sich um einen Standard Query handelt. Mit \emph{aa} wird die Antwort als authoritative markiert. Da die Antwort unter 512 Byte lang ist wird das Flag \emph{tc} auf 0 gesetzt. Das Flag \emph{ra} legt mit dem Wert Null fest, dass der Server keine Rekursiven anfragen erlaubt. \emph{z} ist ein reserviertes Flag, dass immer auf Null stehen muss. Mit \emph{rcode} wird die Antwort als OK markiert, es ist also kein Fehler aufgetreten. \emph{qdcount}, \emph{ancount}, \emph{nscount} und \emph{arcount} enthalten respektive die Anzahl von enthaltenen Frage, Antwort, Nameserver und Zusätlichen Einträgen in der Antwort.
+Die Flags \emph{ad} und \emph{cd} sind für DNSSEC verantwortlich, was wir weder verwenden, noch unterstützen, weshalb sie auf null gesetzt sind. Zum Schluss kommen die eigentlichen Frage, Antwort, Nameserver und Zusätlichen Einträgen in den Parametern qd, an, ns und ar.
 
 \begin{center}
 \begin{lstlisting}
@@ -351,17 +351,19 @@ if __name__ == '__main__':
 \end{center}
 Da die meisten Domains mehr als einen Nameserver besitzen, und die DNS-Antworten vom gleichen NS-Server stammen müssen, die der Victim-DNS angefragt hat, werden zwei Threads gestartet. Jeder dieser Threads generiert Antwortpakete mit verschiedenen Transaktionsnummern, und versucht dem Victim-DNS ein gültiges Antwortpaket zu senden. Beide Threads laufen so lange, bis der Angriff erfolgreich war. 
 
-\section{Versuchsreihen und Vorgehensweise}
+\subsection{Versuchsreihen und Vorgehensweise}
 Es wurden mehrere Versuchsreihen auf dem Weg zum bereits beschriebenen Code unternommen,
 die im Folgenden beschrieben werden.
-\subsection{Versuch 1: Victm-DNS fragt direkt beim Attacker-DNS an}
-Im ersten Versuch wurde der Victm-DNS als forwarding DNS Server konfiguriert, der anfragen direkt an den Attacker-DNS stellt. Ziel des Versuchs war es das richtige Antwort Format zu finden, damit der Victm-DNS die Antwort akzeptiert. Die Pakete wurden mit Wireshark analysiert und mit korrekten Paketen verglichen um Fehler zu finden.
 
-\subsection{Versuch 2: Victm-DNS fragt beim Google-DNS Server an}
-Beim zweiten Versuch wurde der Victm-DNS als forwarding DNS Server konfiguriert, der anfragen direkt an den Google-DNS Server stellt. Ziel war es herauszufinden ob man alle Pakete vor Eintreffen des echten Antwort Pakets senden kann. Zu diesen Zweck wurden die Pakete mit Hilfe von Wireshark auf dem Host und tshark auf dem Victm-DNS überwacht.
+\subsubsection{Setup 1: Victm-DNS fragt direkt beim Attacker-DNS an}
+Im ersten Setup wurde der Victm-DNS als forwarding DNS Server konfiguriert, der anfragen direkt an den Attacker-DNS stellt. Ziel des Versuchs war es das richtige Antwort Format zu finden, damit der Victm-DNS die Antwort akzeptiert. Die Pakete wurden mit Wireshark analysiert und mit korrekten Paketen verglichen um Fehler zu finden. Außerdem wurde über einen aufgesetzten Client getestet, ob auch der Browser mit den Antworten umgehen kann, so dass die Webseite auf die der Attacker leitet auch fehlerfrei aufgerufen werden kann.
 
-\subsection{Versuch 3: Victm-DNS als Caching-Nameserver}
-Der dritte Versuch war Grundsätzlich gleich wie in Versuch 2 nur fragte der Victm-DNS nun bei den Rootnameservern an. Das Ziel war weiterhin herauszufinden ob man alle Pakete vor Eintreffen des echten Antwort Pakets senden kann.
+\subsubsection{Setup 2: Injecten von A-Records beim Victim-DNS}
+Beim zweiten Setup wurde der Victm-DNS als forwarding DNS Server konfiguriert, der Anfragen direkt an Googles DNS-Server (und später auch den TLD-Server) stellt. Ziel war es herauszufinden, ob man alle Pakete vor Eintreffen des echten Antwort Pakets senden kann. Zu diesem Zweck wurden die Pakete mit Hilfe von Wireshark auf dem Host und Tshark auf dem Victm-DNS überwacht. Außerdem wurde in diesem Setup versucht, testweise gefälschte A-Records in den Cache des Victim-DNS zu \glqq injecten\grqq.
+
+%TODO Lukas und Oli
+\subsubsection{Setup 3: Der Angriff von Kaminsky}
+In einem dritten Setup, sehr ähnlich dem Zweiten, wurde der eigentliche Angriff von Kaminsky nachgestellt.
 
 \section{Schutz gegen den Angriff}
 Das eigentliche Problem des Angriffslies sich nicht beheben ohne die Kompatibilität zum bisherigen DNS Protokoll zu verlieren, daher wurden weitere Zufallsquellen neben der bestehenden ID-Randomization eingerichtet.
