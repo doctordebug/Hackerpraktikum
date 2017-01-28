@@ -45,6 +45,9 @@ Tshark is installed to monitor network traffic:
     tshark -i eth1 port 53 and port 54
     tshark -i eth1 -T fields -e ip.src -e udp.srcport -e ip.dst -e udp.dstport -e dns.id -e dns.qry.name -R "ip.addr == 216.69.185.38 and dns.count.answers == 1"
 
+Use Bind9 statistics file to gather information about requests
+
+    rndc stats
 
 ### Attacker
 VM containing the cache poisoning script and the malicious DNS server (default: 192.168.0.26).
