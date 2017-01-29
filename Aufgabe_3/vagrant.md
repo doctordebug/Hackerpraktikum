@@ -40,11 +40,13 @@ Log to statistics file:
 
 ##### Gather information about resolved queries:
 
+
+
 First set Bind9 debug level, see [this](http://docstore.mik.ua/orelly/networking_2ndEd/dns/ch13_01.htm) for additional information regarding debugging levels.
 
     rndc trace 90
 
-Inspect the Log file created from the resolver category, found in:
+Inspect the Log file created from the resolver category (*), found in: 
 
     /srv/named/var/log/named/resolver.log
     
@@ -57,6 +59,9 @@ Start the malicious dns server (should be already running):
 
     nohup python3 dns.py &
 
-Start the poison script:
+Start the poison script (*):
 
     python3 poison.py
+
+
+(*) Dont forget to switch to root (sudo su)
