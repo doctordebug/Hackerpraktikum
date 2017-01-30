@@ -41,6 +41,32 @@ Im nächsten Schritt wurden die angepassten Veränderungen erneut in Vagrant ein
 \end{lstlisting}
 \end{center}
 
+Obwohl der Server nun gefälschte Antworten akzeptierte, war der Angriff nicht erfolgreich. Die gefälschten NS-Records wurden zwar vom Server abgespeichert, jedoch nur für die angefragte Subdomain. 
+
+Der Server Cache nach einem "erfolgreichen" Angriff sah wie folgt aus:
+\begin{center}
+\begin{lstlisting}
+; glue
+bank.com.               172204  NS      ns01.cashparking.com.
+						172204  NS      ns02.cashparking.com.
+; glue
+forged.bank.com.        604543  A       192.168.1.31
+
+; authauthority
+www289a.bank.com.       3036    NS      ns01.cashparking.com.
+; authanswer
+						36      A       184.168.221.96
+; glue
+www290a.bank.com.       604543  NS      forged.bank.com.
+; authanswer
+						86143   A       123.123.123.123
+; authauthority
+www291a.bank.com.       3036    NS      ns01.cashparking.com.
+; authanswer
+						36      A       184.168.221.96
+\end{lstlisting}
+\end{center}
+
 \section{Verbesserungen}
 Im Folgenden wird eine kurze Auflistung über unsere Verbesserungen gegeben:
 \begin{itemize}
