@@ -1,8 +1,15 @@
 ## Preparation
 Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Vagrant](https://www.vagrantup.com/downloads.html).
 Set the INTERFACE variable in the Vagrantfile according to the interface of your host machine and the HOST_NETWORK_GATEWAY variable to the gateway ip address.
+If you are not using the 192.168.0.0/24 subnet you have to change VLN_IP and ATK_IP accordingly.
 
 Make sure that the line endings of the files in the bind directory are Unix style line endings (\n).
+To fix the line endings use:
+	sed -i 's/\r//g' Vagrantfile
+	sed -i 's/\r//g' vulnerable/*
+	sed -i 's/\r//g' vulnerable/bind/*
+	sed -i 's/\r//g' attacker/*
+
 ## Setup
 Navigate into the folder that holds the Vagrantfile and execute the following from the console.
 
