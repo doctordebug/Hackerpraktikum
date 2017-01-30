@@ -35,12 +35,10 @@ def forged_ns_response(id, target_domain, known_ns_ip):
         id=id,  # Query ID / transaction id
         qr=1,  # Response
         opcode=0,  # QUERY
-        # aa=0,  # No authoritative answers, as we are not sending any answers
         aa=1,  # No authoritative answers, as we are not sending any answers
         tc=0,  # Not truncated
         rd=1,  # No recursion desired
         ra=1,  # Recursion is not available, please ask attacker dns
-        # ra=0,  # Recursion is not available, please ask attacker dns
         z=0,  # Reserved and must be zero
         rcode=0,  # Response code for "ok"
         qdcount=1,  # Question record count
