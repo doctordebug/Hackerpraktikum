@@ -1,6 +1,8 @@
 ## Preparation
 Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) and [Vagrant](https://www.vagrantup.com/downloads.html).
 Set the INTERFACE variable in the Vagrantfile according to the interface of your host machine and the HOST_NETWORK_GATEWAY variable to the gateway ip address.
+
+Make sure that the line endings of the files in the bind directory are Unix style line endings (\n).
 ## Setup
 Navigate into the folder that holds the Vagrantfile and execute the following from the console.
 
@@ -50,9 +52,8 @@ Inspect the Log file created from the resolver category, found in:
     
 
 ### Attacker
-VM containing the cache poisoning script and the malicious DNS server (default: 192.168.0.26).
+VM containing the cache poisoning script and the malicious DNS server (default: 192.168.0.26). To access the scripts, log in to the VM and navigate to the "/vagrant" folder.
 
-To access the scripts, log in to the VM and navigate to the "/vagrant" folder.
 Start the malicious dns server (should be already running):
 
     nohup python3 dns.py &
