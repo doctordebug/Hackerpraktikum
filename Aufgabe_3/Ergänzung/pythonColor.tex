@@ -1,0 +1,37 @@
+% Python colored syntax highlighting
+\definecolor{dark-gray}{RGB}{135,135,135}
+\definecolor{light-blue}{RGB}{102,178,255}
+\definecolor{gray}{RGB}{240,240,240}
+\definecolor{light-orchid}{RGB}{210,120,210}
+\lstdefinelanguage{python-color}{
+ backgroundcolor=\color{gray},
+ morekeywords={and, as, assert, break, class, continue, def, del, elif, else, except, exec, finally, for, from, global, if, import, in, is, lambda, not, or, pass, print, raise, return, try, while, with, yield, None, True, False, import},
+ ndkeywords={self},
+ keywordstyle=\color{blue}\bfseries,
+ ndkeywordstyle=\color{light-orchid}\bfseries,
+ sensitive=false,
+ identifierstyle=\color{black},
+ basicstyle=\sffamily ,
+ morecomment=[l]{\#},
+ morecomment=[s]{/*}{*/},
+ morecomment=[s]{"""}{"""},
+ morecomment=[l][\color{light-blue}]{@},
+ morecomment=[s][\color{light-blue}]{"}{"},
+ morecomment=[s][\color{light-blue}]{'}{'},
+ commentstyle=\itshape\color{dark-gray},
+ stringstyle=\color{red}\ttfamily,
+ tabsize=2,
+ columns=fullflexible,
+ literate={^}{{$\mspace{-3mu}\hat{\quad}\mspace{-5mu}$}}1
+ {<}{$<$}2 
+ {>}{$>$}2 
+ {<:}{{$<\mspace{-3mu}:$}}2 
+ {:>}{{$:\mspace{-3mu}>$}}2
+ {+}{$+$ }2 
+ {++}{{$+\mspace{-8mu}+$ }}2
+ {\~}{{$\mspace{-3mu}\tilde{\quad}\mspace{-3mu}$}}1
+ {\~}{$\sim$}1
+ {__}{\underline{\hspace{0.5cm}}}1
+ {*}{${}^{\ast}$}1 
+ {.}{$\mspace{1mu}.\mspace{1mu}$}1
+}
