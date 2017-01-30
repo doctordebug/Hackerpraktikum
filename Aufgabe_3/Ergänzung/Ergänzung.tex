@@ -1,0 +1,48 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{nameref}
+\usepackage{hyperref}
+\usepackage{colortbl}
+\usepackage{hhline}
+
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.5cm}
+
+\include{pythonColor}
+\lstset{language=python-color}
+\lstset{framexleftmargin=5pt, framextopmargin=5pt, framexbottommargin=5pt, frame=tb, framerule=0pt}
+\definecolor{grey}{rgb}{0.9,0.9,0.9}
+\include{pseudo}
+
+\author{Lukas Jung, Marc Narres-Schulz, Oliver Sänger, Tobias Zeimetz}
+\title{Teil III: \\DNS Cache Poisoning \\Ergänzung zum 27.01.2016}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\section{Der Fehler}
+Nach den Vorträgen und der Besprechung unserer Probleme am 27.01 wurde von Daniel Fett und Guido Schmitz angemerkt, dass eventuell Probleme in der Virtualisierungsschicht von Virtual Box bestehen könnten. Darauf hin wurde das ganze Setup auf einen physikalischen Rechner übertragen und mehrfach erneut getestet. In späteren Tests konnte man sehen, dass das Poisoning sehr wohl erfolgreich war, jedoch nur für A-Records. Erst durch ein Debug-Level von 90 konnten alle benötigt Informationen des DNS-Servers eingesehen werden. Ein höheres Debug-Level, wie in den vorherigen Versuchen, hatte leider zur Folge, dass Speicherausnutzungen usw. angezeigt wurden. Dadurch waren alle wichtigen Informationen im Log des Servers verschollen und schwer per Hand zu finden. Ein weiterer Punkt der uns aufgefallen ist, bestand darin, dass nur ein A-Record \glqq injected\grqq\ wurde anstelle eines NS-Records. Dieses verhalten ergab sich durch mehrfache anfragen der Domain von vorherigen Angriffen. 
+
+Im nächsten Schritt wurden die angepassten Veränderungen erneut in Vagrant eingepflegt und getestet. Anschließend wurde der Angriff mehrfach ausgeführt und konnte auch (noch mit A-Records) umgesetzt werden. Außerdem wurde durch den Angriff klar, dass es sich bei unserer Antwort, nicht wie zuerst gedacht, um eine \glqq authoritative\grqq Antwort handelt muss. Da wir keine Antwort auf die Eigentliche Frage (Query) gesendet haben, darf diese Flag nicht auf den Wert Eins gesetzt werden. Dadurch ergab sich ein neuer Code für den Angriff in folgender Form:
+\begin{center}
+\begin{lstlisting}
+   INPUT IF FINISHED
+\end{lstlisting}
+\end{center}
+
+\section{Verbesserungen}
+Im Folgenden wird eine kurze Auflistung über unsere Verbesserungen gegeben:
+
+
+\end{document}
